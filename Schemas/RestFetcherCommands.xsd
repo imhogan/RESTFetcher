@@ -1,0 +1,165 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" elementFormDefault="qualified"
+  targetNamespace="http://THINKronicity.com.au/Schemas/Smirnov/RestFetcherCommands.xsd"
+  xmlns="http://THINKronicity.com.au/Schemas/Smirnov/RestFetcherCommands.xsd">
+  <xs:element name="LambdaEventMaps">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element maxOccurs="unbounded" ref="LambdaEvent"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="LambdaEvent">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element maxOccurs="unbounded" ref="MatchKey"/>
+      </xs:sequence>
+      <xs:attribute name="Event" use="required"/>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="MatchKey">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element maxOccurs="unbounded" name="RegExp"/>
+        <xs:element ref="Parameters" minOccurs="0" maxOccurs="1"/>
+      </xs:sequence>
+      <xs:attribute name="Command" use="required" type="xs:NCName"/>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="Commands">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element maxOccurs="unbounded" ref="Command"/>
+      </xs:sequence>
+    </xs:complexType>
+    <xs:key name="CommandNameKey">
+      <xs:selector xpath="Command"/>
+      <xs:field xpath="@Name"/>
+    </xs:key>
+    <xs:keyref name="CommandNameKeyRef" refer="CommandNameKey">
+      <xs:selector xpath=".//Action"/>
+      <xs:field xpath="@Command"/>
+    </xs:keyref>
+  </xs:element>
+  <xs:simpleType name="ActionType">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="Command"/>
+      <xs:enumeration value="Output"/>
+      <xs:enumeration value="XSLT"/>
+      <xs:enumeration value="XSLT2"/>
+      <xs:enumeration value="FOP"/>
+      <xs:enumeration value="eMail"/>
+      <xs:enumeration value="S3PUT"/>
+      <xs:enumeration value="S3DELETE"/>
+      <xs:enumeration value="AddResult"/>
+    </xs:restriction>
+  </xs:simpleType>
+  <xs:simpleType name="HeaderType">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="BasicAuth"/>
+      <xs:enumeration value="AuthToken"/>
+      <xs:enumeration value="Text"/>
+    </xs:restriction>
+  </xs:simpleType>
+  <xs:simpleType name="ParameterFormatType">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="Path"/>
+      <xs:enumeration value="Query"/>
+      <xs:enumeration value="Form"/>
+    </xs:restriction>
+  </xs:simpleType>
+  <xs:simpleType name="BodyType">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="ActionContent"/>
+      <xs:enumeration value="Template"/>
+      <xs:enumeration value="Form"/>
+    </xs:restriction>
+  </xs:simpleType>
+  <xs:element name="Command">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="Headers" minOccurs="0" maxOccurs="1"/>
+        <xs:element ref="Parameters" minOccurs="0" maxOccurs="1"/>
+        <xs:element ref="Body" minOccurs="0" maxOccurs="1"/>
+        <xs:element ref="Actions" minOccurs="0" maxOccurs="1"/>
+      </xs:sequence>
+      <xs:attribute name="IsInit" type="xs:boolean"/>
+      <xs:attribute name="Name" use="required" type="xs:NCName"/>
+      <xs:attribute name="IsJSON" type="xs:boolean"/>
+      <!-- TODO: Add verb types -->
+      <xs:attribute name="Verb"/>
+      <xs:attribute name="Timeout" type="xs:integer"/>
+      <xs:attribute name="IsNOP" type="xs:boolean"/>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="Headers">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element maxOccurs="unbounded" ref="Header"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="Header">
+    <xs:complexType mixed="true">
+      <xs:attribute name="Comment"/>
+      <xs:attribute name="Name" use="required" type="xs:NCName"/>
+      <xs:attribute name="XPath"/>
+      <xs:attribute name="Function"/>
+      <xs:attribute name="Type" type="HeaderType"/>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="Parameters">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element maxOccurs="unbounded" ref="Parameter"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="Parameter">
+    <xs:complexType mixed="true">
+      <xs:sequence>
+        <xs:element name="RegExp" minOccurs="0" maxOccurs="unbounded"/>
+      </xs:sequence>
+      <xs:attribute name="Comment"/>
+      <xs:attribute name="Name" use="required" type="xs:NCName"/>
+      <xs:attribute name="Separator"/>
+      <xs:attribute name="Format" type="ParameterFormatType"/>
+      <xs:attribute name="XPath"/>
+      <xs:attribute name="Function"/>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="Body">
+    <xs:complexType mixed="true">
+      <xs:sequence>
+        <xs:element ref="Actions" minOccurs="0" maxOccurs="1"/>
+      </xs:sequence>
+      <xs:attribute name="Comment"/>
+      <xs:attribute name="Type" type="BodyType"/>
+      <xs:attribute name="ContentType"/>
+      <xs:attribute name="XPath"/>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="Actions">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element minOccurs="0" maxOccurs="unbounded" ref="Action"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="Action">
+    <xs:complexType>
+      <xs:sequence maxOccurs="unbounded" minOccurs="0">
+        <xs:element ref="Parameters" minOccurs="0" maxOccurs="1"/>
+        <xs:element ref="Body" minOccurs="0" maxOccurs="1"/>
+        <xs:element ref="Actions" minOccurs="0" maxOccurs="1"/>
+      </xs:sequence>
+      <xs:attribute name="Command" type="xs:NCName"/>
+      <xs:attribute name="Match"/>
+      <xs:attribute name="Mode"/>
+      <xs:attribute name="Root" type="xs:NCName"/>
+      <xs:attribute name="Transform" type="xs:NCName"/>
+      <xs:attribute name="Type" use="required" type="ActionType"/>
+      <xs:attribute name="ParametersRegExp"/>
+    </xs:complexType>
+  </xs:element>
+</xs:schema>

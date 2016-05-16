@@ -52,6 +52,7 @@
       <xs:enumeration value="S3PUT"/>
       <xs:enumeration value="S3DELETE"/>
       <xs:enumeration value="AddResult"/>
+      <xs:enumeration value="ZIP"/>
     </xs:restriction>
   </xs:simpleType>
   <xs:simpleType name="HeaderType">

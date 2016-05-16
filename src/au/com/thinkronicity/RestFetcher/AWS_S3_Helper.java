@@ -16,7 +16,7 @@ import java.util.regex.Pattern;
 /**
  * AWS S3 Helper functions.
  * 
- * @author Ian Hogan, Iam.Hogan@THINKronicity.com.au
+ * @author Ian Hogan, Ian.Hogan@THINKronicity.com.au
  *
  */
 public class AWS_S3_Helper {

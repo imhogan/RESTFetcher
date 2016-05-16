@@ -11,7 +11,7 @@ import javax.xml.namespace.NamespaceContext;
 /**
  * A simple nammespace map for XML namespace prefixes.
  * 
- * @author Ian Hogan, Iam.Hogan@THINKronicity.com.au
+ * @author Ian Hogan, Ian.Hogan@THINKronicity.com.au
  *
  */
 public class MappedNamespaceContext

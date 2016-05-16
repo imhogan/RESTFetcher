@@ -19,7 +19,11 @@ import com.amazonaws.auth.AWSCredentials;
 import com.amazonaws.auth.DefaultAWSCredentialsProviderChain;
 import com.amazonaws.regions.Regions;
 import com.amazonaws.services.s3.model.CannedAccessControlList;
+
+import java.io.BufferedOutputStream;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URI;
@@ -28,7 +32,13 @@ import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 import java.util.regex.Pattern;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipOutputStream;
+
+import javax.activation.URLDataSource;
+import javax.mail.internet.MimeBodyPart;
 import javax.net.ssl.HttpsURLConnection;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -40,7 +50,7 @@ import org.w3c.dom.NodeList;
  * possibly converted from JSON to XML, and calls one or more methods. Results can be transformed and/or stored, and 
  * converted to PDF via XSL:FO, and emails can be sent to deliver PDF or other reports.
  * 
- * @author Ian Hogan, Iam.Hogan@THINKronicity.com.au
+ * @author Ian Hogan, Ian.Hogan@THINKronicity.com.au
  *
  */
 public class REST_Walker {
@@ -425,7 +435,7 @@ public class REST_Walker {
         	// Validate parameters.
             String missingParams = this.missingParameters("Name", actionParameters);
             if (!missingParams.isEmpty()) {
-                throw new Exception("Action with Type S3PUT is missing required parameters " + missingParams + "!");
+                throw new Exception("Action with Type Output is missing required parameters " + missingParams + "!");
             }
             
             // Create the folder if required.
@@ -462,7 +472,7 @@ public class REST_Walker {
             }
             
             if (this.walkerConfig.debug) {
-            	Utility.LogMessage("Wrote file.");
+            	Utility.LogMessage("Wrote file '"+outputFile.getPath()+"'");
             }
         }
         else if (actionType.equals("S3PUT")) {
@@ -623,6 +633,90 @@ public class REST_Walker {
             
             // The result document provides the sent email details.
             actionDocument =  Utility.readXmlFromString(Utility.replaceParameters("<Result><EmailLog><From><![CDATA[${From}]]></From><To><![CDATA[${To}]]></To><ReplyTo><![CDATA[${ReplyTo}]]></ReplyTo><Subject><![CDATA[${Subject}]]></Subject><Body><![CDATA[" + bodyContent + "]]></Body>" + "</EmailLog></Result>", actionParameters));
+        }
+        else if (actionType.equals("ZIP")) {
+        	
+        	// Send an email using AWS SES using the supplied body.
+        	
+        	// Validate the parameters.
+            String missingParams = this.missingParameters("Name,SourceFiles", actionParameters);
+            if (!missingParams.isEmpty()) {
+                throw new Exception("Action with Type ZIP is missing required parameters " + missingParams + "!");
+            }
+            
+            // Create the folder if required.
+            String folder = "";
+            if (actionParameters.containsKey("Folder")) {
+                folder = actionParameters.get("Folder");
+                File theDir = new File(folder);
+                try {
+                    if (!theDir.exists() && !theDir.mkdirs()) {
+                        throw new Exception("Could not create folder " + folder);
+                    }
+                }
+                catch (Exception e) {
+                    throw new Exception("Could not create folder " + folder, e);
+                }
+            }
+            
+            // Create the file.
+            String fileName = actionParameters.get("Name");
+            fileName = actionParameters.containsKey("Extension") ? String.valueOf(fileName) + actionParameters.get("Extension") : String.valueOf(fileName) + ".xml";
+            File outputFile = new File(folder, fileName);
+            if (this.walkerConfig.debug || this.walkerConfig.verbose) {
+                Utility.LogMessage("Writing file " + outputFile.getPath());
+            }
+
+            // Get the zip files.
+            String zipFilesList = actionParameters.get("SourceFiles");
+            
+            // Zip Output - to local file 
+            FileOutputStream fos = new FileOutputStream(outputFile.getPath());
+            ZipOutputStream zos = new ZipOutputStream(fos);
+
+            try {
+                //create byte buffer
+                byte[] buffer = new byte[1024];
+
+                String[] zipFiles = zipFilesList.split(";");
+                
+                for (int a = 0; a < zipFiles.length; a++) {
+                	
+                    FileInputStream fin = new FileInputStream(zipFiles[a]);
+
+                    zos.putNextEntry(new ZipEntry((new File(zipFiles[a])).getName()));
+
+                    /*
+                     * After creating entry in the zip file, actually
+                     * write the file.
+                     */
+                    int length;
+     
+                    while((length = fin.read(buffer)) > 0)
+                    {
+                       zos.write(buffer, 0, length);
+                    }
+     
+                    /*
+                     * After writing the file to ZipOutputStream, use
+                     *
+                     * void closeEntry() method of ZipOutputStream class to
+                     * close the current entry and position the stream to
+                     * write the next entry.
+                     */
+     
+                     fin.close();
+                     
+                    // not available on BufferedOutputStream
+                    zos.closeEntry();
+                }
+            }
+            finally {
+                zos.close();
+            }
+            
+            // The result document provides the sent email details.
+            actionDocument =  Utility.readXmlFromString(Utility.replaceParameters("<Result><ZipLog><SourceFiles><![CDATA[${SourceFiles}]]></SourceFiles><ZipFile><![CDATA[${ZipFile}]]></ZipFile></ZipLog></Result>", actionParameters));
         }
         else {
         	Utility.LogMessage("Warning - Unknown action type: " + actionType);

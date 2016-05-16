@@ -9,6 +9,7 @@ import com.amazonaws.services.simpleemail.model.RawMessage;
 import com.amazonaws.services.simpleemail.model.SendRawEmailRequest;
 import com.amazonaws.services.simpleemail.model.SendRawEmailResult;
 import java.io.ByteArrayOutputStream;
+import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.net.URL;
@@ -16,6 +17,8 @@ import java.nio.ByteBuffer;
 import java.util.Properties;
 import java.util.UUID;
 import javax.activation.DataHandler;
+import javax.activation.DataSource;
+import javax.activation.FileDataSource;
 import javax.activation.URLDataSource;
 import javax.mail.Address;
 import javax.mail.BodyPart;
@@ -101,7 +104,15 @@ public class EmailHelper {
                 sb.append(id);
                 sb.append("\" alt=\"ATTACHMENT\"/>\n");
                 MimeBodyPart attachment = new MimeBodyPart();
-                URLDataSource fds = new URLDataSource(new URL(attachmentsFiles[a]));
+                DataSource fds = null;
+                
+                if ((new File(attachmentsFiles[a])).exists()) {
+                	fds = new FileDataSource(attachmentsFiles[a]);
+                }
+                else {
+                	fds = new URLDataSource(new URL(attachmentsFiles[a]));
+                }
+                
                 String attachmentName = fds.getName().replaceFirst("^([^/]*/)*", "").replaceAll("\\?.*$", "");
                 attachment.setDataHandler(new DataHandler(fds));
                 attachment.setHeader("Content-ID", "<" + id + ">");

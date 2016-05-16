@@ -26,7 +26,7 @@ import org.xml.sax.SAXException;
 /**
  * Helper functions for Apache FOP.
  * 
- * @author Ian Hogan, Iam.Hogan@THINKronicity.com.au
+ * @author Ian Hogan, Ian.Hogan@THINKronicity.com.au
  *
  */
 public class FopHelper {

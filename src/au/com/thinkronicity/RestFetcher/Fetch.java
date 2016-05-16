@@ -46,7 +46,7 @@ import org.w3c.dom.NodeList;
 /**
  * Class to recursively fetch and process XML (or JSON) data from a REST API in an AWS Lambda context. 
  * 
- * @author Ian Hogan, Iam.Hogan@THINKronicity.com.au
+ * @author Ian Hogan, Ian.Hogan@THINKronicity.com.au
  *
  */
 /**

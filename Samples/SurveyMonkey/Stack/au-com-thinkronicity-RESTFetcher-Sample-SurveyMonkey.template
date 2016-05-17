@@ -1,0 +1,465 @@
+{
+  "AWSTemplateFormatVersion": "2010-09-09",
+  "Description": "Demonstration stack for the RESTFetcher Lambda Function - built by THINKronicity Pty Ltd.\nThis sample will deploy the RESTFetcher function from a THINKronicity hosted S3 bucket.",
+  "Parameters": {
+    "ProjectPrefix": {
+      "Description": "Project prefix - for reuse with different projects the bucket name will be prefix-target-domain - observre bucket name restrictions - see http://docs.aws.amazon.com/AmazonS3/latest/dev/BucketRestrictions.html",
+      "Type": "String",
+      "Default": "restfetcher"
+    },
+    "TargetEnvironment": {
+      "Description": "Target environment - dev, uat or prod, default is prod",
+      "Type": "String",
+      "AllowedValues": [
+        "dev",
+        "uat",
+        "prod"
+      ],
+      "Default": "prod"
+    },
+    "TargetDomain": {
+      "Description": "Target domain - this is used as the final bucket suffix to ensure global uniqueness - typically your internet domain name but use - rather than . as separators.",
+      "Type": "String",
+      "Default": "your-domain-name"
+    },
+    "RESTFetcherKey": {
+      "Description": "Zip file for REST Fetcher function",
+      "Type": "String",
+      "Default": "au-com-thinkronicity-RestFetcher-V2.1.0.zip"
+    },
+    "ProjectZipFilesList": {
+      "Description": "Project Files List",
+      "Type": "CommaDelimitedList",
+      "Default": "au-com-thinkronicity-RestFetcher-SurveyMonkeySample-V1.0.0.zip"
+    },
+    "S3ZipFileLoaderKey": {
+      "Description": "Zip file for S3 Zip File Loader function",
+      "Type": "String",
+      "Default": "au-com-thinkronicity-S3ZipFileLoader-V1.1.2.zip"
+    }
+  },
+  "Mappings": {
+    "AWSRegion2Bucket": {
+      "us-east-1": {
+        "OpenCode": "au-com-thinkronicity-opencode-usea1",
+        "ClientCode": "au-com-thinkronicity-clientcode-apne1"
+      },
+      "us-west-2": {
+        "OpenCode": "au-com-thinkronicity-opencode-uswe2",
+        "ClientCode": "au-com-thinkronicity-clientcode-apne1"
+      },
+      "eu-west-1": {
+        "OpenCode": "au-com-thinkronicity-opencode-euwe1",
+        "ClientCode": "au-com-thinkronicity-clientcode-apne1"
+      },
+      "ap-northeast-1": {
+        "OpenCode": "au-com-thinkronicity-opencode-apne1",
+        "ClientCode": "au-com-thinkronicity-clientcode-apne1"
+      }
+    }
+  },
+  "Resources": {
+    "LambdaExecutionRole": {
+      "Type": "AWS::IAM::Role",
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Version": "2012-10-17",
+          "Statement": [
+            {
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "lambda.amazonaws.com"
+              },
+              "Action": "sts:AssumeRole"
+            },
+            {
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "apigateway.amazonaws.com"
+              },
+              "Action": "sts:AssumeRole"
+            },
+            {
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "s3.amazonaws.com"
+              },
+              "Action": "sts:AssumeRole"
+            }
+          ]
+        },
+        "Path": {
+          "Fn::Join": [
+            "",
+            [
+              "/",
+              {
+                "Ref": "ProjectPrefix"
+              },
+              "/"
+            ]
+          ]
+        },
+        "Policies": [
+          {
+            "PolicyName": "AccessProjectS3FilesAndSES",
+            "PolicyDocument": {
+              "Version": "2012-10-17",
+              "Statement": [
+                {
+                  "Effect": "Allow",
+                  "Action": [
+                    "s3:*"
+                  ],
+                  "Resource": {
+                    "Fn::Join": [
+                      "",
+                      [
+                        "arn:aws:s3:::",
+                        {
+                          "Ref": "ProjectPrefix"
+                        },
+                        "-",
+                        {
+                          "Ref": "TargetEnvironment"
+                        },
+                        "-files-",
+                        {
+                          "Ref": "TargetDomain"
+                        },
+                        "/*"
+                      ]
+                    ]
+                  }
+                },
+                {
+                  "Effect": "Allow",
+                  "Action": [
+                    "ses:*"
+                  ],
+                  "Resource": "*"
+                },
+                {
+                  "Effect": "Allow",
+                  "Action": [
+                    "logs:CreateLogGroup",
+                    "logs:CreateLogStream",
+                    "logs:PutLogEvents"
+                  ],
+                  "Resource": "arn:aws:logs:*:*:*"
+                }
+              ]
+            }
+          }
+        ]
+      },
+      "Metadata": {
+        "AWS::CloudFormation::Designer": {
+          "id": "eee67dc5-d36f-4363-920f-4df4f8cb7aed"
+        }
+      }
+    },
+    "THINKonicityRESTFetcherLambda": {
+      "Type": "AWS::Lambda::Function",
+      "Properties": {
+        "Code": {
+          "S3Bucket": {
+            "Fn::FindInMap": [
+              "AWSRegion2Bucket",
+              {
+                "Ref": "AWS::Region"
+              },
+              "OpenCode"
+            ]
+          },
+          "S3Key": {
+            "Ref": "RESTFetcherKey"
+          }
+        },
+        "Runtime": "java8",
+        "Handler": "au.com.thinkronicity.RestFetcher.Fetch",
+        "Description": "Generic REST processor from THINKronicity.com.au",
+        "Timeout": 300,
+        "MemorySize": 512,
+        "Role": {
+          "Fn::GetAtt": [
+            "LambdaExecutionRole",
+            "Arn"
+          ]
+        }
+      },
+      "Metadata": {
+        "AWS::CloudFormation::Designer": {
+          "id": "f1b54c1b-6d9d-4c5d-adcd-376fd2ad980e"
+        }
+      }
+    },
+    "ProjectFilesBucket": {
+      "Type": "AWS::S3::Bucket",
+      "DeletionPolicy": "Retain",
+      "Properties": {
+        "BucketName": {
+          "Fn::Join": [
+            "",
+            [
+              {
+                "Ref": "ProjectPrefix"
+              },
+              "-",
+              {
+                "Ref": "TargetEnvironment"
+              },
+              "-files-",
+              {
+                "Ref": "TargetDomain"
+              }
+            ]
+          ]
+        },
+        "AccessControl": "Private",
+        "VersioningConfiguration": {
+          "Status": "Suspended"
+        }
+      },
+      "Metadata": {
+        "AWS::CloudFormation::Designer": {
+          "id": "9c6b2edc-375c-4a04-a241-002ade326079"
+        }
+      }
+    },
+    "THINKonicityS3ZipLoaderLambda": {
+      "Type": "AWS::Lambda::Function",
+      "Properties": {
+        "Code": {
+          "S3Bucket": {
+            "Fn::FindInMap": [
+              "AWSRegion2Bucket",
+              {
+                "Ref": "AWS::Region"
+              },
+              "OpenCode"
+            ]
+          },
+          "S3Key": {
+            "Ref": "S3ZipFileLoaderKey"
+          }
+        },
+        "Runtime": "java8",
+        "Handler": "au.com.thinkronicity.aws.S3ZipFileLoader",
+        "Description": "CloudFormation S3 Zip Loader from THINKronicity.com.au",
+        "Timeout": 300,
+        "MemorySize": 768,
+        "Role": {
+          "Fn::GetAtt": [
+            "LambdaExecutionRole",
+            "Arn"
+          ]
+        }
+      },
+      "Metadata": {
+        "AWS::CloudFormation::Designer": {
+          "id": "40239079-bb58-44f6-9455-5ffd70c8a373"
+        }
+      }
+    },
+    "ProjectFilesLoad": {
+      "Type": "Custom::S3ZipLoader",
+      "DeletionPolicy": "Retain",
+      "Properties": {
+        "ServiceToken": {
+          "Fn::GetAtt": [
+            "THINKonicityS3ZipLoaderLambda",
+            "Arn"
+          ]
+        },
+        "SourceBucket": {
+          "Fn::FindInMap": [
+            "AWSRegion2Bucket",
+            {
+              "Ref": "AWS::Region"
+            },
+            "OpenCode"
+          ]
+        },
+        "SourceKeys": {
+          "Ref": "ProjectZipFilesList"
+        },
+        "TargetBucket": {
+          "Ref": "ProjectFilesBucket"
+        },
+        "PublicRead": "^(images/|xsl/|xsl/f/|fop/).*$",
+        "Debug": "true"
+      },
+      "Metadata": {
+        "AWS::CloudFormation::Designer": {
+          "id": "cb93fb54-777b-426e-b4a4-5337dab2c4fb"
+        }
+      },
+      "DependsOn": [
+        "ProjectFilesBucket"
+      ]
+    }
+  },
+  "Outputs": {
+    "LambdaExecutionRoleArn": {
+      "Value": {
+        "Fn::GetAtt": [
+          "LambdaExecutionRole",
+          "Arn"
+        ]
+      },
+      "Description": "Unique resource ID of the IAM Role allocated to the Lambda Functions."
+    },
+    "AccessProjectS3FilesBucket": {
+      "Value": {
+        "Fn::Join": [
+          "",
+          [
+            {
+              "Ref": "ProjectPrefix"
+            },
+            "-",
+            {
+              "Ref": "TargetEnvironment"
+            },
+            "-files-",
+            {
+              "Ref": "TargetDomain"
+            }
+          ]
+        ]
+      },
+      "Description": "The generated name of the S3 Bucket, used by subsequent stacks to access the project files."
+    },
+    "SelectedProjectPrefix": {
+      "Value": {
+        "Ref": "ProjectPrefix"
+      },
+      "Description": "The parameter value entered when the stack was created, used in subsequent stacks which build on this one."
+    },
+    "SelectedTargetEnvironment": {
+      "Value": {
+        "Ref": "TargetEnvironment"
+      },
+      "Description": "The parameter value entered when the stack was created, used in subsequent stacks which build on this one."
+    },
+    "SelectedTargetDomain": {
+      "Value": {
+        "Ref": "TargetDomain"
+      },
+      "Description": "The parameter value entered when the stack was created, used in subsequent stacks which build on this one."
+    },
+    "THINKonicityRESTFetcherLambdaArn": {
+      "Value": {
+        "Fn::GetAtt": [
+          "THINKonicityRESTFetcherLambda",
+          "Arn"
+        ]
+      },
+      "Description": "Unique resource ID of the REST Fetcher Lamba Function."
+    },
+    "THINKonicityS3ZipLoaderLambdaArn": {
+      "Value": {
+        "Fn::GetAtt": [
+          "THINKonicityS3ZipLoaderLambda",
+          "Arn"
+        ]
+      },
+      "Description": "Unique resource ID of the S3 Zip Loader Lamba Function."
+    },
+    "ProjectFilesLoadResult": {
+      "Value": {
+        "Fn::GetAtt": [
+          "ProjectFilesLoad",
+          "SourceZips"
+        ]
+      },
+      "Description": "The result message from the S3 Zip Loader."
+    }
+  },
+  "Metadata": {
+    "AWS::CloudFormation::Designer": {
+      "9c6b2edc-375c-4a04-a241-002ade326079": {
+        "size": {
+          "width": 60,
+          "height": 60
+        },
+        "position": {
+          "x": 60,
+          "y": 90
+        },
+        "z": 1,
+        "embeds": []
+      },
+      "eee67dc5-d36f-4363-920f-4df4f8cb7aed": {
+        "size": {
+          "width": 60,
+          "height": 60
+        },
+        "position": {
+          "x": 180,
+          "y": 90
+        },
+        "z": 1,
+        "embeds": []
+      },
+      "40239079-bb58-44f6-9455-5ffd70c8a373": {
+        "size": {
+          "width": 60,
+          "height": 60
+        },
+        "position": {
+          "x": 280,
+          "y": 200
+        },
+        "z": 1,
+        "embeds": [],
+        "isrelatedto": [
+          "eee67dc5-d36f-4363-920f-4df4f8cb7aed"
+        ]
+      },
+      "cb93fb54-777b-426e-b4a4-5337dab2c4fb": {
+        "size": {
+          "width": 60,
+          "height": 60
+        },
+        "position": {
+          "x": 50,
+          "y": 220
+        },
+        "z": 1,
+        "embeds": [],
+        "dependson": [
+          "9c6b2edc-375c-4a04-a241-002ade326079"
+        ],
+        "isrelatedto": [
+          "40239079-bb58-44f6-9455-5ffd70c8a373"
+        ]
+      },
+      "f1b54c1b-6d9d-4c5d-adcd-376fd2ad980e": {
+        "size": {
+          "width": 60,
+          "height": 60
+        },
+        "position": {
+          "x": 300,
+          "y": 90
+        },
+        "z": 1,
+        "embeds": [],
+        "isrelatedto": [
+          "eee67dc5-d36f-4363-920f-4df4f8cb7aed"
+        ]
+      },
+      "5f4f7b34-c276-4ef7-a3e9-b688325966ed": {
+        "source": {
+          "id": "cb93fb54-777b-426e-b4a4-5337dab2c4fb"
+        },
+        "target": {
+          "id": "9c6b2edc-375c-4a04-a241-002ade326079"
+        },
+        "z": 11
+      }
+    }
+  }
+}

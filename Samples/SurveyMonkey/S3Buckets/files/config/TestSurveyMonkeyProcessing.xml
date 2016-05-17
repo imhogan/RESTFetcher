@@ -1,0 +1,135 @@
+<Commands 
+	xmlns="http://THINKronicity.com.au/Schemas/Smirnov/RestFetcherCommands.xsd" 
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+	xsi:schemaLocation="http://THINKronicity.com.au/Schemas/Smirnov/RestFetcherCommands.xsd http://thinkronicity.com.au/Schemas/RestFetcherCommands.xsd"
+	>
+	<!-- 
+		Sample RESTFetcher commands file for Survey Monkey API V3 processing.
+		
+		Author Ian Hogan, Ian.Hogan@THINKronicity.com.au
+	-->
+	<Command Name="DoNothing" IsNOP="true">
+		<Actions>
+			<Action Type="AddResult">
+				<Parameters>
+					<Parameter Name="Result">Did nothing!</Parameter>
+				</Parameters>
+			</Action>
+		</Actions>
+	</Command>
+	<Command Name="GetSurveyList" Timeout="5000" IsJSON="true">
+		<Headers>
+			<Header Name="Authorization" Type="AuthToken">$authToken</Header>
+		</Headers>
+		<Parameters>
+			<Parameter Name="Resource">surveys</Parameter>
+			<Parameter Name="api_key" Separator="?" Format="Query">$API_Key</Parameter>
+		</Parameters>
+		<Actions>
+			<Action Type="S3PUT" Mode="debug">
+				<Parameters>
+					<Parameter Name="Bucket">$S3_Bucket</Parameter>
+					<Parameter Name="Name">=${REST_Log_Path}/surveys_${TestID}.xml</Parameter>
+				</Parameters>
+			</Action>
+			<Action Type="FOP">
+				<Parameters>
+					<Parameter Name="Transform" Function="S3URL">=${S3_Bucket},xsl/TestSurveysList2FO.xsl</Parameter>
+					<Parameter Name="Bucket">$S3_Bucket</Parameter>
+					<Parameter Name="Name">=PDFs/${TestID}.pdf</Parameter>
+				</Parameters>
+			</Action>
+			<Action Type="eMail">
+				<Parameters>
+					<Parameter Name="From">$EmailSender</Parameter>
+					<Parameter Name="Name">$EmailSenderName</Parameter>
+					<Parameter Name="To">$EmailSender</Parameter>
+					<Parameter Name="Subject">=Here is the survey list.</Parameter>
+					<Parameter Name="Attachments" Function="S3URL">=${S3_Bucket},PDFs/${TestID}.pdf</Parameter>
+				</Parameters>
+				<Body ContentType="text/html"><![CDATA[=<html><body><p>Hi, here is the PDF from ${S3_Bucket}/PDFs/${TestID}.pdf</p><br/><p>Enjoy!</p></body></html>]]>
+				</Body>
+				<Actions>
+					<Action Type="AddResult" ParametersRegExp="^EmailResult$">
+						<Parameters>
+							<Parameter Name="EmailResult">=Survey List sent to ${EmailSender}</Parameter>
+						</Parameters>
+					</Action>
+					<Action Type="S3DELETE" Mode="!debug">
+						<Parameters>
+							<Parameter Name="Bucket">$S3_Bucket</Parameter>
+							<Parameter Name="Name">=PDFs/${TestID}.pdf</Parameter>
+						</Parameters>
+					</Action>
+				</Actions>
+			</Action>
+		</Actions>
+	</Command>
+	<Command Name="GetAllSurveys" Timeout="5000" IsJSON="true">
+		<Headers>
+			<Header Name="Authorization" Type="AuthToken">$authToken</Header>
+		</Headers>
+		<Parameters>
+			<Parameter Name="Resource">surveys</Parameter>
+			<Parameter Name="api_key" Separator="?" Format="Query">$API_Key</Parameter>
+		</Parameters>
+		<Actions>
+			<Action Type="S3PUT" Mode="debug">
+				<Parameters>
+					<Parameter Name="Bucket">$S3_Bucket</Parameter>
+					<Parameter Name="Name">=${REST_Log_Path}/Surveys_List_${TestID}.xml</Parameter>
+				</Parameters>
+			</Action>
+			<Action Type="Command" Command="GetSurveyDetails" Match="//data/id" Root="Surveys">
+				<Parameters>
+					<Parameter Name="SurveyID" XPath="."/>
+				</Parameters>
+				<Actions>
+					<Action Type="S3PUT">
+						<Parameters>
+							<Parameter Name="Bucket">$S3_Bucket</Parameter>
+							<Parameter Name="Name">=config/AllSurveyDetails_${TestID}.xml</Parameter>
+						</Parameters>
+					</Action>
+					<Action Type="eMail">
+						<Parameters>
+							<Parameter Name="From">$EmailSender</Parameter>
+							<Parameter Name="Name">$EmailSenderName</Parameter>
+							<Parameter Name="To">$EmailSender</Parameter>
+							<Parameter Name="Subject">=Here is the survey details XML file.</Parameter>
+							<Parameter Name="Attachments" Function="S3URL">=${S3_Bucket},config/AllSurveyDetails_${TestID}.xml</Parameter>
+						</Parameters>
+						<Body ContentType="text/html"><![CDATA[=<html><body><p>Hi, here is the detail of all surveys in XML format - the file is also stored in S3://${S3_Bucket}/config/AllSurveyDetails_${TestID}.xml</p><br/><p>Enjoy!</p></body></html>]]>
+						</Body>
+						<Actions>
+							<Action Type="AddResult" ParametersRegExp="^EmailResult$">
+								<Parameters>
+									<Parameter Name="EmailResult">=Survey details XML sent to ${EmailSender}</Parameter>
+								</Parameters>
+							</Action>
+						</Actions>
+					</Action>
+				</Actions>
+			</Action>
+		</Actions>
+	</Command>
+	<Command Name="GetSurveyDetails" Timeout="5000" IsJSON="true">
+		<Headers>
+			<Header Name="Authorization" Type="AuthToken">$authToken</Header>
+		</Headers>
+		<Parameters>
+			<Parameter Name="Resource">surveys</Parameter>
+			<Parameter Name="ID">$SurveyID</Parameter>
+			<Parameter Name="Aspect">details</Parameter>
+			<Parameter Name="api_key" Separator="?" Format="Query">$API_Key</Parameter>
+		</Parameters>
+		<Actions>
+			<Action Type="S3PUT" Mode="debug">
+				<Parameters>
+					<Parameter Name="Bucket">$S3_Bucket</Parameter>
+					<Parameter Name="Name">=${REST_Log_Path}/Survey_${SurveyID}_Details_${TestID}.xml</Parameter>
+				</Parameters>
+			</Action>
+		</Actions>
+	</Command>
+</Commands>

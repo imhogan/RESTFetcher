@@ -59,7 +59,7 @@ implements RequestHandler<Object, String> {
     /**
      * input from the Lamba invocation.
      */
-    private LinkedHashMap<String, String> input = new LinkedHashMap<String, String>();
+    private LinkedHashMap<String, String> input = null;
     
     /**
      * Default debug mode.  
@@ -69,7 +69,7 @@ implements RequestHandler<Object, String> {
     /**
      * Version of this codebase.
      */
-    private static final String version = "2.1.0";
+    private static final String version = "2.1.1";
     
     /**
      * Namespace for the Commands XML schema. 
@@ -96,6 +96,19 @@ implements RequestHandler<Object, String> {
      */
     private HashMap<String, String> commandsNamespaceMap = null;
 
+    /**
+     * Initialise local variables at start of event processing.
+     * 
+     *  This is required as AWS Lambda will instantiate the handler class and then send it 
+     *  events as they arrive, until the handler resources are released when the container is 
+     *  destroyed on timeout.
+     */
+    private void initialise() {
+    	input = new LinkedHashMap<String, String>();
+    	fetchConfig = null;
+    	eventMapXml = null;
+    }
+    
     /**
      * getMyCredentials - get the AWS credentials - initialised on first used.
      * 
@@ -173,14 +186,15 @@ implements RequestHandler<Object, String> {
      */
     public Object createInputFromS3Event(S3Event s3event, Context context) throws IOException {
         try {
+        	LinkedHashMap<String, String> eventInput = new LinkedHashMap<String, String>();
             S3EventNotification.S3EventNotificationRecord record = (S3EventNotification.S3EventNotificationRecord)s3event.getRecords().get(0);
             String srcBucket = record.getS3().getBucket().getName();
             String srcKey = record.getS3().getObject().getKey().replace('+', ' ');
             srcKey = URLDecoder.decode(srcKey, "UTF-8");
-            this.input.put("S3_Bucket", srcBucket);
-            this.input.put("S3_Key", srcKey);
-            this.input.put("AWS_Event_Name", record.getEventName());
-            this.input.put("AWS_Event_Source", record.getEventSource());
+            eventInput.put("S3_Bucket", srcBucket);
+            eventInput.put("S3_Key", srcKey);
+            eventInput.put("AWS_Event_Name", record.getEventName());
+            eventInput.put("AWS_Event_Source", record.getEventSource());
             Utility.LogMessage("Processing event " + record.getEventName() + " from " + record.getEventSource() + " for s3://" + srcBucket + "/" + srcKey);
             String eventMappingURI = AWS_S3_Helper.resolveURI(this.getMyCredentials(), "s3://" + srcBucket + "/config/LambdaEventsMap.xml", 3600);
             if (!eventMappingURI.isEmpty()) {
@@ -188,7 +202,7 @@ implements RequestHandler<Object, String> {
             } else {
                 Utility.LogMessage("Could not resolve URI 's3://" + srcBucket + "/config/LambdaEventsMap.xml");
             }
-            return this.input;
+            return eventInput;
         }
         catch (IOException e) {
             throw new RuntimeException(e);
@@ -201,6 +215,7 @@ implements RequestHandler<Object, String> {
      * @see com.amazonaws.services.lambda.runtime.RequestHandler#handleRequest(java.lang.Object, com.amazonaws.services.lambda.runtime.Context)
      */
     public String handleRequest(Object input, Context context) {
+    	this.initialise();
         Utility.setMyContext(context);
         Utility.LogMessage("RestFetcher - Version "+version);
         Utility.LogMessage("[INPUT] " + input);

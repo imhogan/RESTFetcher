@@ -25,7 +25,7 @@
     "RESTFetcherKey": {
       "Description": "Zip file for REST Fetcher function",
       "Type": "String",
-      "Default": "au-com-thinkronicity-RestFetcher-V2.1.0.zip"
+      "Default": "au-com-thinkronicity-RestFetcher-V2.1.1.zip"
     },
     "ProjectZipFilesList": {
       "Description": "Project Files List",

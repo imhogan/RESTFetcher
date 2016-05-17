@@ -26,17 +26,17 @@ The following CloudFormation template demonstrates this:
  To run the sample use the Actions > Configure Test Event menu item in the Lambda Function console and enter the following event JSON:
 ```
 {
-  "S3_Bucket": "```*bucket-name-created-by-cloudformation*```",
+  "S3_Bucket": "bucket-name-created-by-cloudformation",
   "S3_FilePrefix": "Test",
   "configurationURI": "s3://${S3_Bucket}/config/${S3_FilePrefix}SurveyMonkeyProcessing.properties",
-  "command": "*command-name*",
+  "command": "command-name",
   "TestID": "Test",
-  "EmailSenderName": "*Sender Name*",
-  "EmailSender": "*Sender Email*",
+  "EmailSenderName": "Sender Name",
+  "EmailSender": "Sender Email",
   "DeleteFile": "Dummy",
   "traceDebug": "true",
-  "API_Key": "*your-api-key*",
-  "authToken": "*your-auth-token*"
+  "API_Key": "your-api-key",
+  "authToken": "your-auth-token"
 }
 ```
 

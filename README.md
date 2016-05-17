@@ -24,7 +24,7 @@ The following CloudFormation template demonstrates this:
     GetAllSurveys - this fetches the list of surveys and then gets the details for each survey, combining them into a single XML file and emailing the result. 
   
  To run the sample use the Actions > Configure Test Event menu item in the Lambda Function console and enter the following event JSON:
-```
+```JSON
 {
   "S3_Bucket": "bucket-name-created-by-cloudformation",
   "S3_FilePrefix": "Test",
@@ -44,12 +44,12 @@ The following table explains the placeholders used in the above sample JSON.
 
 | Placeholder | Usage |
 | --- | --- |
-|*bucket-name-created-by-cloudformation*|The bucket name created by the stack - this is shown in the CloudFormation stack output.|
-|*command-name*|GetSurveyList or GetAllSurveys|
-|*Sender Name*|The email sender name for the body of the email message.|
-|*Sender Email*|The sender email address, eg "Sender Name\<Sender.Name@emaildomain\>".|
-|*your-api-key*|Your Survey Monkey API key.|
-|*your-auth-token*|The Authorisation Token for your Survey Monkey API key.|
+|```bucket-name-created-by-cloudformation```|The bucket name created by the stack - this is shown in the CloudFormation stack output.|
+|```command-name```|GetSurveyList or GetAllSurveys|
+|```Sender Name```|The email sender name for the body of the email message.|
+|```Sender Email```|The sender email address, eg "Sender Name\<Sender.Name@emaildomain\>".|
+|```your-api-key```|Your Survey Monkey API key.|
+|```your-auth-token```|The Authorisation Token for your Survey Monkey API key.|
    
  See https://developer.surveymonkey.com/api/v3/#getting-started for instructions on registering a Survey Monkey App. 
  

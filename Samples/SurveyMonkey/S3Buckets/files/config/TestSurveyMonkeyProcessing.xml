@@ -1,7 +1,7 @@
 <Commands 
 	xmlns="http://THINKronicity.com.au/Schemas/Smirnov/RestFetcherCommands.xsd" 
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
-	xsi:schemaLocation="http://THINKronicity.com.au/Schemas/Smirnov/RestFetcherCommands.xsd http://thinkronicity.com.au/Schemas/RestFetcherCommands.xsd"
+	xsi:schemaLocation="http://THINKronicity.com.au/Schemas/Smirnov/RestFetcherCommands.xsd https://github.com/imhogan/RESTFetcher/raw/master/Schemas/RestFetcherCommands.xsd"
 	>
 	<!-- 
 		Sample RESTFetcher commands file for Survey Monkey API V3 processing.

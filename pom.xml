@@ -3,7 +3,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>THINKronicity</groupId>
     <artifactId>RESTFetcher</artifactId>
-    <version>1.2.3CE</version>
+    <version>2.2.0CE</version>
     <packaging>jar</packaging>
 <dependencies>
     <dependency>
@@ -12,11 +12,23 @@
       <version>3.8.1</version>
       <scope>test</scope>
     </dependency>
-  <dependency>
+  <!--<dependency>
     <groupId>com.fasterxml.jackson.core</groupId>
     <artifactId>jackson-databind</artifactId>
     <version>2.7.0</version>
-  </dependency>
+  </dependency>-->
+<!-- https://mvnrepository.com/artifact/com.fasterxml.jackson.dataformat/jackson-dataformat-xml -->
+<!--<dependency>
+    <groupId>com.fasterxml.jackson.dataformat</groupId>
+    <artifactId>jackson-dataformat-xml</artifactId>
+    <version>2.7.0</version>
+</dependency>-->
+<!-- https://mvnrepository.com/artifact/org.json/json -->
+<dependency>
+    <groupId>org.json</groupId>
+    <artifactId>json</artifactId>
+    <version>20160810</version>
+</dependency>
 <!-- https://mvnrepository.com/artifact/net.sf.saxon/Saxon-HE -->
 <dependency>
     <groupId>net.sf.saxon</groupId>
@@ -28,6 +40,18 @@
     <groupId>org.apache.xmlgraphics</groupId>
     <artifactId>fop</artifactId>
     <version>1.1</version>
+</dependency>
+<!-- https://mvnrepository.com/artifact/org.apache.avalon.framework/avalon-framework-api -->
+<dependency>
+    <groupId>org.apache.avalon.framework</groupId>
+    <artifactId>avalon-framework-api</artifactId>
+    <version>4.3.1</version>
+</dependency>
+<!-- https://mvnrepository.com/artifact/org.apache.avalon.framework/avalon-framework-impl -->
+<dependency>
+    <groupId>org.apache.avalon.framework</groupId>
+    <artifactId>avalon-framework-impl</artifactId>
+    <version>4.3.1</version>
 </dependency>
 <!-- https://mvnrepository.com/artifact/org.apache.servicemix.bundles/org.apache.servicemix.bundles.not-yet-commons-ssl -->
 <dependency>

@@ -23,6 +23,12 @@
     <artifactId>Saxon-HE</artifactId>
     <version>9.7.0-8</version>
 </dependency>
+<!-- https://mvnrepository.com/artifact/org.apache.xmlgraphics/fop -->
+<dependency>
+    <groupId>org.apache.xmlgraphics</groupId>
+    <artifactId>fop</artifactId>
+    <version>1.1</version>
+</dependency>
 <!-- https://mvnrepository.com/artifact/org.apache.servicemix.bundles/org.apache.servicemix.bundles.not-yet-commons-ssl -->
 <dependency>
     <groupId>org.apache.servicemix.bundles</groupId>
@@ -53,6 +59,17 @@
         <groupId>com.amazonaws</groupId>
         <artifactId>aws-java-sdk-s3</artifactId>
     </dependency>
+<!-- https://mvnrepository.com/artifact/com.amazonaws/aws-java-sdk-ses -->
+<dependency>
+    <groupId>com.amazonaws</groupId>
+    <artifactId>aws-java-sdk-ses</artifactId>
+</dependency>
+<!-- https://mvnrepository.com/artifact/javax.mail/javax.mail-api -->
+<dependency>
+    <groupId>javax.mail</groupId>
+    <artifactId>javax.mail-api</artifactId>
+    <version>1.5.6</version>
+</dependency>
   </dependencies>
   <dependencyManagement>
   <dependencies>
@@ -60,7 +77,7 @@
       <groupId>com.amazonaws</groupId>
       <artifactId>aws-java-sdk-bom</artifactId>
    <!--<version>1.10.50</version>-->
-      <version>1.11.13</version>
+      <version>1.11.31</version>
       <type>pom</type>
       <scope>import</scope>
     </dependency>
@@ -92,6 +109,7 @@
 <plugin>
     <groupId>org.apache.maven.plugins</groupId>
     <artifactId>maven-jar-plugin</artifactId>
+     <version>2.3.2</version>
     <configuration>
         <archive>
             <manifest>

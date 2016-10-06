@@ -73,7 +73,7 @@ implements RequestHandler<Object, String> {
     /**
      * Version of this codebase.
      */
-    private static final String version = "2.1.1";
+    private static final String version = "2.2.0CE";
     
     /**
      * Namespace for the Commands XML schema. 
@@ -203,6 +203,7 @@ implements RequestHandler<Object, String> {
             String eventMappingURI = AWS_S3_Helper.resolveURI(this.getMyCredentials(), "s3://" + srcBucket + "/config/LambdaEventsMap.xml", 3600);
             if (!eventMappingURI.isEmpty()) {
                 this.processEventMap(eventMappingURI, String.valueOf(record.getEventSource()) + ":" + record.getEventName(), srcKey);
+                // TODO: Read extra event parameters from "s3://" + srcBucket + "/" + srcKey using XPath = /*/*
             } else {
                 Utility.LogMessage("Could not resolve URI 's3://" + srcBucket + "/config/LambdaEventsMap.xml");
             }

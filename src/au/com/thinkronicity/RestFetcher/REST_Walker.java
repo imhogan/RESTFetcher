@@ -629,7 +629,20 @@ public class REST_Walker {
             }
             
             // Send the email.
-            EmailHelper.sendEmailViaSES(this.getMyCredentials(), actionParameters.get("From"), actionParameters.get("ReplyTo"), actionParameters.get("Attachments"), actionParameters.get("Subject"), bodyContent, bodyType, actionParameters.get("To"), Regions.fromName((String)regionName), this.walkerConfig.debug || this.walkerConfig.verbose);
+            EmailHelper.sendEmailViaSES(
+                this.getMyCredentials()
+                , actionParameters.get("From")
+                , actionParameters.get("ReplyTo")
+                , actionParameters.get("Attachments")
+                , actionParameters.get("Subject")
+                , bodyContent
+                , bodyType
+                , actionParameters.get("To")
+                , actionParameters.get("CC")
+                , actionParameters.get("BCC")
+                , Regions.fromName((String)regionName)
+                , this.walkerConfig.debug || this.walkerConfig.verbose
+            );
             
             // The result document provides the sent email details.
             actionDocument =  Utility.readXmlFromString(Utility.replaceParameters("<Result><EmailLog><From><![CDATA[${From}]]></From><To><![CDATA[${To}]]></To><ReplyTo><![CDATA[${ReplyTo}]]></ReplyTo><Subject><![CDATA[${Subject}]]></Subject><Body><![CDATA[" + bodyContent + "]]></Body>" + "</EmailLog></Result>", actionParameters));

@@ -62,6 +62,8 @@ public class EmailHelper {
     		,String body
     		,String bodyType
     		,String recipients
+    		,String recipientsCC
+    		,String recipientsBCC
     		,Regions awsRegion
     		,Boolean traceLog
     	) 
@@ -82,6 +84,13 @@ public class EmailHelper {
         arraddress[0] = new InternetAddress(replyTo == null || replyTo.isEmpty() ? sender : replyTo);
         message.setReplyTo(arraddress);
         message.setRecipients(Message.RecipientType.TO, (Address[])InternetAddress.parse((String)recipients));
+        if (recipientsCC != null && !recipientsCC.isEmpty()) {
+            message.setRecipients(Message.RecipientType.CC, (Address[])InternetAddress.parse((String)recipientsCC));
+        }
+        if (recipientsBCC != null && !recipientsBCC.isEmpty()) {
+            message.setRecipients(Message.RecipientType.BCC, (Address[])InternetAddress.parse((String)recipientsBCC));
+        }
+
         
         // Initialise the email body
         MimeBodyPart wrap = new MimeBodyPart();
@@ -94,7 +103,7 @@ public class EmailHelper {
         content.addBodyPart((BodyPart)wrap);
         
         // Add attachments if they are specified
-        if (!attachmentURIs.isEmpty()) {
+        if (attachmentURIs != null && !attachmentURIs.isEmpty()) {
             String[] attachmentsFiles = attachmentURIs.split(";");
             StringBuilder sb = new StringBuilder();
             

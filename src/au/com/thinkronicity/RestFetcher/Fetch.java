@@ -73,7 +73,7 @@ implements RequestHandler<Object, String> {
     /**
      * Version of this codebase.
      */
-    private static final String version = "2.2.0CE";
+    private static final String version = "2.2.1CE";
     
     /**
      * Namespace for the Commands XML schema. 
@@ -128,6 +128,38 @@ implements RequestHandler<Object, String> {
             }
         }
         return this.myCredentials;
+    }
+
+    /**
+     * processEventMap - process the given event map to work out how to handle an AWS S3 event. 
+     * 
+     * This gets any initial parameter values and the initial command.
+     * 
+     * @param triggerfileURI	- URI of the trigger file.
+     * @param event				- S3 event.
+     * @param eventMatchKey		- key of the S3 file containing the event map.
+     */
+    public void loadTriggerfileParameters(String triggerfileURI) {
+        try {
+            Document triggerXml = Utility.readXmlFromURI(triggerfileURI);
+            NodeList triggerNodes = Utility.getNodesByXPath(triggerXml, "/*/*", null);
+            if (triggerNodes.getLength() > 0) {
+
+                for (int tn = 0; tn < triggerNodes.getLength(); ++tn) {
+                    Element triggerElement = (Element)triggerNodes.item(tn);
+                    
+                    this.input.put(triggerElement.getLocalName(), triggerElement.getTextContent());
+
+                }
+                return;
+            }
+            else {
+                throw new Exception("Could not find root element in '" + triggerfileURI + "'.");
+            }
+        }
+        catch (Exception e) {
+            Utility.LogMessage(Utility.GetStackTrace(e));
+        }
     }
 
     /**

@@ -20,7 +20,6 @@ import com.amazonaws.auth.DefaultAWSCredentialsProviderChain;
 import com.amazonaws.regions.Regions;
 import com.amazonaws.services.s3.model.CannedAccessControlList;
 
-import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -32,13 +31,10 @@ import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.UUID;
 import java.util.regex.Pattern;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
-import javax.activation.URLDataSource;
-import javax.mail.internet.MimeBodyPart;
 import javax.net.ssl.HttpsURLConnection;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -50,7 +46,7 @@ import org.w3c.dom.NodeList;
  * possibly converted from JSON to XML, and calls one or more methods. Results can be transformed and/or stored, and 
  * converted to PDF via XSL:FO, and emails can be sent to deliver PDF or other reports.
  * 
- * @author Ian Hogan, Ian.Hogan@THINKronicity.com.au
+ * @author Ian Hogan, Ian_MacDonald_Hogan@yahoo.com
  *
  */
 public class REST_Walker {
@@ -233,8 +229,17 @@ public class REST_Walker {
                     }
                 }
                 
-                // Get the result form the command.
-                restDocument = Utility.readXmlFromStream(urlConnection.getInputStream(), commandElement.getAttribute("IsJSON").toLowerCase().equals("true"));
+                // Get the result from the command response
+                
+                if (commandElement.getAttribute("NoResultBody").toLowerCase().equals("true") || urlConnection.getContentLengthLong() == 0) {
+                    
+                    restDocument = Utility.readXmlFromString("<HTTP_Response><Code>"+(new Integer(urlConnection.getResponseCode())).toString()+"</Code><Message>"+urlConnection.getResponseMessage()+"</Message></HTTP_Response>");
+                    
+                }
+                else {
+                    restDocument = Utility.readXmlFromStream(urlConnection.getInputStream(), commandElement.getAttribute("IsJSON").toLowerCase().equals("true"));
+                }
+
                 String responseXmlFileName = this.walkerConfig.configurationProperties.getProperty("service.responseXml", "");
                 if (!responseXmlFileName.equals("")) {
                     Utility.writeXmlDocument2File(restDocument, responseXmlFileName);

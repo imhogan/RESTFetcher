@@ -33,7 +33,7 @@ import javax.mail.internet.MimeMessage;
 import javax.mail.internet.MimeMultipart;
 
 /**
- * @author Ian Hogan
+ * @author Ian Hogan, Ian_MacDonald_Hogan@yahoo.com
  *
  */
 public class EmailHelper {

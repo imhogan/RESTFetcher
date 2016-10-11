@@ -1,22 +1,3 @@
-/*
- * Decompiled with CFR 0_113.
- * 
- * Could not load the following classes:
- *  com.amazonaws.AmazonClientException
- *  com.amazonaws.auth.AWSCredentials
- *  com.amazonaws.auth.EnvironmentVariableCredentialsProvider
- *  com.amazonaws.services.lambda.runtime.Context
- *  com.amazonaws.services.lambda.runtime.LambdaLogger
- *  com.amazonaws.services.lambda.runtime.RequestHandler
- *  com.amazonaws.services.lambda.runtime.events.S3Event
- *  com.amazonaws.services.s3.event.S3EventNotification
- *  com.amazonaws.services.s3.event.S3EventNotification$S3BucketEntity
- *  com.amazonaws.services.s3.event.S3EventNotification$S3Entity
- *  com.amazonaws.services.s3.event.S3EventNotification$S3EventNotificationRecord
- *  com.amazonaws.services.s3.event.S3EventNotification$S3ObjectEntity
- *  org.json.JSONObject
- *  org.json.XML
- */
 package au.com.thinkronicity.RestFetcher;
 
 import au.com.thinkronicity.RestFetcher.AWS_S3_Helper;
@@ -50,7 +31,7 @@ import org.w3c.dom.NodeList;
 /**
  * Class to recursively fetch and process XML (or JSON) data from a REST API in an AWS Lambda context. 
  * 
- * @author Ian Hogan, Ian.Hogan@THINKronicity.com.au
+ * @author Ian Hogan, Ian_MacDonald_Hogan@yahoo.com
  *
  */
 /**
@@ -73,7 +54,7 @@ implements RequestHandler<Object, String> {
     /**
      * Version of this codebase.
      */
-    private static final String version = "2.2.2CE";
+    private static final String version = "2.2.3CE";
     
     /**
      * Namespace for the Commands XML schema. 

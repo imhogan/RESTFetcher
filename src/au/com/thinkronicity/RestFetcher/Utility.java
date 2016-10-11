@@ -558,7 +558,15 @@ public class Utility {
                 }
             }
             in.close();
-            JSONObject jsonData = new JSONObject(textBuilder.toString());
+            String jsonString = textBuilder.toString().trim();
+            
+            // Handle anonymous object results
+            if (!jsonString.startsWith("{")) {
+                
+                jsonString = "{\"Anonymous\":"+jsonString+"}";
+            }
+            
+            JSONObject jsonData = new JSONObject(jsonString);
             String xmlContent = "<?xml version=\"1.0\" encoding=\"ISO-8859-15\"?>\n<root>" + XML.toString((Object)jsonData) + "</root>";
             doc = Utility.readXmlFromString(xmlContent);
         } else {

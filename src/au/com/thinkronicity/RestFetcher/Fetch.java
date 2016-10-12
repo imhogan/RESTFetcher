@@ -54,7 +54,7 @@ implements RequestHandler<Object, String> {
     /**
      * Version of this codebase.
      */
-    private static final String version = "2.2.4CE";
+    private static final String version = "2.2.5CE";
     
     /**
      * Namespace for the Commands XML schema. 
@@ -272,6 +272,11 @@ implements RequestHandler<Object, String> {
             if (!this.fetchConfig.commandsURI.isEmpty()) {
                 Utility.setFopBaseURI(this.fetchConfig.getParameter("FOP_BASE_URI", Utility.getFopBaseURI()));
                 Utility.setFopConfig(this.fetchConfig.getParameter("FOP_CONFIG", Utility.getFopConfig()));
+                
+                if (this.fetchConfig.getParameter("ENABLE_SSL_LOGGING", "false").toLowerCase().equals("true")) {
+                    System.setProperty("javax.net.debug","all");
+                }
+                
                 REST_Walker walker = new REST_Walker(this.fetchConfig);
                 result = walker.walkServices();
             } else {

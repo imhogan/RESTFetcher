@@ -504,9 +504,21 @@ public class REST_Walker {
             
             // Get the content.
             Document outputDocument = null;
-            NodeList bodyNodes = actionElement.getElementsByTagNameNS(commandsXmlNamespace, "Body");
+            NodeList bodyNodes = Utility.getNodesByXPath(actionElement, "cmd:Body", this.commandsNamespaceMap);
+            // actionElement.getElementsByTagNameNS(commandsXmlNamespace, "Body");
+            
+            // Log information if required.
+            if (this.walkerConfig.debug) {
+	            Utility.LogMessage("S3PUT found " + (new Integer(bodyNodes.getLength())).toString() + " Body nodes.");
+            }
+
             if (bodyNodes.getLength() == 1) {
                 Element bodyElement = (Element)bodyNodes.item(0);
+                
+                if (bodyElement.hasAttribute("ContentType")) {
+                    contentType = bodyElement.getAttribute("ContentType");
+                }
+
                 String bodyContent = Utility.getParameterValue("Body", bodyElement, this.commandsNamespaceMap, actionParameters, contextElement, this.walkerConfig.verbose, this.walkerConfig.debug);
                 outputDocument = Utility.readXmlFromString(bodyContent);
             } else {

@@ -568,12 +568,14 @@ public class Utility {
             
             // Fix characters in key names not handled by org.json library - eg spaces, &, etc
             // TODO: update org.json library at https://github.com/stleary/JSON-java/blob/master/XML.java to do safeTagName on all generated tagnames.
-            String newJsonString = "";
-            while (!newJsonString.equals(jsonString)) {
+            for (String newJsonString = jsonString.replaceAll("(\"[^ &\"]*)( +)([^\"]*\":)", "$1_$3"); !newJsonString.equals(jsonString); jsonString = newJsonString) {
+                
                 newJsonString = jsonString.replaceAll("(\"[^ &\"]*)( +)([^\"]*\":)", "$1_$3");
             }
             
-            JSONObject jsonData = new JSONObject(newJsonString);
+            Utility.LogMessage("jsonString is " + jsonString);
+            
+            JSONObject jsonData = new JSONObject(jsonString);
             String xmlContent = "<?xml version=\"1.0\" encoding=\"ISO-8859-15\"?>\n<root>" + XML.toString((Object)jsonData) + "</root>";
             doc = Utility.readXmlFromString(xmlContent);
         } else {

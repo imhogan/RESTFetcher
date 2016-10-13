@@ -593,14 +593,14 @@ public class Utility {
             jsonString = "{\"Anonymous\":"+jsonString+"}";
         }
         
-        // Fix characters in key names not handled by org.json library - eg spaces, &, etc
+        // Fix characters in key names not handled by org.json library - eg spaces, &, etc, leading numerics
         // TODO: update org.json library at https://github.com/stleary/JSON-java/blob/master/XML.java to do safeTagName on all generated tagnames.
         while (true) {
             
             String newJsonString = jsonString
                                 .replaceAll("(\"[^ :&\"]*)([ :&]+)([^\"]*\":)", "$1_$3")
                                 .replaceAll("(\"[^\\\\\"]*)(\\\\\")([^\"]*\":)", "$1_$3")
-                                .replaceAll("(\")([0-9]+)(\":)", "$1_$2$3"); 
+                                .replaceAll("(\")([0-9]+[^\"]*)(\":)", "$1_$2$3"); 
             
             if (newJsonString.equals(jsonString)) {
                 

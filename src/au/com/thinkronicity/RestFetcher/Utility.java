@@ -558,20 +558,7 @@ public class Utility {
                 }
             }
             in.close();
-            String jsonString = textBuilder.toString().trim();
-            
-            // Handle anonymous object results
-            if (!jsonString.startsWith("{")) {
-                
-                jsonString = "{\"Anonymous\":"+jsonString+"}";
-            }
-            
-            // Fix characters in key names not handled by org.json library - eg spaces, &, etc
-            // TODO: update org.json library at https://github.com/stleary/JSON-java/blob/master/XML.java to do safeTagName on all generated tagnames.
-            for (String newJsonString = jsonString.replaceAll("(\"[^ &\"]*)( +)([^\"]*\":)", "$1_$3"); !newJsonString.equals(jsonString); jsonString = newJsonString) {
-                
-                newJsonString = jsonString.replaceAll("(\"[^ &\"]*)( +)([^\"]*\":)", "$1_$3");
-            }
+            String jsonString = sanitizeJson4XML(textBuilder.toString());
             
             Utility.LogMessage("jsonString is " + jsonString);
             
@@ -588,6 +575,40 @@ public class Utility {
         return doc;
     }
 
+    /**
+     * sanitizeJson4XML - Sanitize a JSON string so it converts to XML without error.
+     * 
+     * @param jsonString    - the JSON string to process.
+     * @return			    - an "XML safe" JSON string.
+     * 
+     */
+    public static String sanitizeJson4XML(String jsonString) {
+        
+        // Remove leading & trailing whitespace
+        jsonString = jsonString.trim();
+        
+        // Handle anonymous object results
+        if (!jsonString.startsWith("{")) {
+            
+            jsonString = "{\"Anonymous\":"+jsonString+"}";
+        }
+        
+        // Fix characters in key names not handled by org.json library - eg spaces, &, etc
+        // TODO: update org.json library at https://github.com/stleary/JSON-java/blob/master/XML.java to do safeTagName on all generated tagnames.
+        while (true) {
+            
+            String newJsonString = jsonString.replaceAll("(\"[^ &\"]*)( +)([^\"]*\":)", "$1_$3"); 
+            
+            if (newJsonString.equals(jsonString)) {
+                
+                return jsonString;
+            }
+            
+            jsonString = newJsonString;
+            
+        }
+    }
+    
     /**
      * readXmlFromString - read an XML document from an XML string.
      * 

@@ -92,6 +92,7 @@
       <xs:attribute name="IsInit" type="xs:boolean"/>
       <xs:attribute name="Name" use="required" type="xs:NCName"/>
       <xs:attribute name="IsJSON" type="xs:boolean"/>
+      <xs:attribute name="UseJSON2SafeXML" type="xs:boolean"/>
       <!-- TODO: Add verb types -->
       <xs:attribute name="Verb"/>
       <xs:attribute name="Timeout" type="xs:integer"/>

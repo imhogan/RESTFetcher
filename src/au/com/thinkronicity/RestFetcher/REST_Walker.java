@@ -237,7 +237,7 @@ public class REST_Walker {
                     
                 }
                 else {
-                    restDocument = Utility.readXmlFromStream(urlConnection.getInputStream(), commandElement.getAttribute("IsJSON").toLowerCase().equals("true"));
+                    restDocument = Utility.readXmlFromStream(urlConnection.getInputStream(), commandElement.getAttribute("IsJSON").toLowerCase().equals("true"), commandElement.getAttribute("UseJSON2SafeXML").toLowerCase().equals("true"));
                 }
 
                 String responseXmlFileName = this.walkerConfig.configurationProperties.getProperty("service.responseXml", "");

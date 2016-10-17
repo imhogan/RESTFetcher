@@ -595,7 +595,11 @@ public class Utility {
     public static Document JSON2SafeXML(Object jsonData, Element parentElement) 
     throws ParserConfigurationException
     {
-     
+        // Map null to empty string     
+        if (jsonData == null) {
+            jsonData = "";
+        }
+        
         DocumentBuilderFactory icFactory = DocumentBuilderFactory.newInstance();
         DocumentBuilder icBuilder;
 
@@ -604,15 +608,14 @@ public class Utility {
             icBuilder = icFactory.newDocumentBuilder();
             Document doc = icBuilder.newDocument();
             parentElement = doc.createElement("JSON");
+            parentElement.setAttribute("class", jsonData.getClass().getName());
             doc.appendChild(parentElement);
         }
          
         Document doc = parentElement.getOwnerDocument();
         
-        if (jsonData == null) {
-            // do nothing!
-        }
-        else if (jsonData instanceof JSONObject) {
+        
+        if (jsonData instanceof JSONObject) {
             
             for (Object key : ((JSONObject)jsonData).keySet()) {
 
@@ -635,6 +638,8 @@ public class Utility {
                     keyvalue = new JSONArray(keyvalue);
                 }
                 
+                valueElement.setAttribute("class", keyvalue.getClass().getName());
+
                 if (keyvalue instanceof JSONArray) {
                     JSON2SafeXML(keyvalue, valueElement);                    
                 }
@@ -657,6 +662,7 @@ public class Utility {
             for (Object val : (JSONArray)jsonData) {
                 Element rowElement = doc.createElement("row");
                 rowElement.setAttribute("order", i.toString());
+                rowElement.setAttribute("class", val.getClass().getName());
                 JSON2SafeXML(val, rowElement);
                 container.appendChild(rowElement);
                 i++;
@@ -670,7 +676,6 @@ public class Utility {
             
         }
         else {
-            parentElement.setAttribute("class", jsonData.getClass().getName());
             parentElement.setTextContent(jsonData.toString());
         }
         

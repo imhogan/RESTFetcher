@@ -54,7 +54,7 @@ implements RequestHandler<Object, String> {
     /**
      * Version of this codebase.
      */
-    private static final String version = "2.2.6CE";
+    private static final String version = "2.2.7CE";
     
     /**
      * Namespace for the Commands XML schema. 
@@ -120,10 +120,10 @@ implements RequestHandler<Object, String> {
      * @param event				- S3 event.
      * @param eventMatchKey		- key of the S3 file containing the event map.
      */
-    public void loadTriggerfileParameters(String triggerfileURI) {
+    public void loadTriggerfileParameters(String triggerfileURI, String paramsXPath) {
         try {
             Document triggerXml = Utility.readXmlFromURI(triggerfileURI);
-            NodeList triggerNodes = Utility.getNodesByXPath(triggerXml, "/*/*", null);
+            NodeList triggerNodes = Utility.getNodesByXPath(triggerXml, paramsXPath, null);
             if (triggerNodes.getLength() > 0) {
 
                 for (int tn = 0; tn < triggerNodes.getLength(); ++tn) {
@@ -216,7 +216,10 @@ implements RequestHandler<Object, String> {
             String eventMappingURI = AWS_S3_Helper.resolveURI(this.getMyCredentials(), "s3://" + srcBucket + "/config/LambdaEventsMap.xml", 3600);
             if (!eventMappingURI.isEmpty()) {
                 this.processEventMap(eventMappingURI, String.valueOf(record.getEventSource()) + ":" + record.getEventName(), srcKey);
-                // TODO: Read extra event parameters from "s3://" + srcBucket + "/" + srcKey using XPath = /*/*
+                // Read extra event parameters from "s3://" + srcBucket + "/" + srcKey using XPath 
+                // specified by input parameter triggerFileParamsXPath or "/*/*" if the parameter is not present.
+                String triggerfileURI = AWS_S3_Helper.resolveURI(this.getMyCredentials(), "s3://" + srcBucket +  "/" + srcKey, 3600);
+                this.loadTriggerfileParameters(triggerfileURI, this.input.getOrDefault("triggerFileParamsXPath", "/*/*"));
             } else {
                 Utility.LogMessage("Could not resolve URI 's3://" + srcBucket + "/config/LambdaEventsMap.xml");
             }

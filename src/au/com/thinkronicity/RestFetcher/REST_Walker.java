@@ -207,16 +207,17 @@ public class REST_Walker {
                 NodeList bodyNodes = Utility.getNodesByXPath(commandElement, "cmd:Body", this.commandsNamespaceMap);
                 if (bodyNodes.getLength() == 1) {
                     Element bodyElement = (Element)bodyNodes.item(0);
+                    String contentType = this.walkerConfig.contentType;
                     if (bodyElement.hasAttribute("ContentType")) {
-                        urlConnection.setRequestProperty("Content-Type", bodyElement.getAttribute("ContentType"));
-                    } else {
-                        urlConnection.setRequestProperty("Content-Type", this.walkerConfig.contentType);
-                    }
+                       contentType = bodyElement.getAttribute("ContentType");
+                    } 
+                    
+                    urlConnection.setRequestProperty("Content-Type", contentType);
                     urlConnection.setDoOutput(true);
                     OutputStream os = urlConnection.getOutputStream();
                     String bodyValue = Utility.getParameterValue("Body", bodyElement, this.commandsNamespaceMap, parameters, this.commandsXml.getDocumentElement(), this.walkerConfig.verbose, this.walkerConfig.debug);
                     if (this.walkerConfig.debug || this.walkerConfig.verbose) {
-                        Utility.LogMessage("body of type '"+urlConnection.getContentType()+"' is " + bodyValue);
+                        Utility.LogMessage("body of type '"+contentType+"' is " + bodyValue);
                     }
                     os.write(bodyValue.getBytes("UTF-8"));
                     os.close();

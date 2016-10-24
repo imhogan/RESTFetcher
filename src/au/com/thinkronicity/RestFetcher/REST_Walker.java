@@ -216,7 +216,7 @@ public class REST_Walker {
                     OutputStream os = urlConnection.getOutputStream();
                     String bodyValue = Utility.getParameterValue("Body", bodyElement, this.commandsNamespaceMap, parameters, this.commandsXml.getDocumentElement(), this.walkerConfig.verbose, this.walkerConfig.debug);
                     if (this.walkerConfig.debug || this.walkerConfig.verbose) {
-                        Utility.LogMessage("body of type '"+urlConnection.getContentType()+"'' is " + bodyValue);
+                        Utility.LogMessage("body of type '"+urlConnection.getContentType()+"' is " + bodyValue);
                     }
                     os.write(bodyValue.getBytes("UTF-8"));
                     os.close();

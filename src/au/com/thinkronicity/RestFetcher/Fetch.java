@@ -54,7 +54,7 @@ implements RequestHandler<Object, String> {
     /**
      * Version of this codebase.
      */
-    private static final String version = "2.2.7CE";
+    private static final String version = "2.2.8CE";
     
     /**
      * Namespace for the Commands XML schema. 
@@ -135,7 +135,7 @@ implements RequestHandler<Object, String> {
                 return;
             }
             else {
-                throw new Exception("Could not find root element in '" + triggerfileURI + "'.");
+                Utility.LogMessage("Warning: Could not find parameter elements in '" + triggerfileURI + "' using XPath '" + paramsXPath + "'.");
             }
         }
         catch (Exception e) {
@@ -223,6 +223,7 @@ implements RequestHandler<Object, String> {
             } else {
                 Utility.LogMessage("Could not resolve URI 's3://" + srcBucket + "/config/LambdaEventsMap.xml");
             }
+            eventInput.putAll(this.input);
             return eventInput;
         }
         catch (IOException e) {
@@ -262,6 +263,10 @@ implements RequestHandler<Object, String> {
                 String eventMappingURI = AWS_S3_Helper.resolveURI(this.getMyCredentials(), "s3://" + srcBucket + "/config/LambdaEventsMap.xml", 3600);
                 if (!eventMappingURI.isEmpty()) {
                     this.processEventMap(eventMappingURI, String.valueOf(eventSource) + ":" + eventName, srcKey);
+                    // Read extra event parameters from "s3://" + srcBucket + "/" + srcKey using XPath 
+                    // specified by input parameter triggerFileParamsXPath or "/*/*" if the parameter is not present.
+                    String triggerfileURI = AWS_S3_Helper.resolveURI(this.getMyCredentials(), "s3://" + srcBucket +  "/" + srcKey, 3600);
+                    this.loadTriggerfileParameters(triggerfileURI, this.input.getOrDefault("triggerFileParamsXPath", "/*/*"));
                 } else {
                     Utility.LogMessage("Could not resolve URI 's3://" + srcBucket + "/config/LambdaEventsMap.xml");
                 }

@@ -54,7 +54,7 @@ implements RequestHandler<Object, String> {
     /**
      * Version of this codebase.
      */
-    private static final String version = "2.2.8CE";
+    private static final String version = "2.2.9CE";
     
     /**
      * Namespace for the Commands XML schema. 
@@ -216,10 +216,14 @@ implements RequestHandler<Object, String> {
             String eventMappingURI = AWS_S3_Helper.resolveURI(this.getMyCredentials(), "s3://" + srcBucket + "/config/LambdaEventsMap.xml", 3600);
             if (!eventMappingURI.isEmpty()) {
                 this.processEventMap(eventMappingURI, String.valueOf(record.getEventSource()) + ":" + record.getEventName(), srcKey);
-                // Read extra event parameters from "s3://" + srcBucket + "/" + srcKey using XPath 
-                // specified by input parameter triggerFileParamsXPath or "/*/*" if the parameter is not present.
-                String triggerfileURI = AWS_S3_Helper.resolveURI(this.getMyCredentials(), "s3://" + srcBucket +  "/" + srcKey, 3600);
-                this.loadTriggerfileParameters(triggerfileURI, this.input.getOrDefault("triggerFileParamsXPath", "/*/*"));
+                // Read extra event parameters from "s3://" + srcBucket + "/" + srcKey using XPath, if it is an XML file and the
+                // input parameter triggerFileParamsXPath is not empty. Note if the default value is "/*/*" if the parameter is not present,
+                // so an empty parameter is required to suppress this behaviour.
+                String triggerfileXPath = this.input.getOrDefault("triggerFileParamsXPath", "/*/*");
+                if (!triggerfileXPath.equals("") && srcKey.toUpperCase().endsWith(".XML")) {
+                    String triggerfileURI = AWS_S3_Helper.resolveURI(this.getMyCredentials(), "s3://" + srcBucket +  "/" + srcKey, 3600);
+                    this.loadTriggerfileParameters(triggerfileURI, triggerfileXPath);
+                }
             } else {
                 Utility.LogMessage("Could not resolve URI 's3://" + srcBucket + "/config/LambdaEventsMap.xml");
             }
@@ -263,10 +267,14 @@ implements RequestHandler<Object, String> {
                 String eventMappingURI = AWS_S3_Helper.resolveURI(this.getMyCredentials(), "s3://" + srcBucket + "/config/LambdaEventsMap.xml", 3600);
                 if (!eventMappingURI.isEmpty()) {
                     this.processEventMap(eventMappingURI, String.valueOf(eventSource) + ":" + eventName, srcKey);
-                    // Read extra event parameters from "s3://" + srcBucket + "/" + srcKey using XPath 
-                    // specified by input parameter triggerFileParamsXPath or "/*/*" if the parameter is not present.
-                    String triggerfileURI = AWS_S3_Helper.resolveURI(this.getMyCredentials(), "s3://" + srcBucket +  "/" + srcKey, 3600);
-                    this.loadTriggerfileParameters(triggerfileURI, this.input.getOrDefault("triggerFileParamsXPath", "/*/*"));
+                    // Read extra event parameters from "s3://" + srcBucket + "/" + srcKey using XPath, if it is an XML file and the
+                    // input parameter triggerFileParamsXPath is not empty. Note if the default value is "/*/*" if the parameter is not present,
+                    // so an empty parameter is required to suppress this behaviour.
+                    String triggerfileXPath = this.input.getOrDefault("triggerFileParamsXPath", "/*/*");
+                    if (!triggerfileXPath.equals("") && srcKey.toUpperCase().endsWith(".XML")) {
+                        String triggerfileURI = AWS_S3_Helper.resolveURI(this.getMyCredentials(), "s3://" + srcBucket +  "/" + srcKey, 3600);
+                        this.loadTriggerfileParameters(triggerfileURI, triggerfileXPath);
+                    }
                 } else {
                     Utility.LogMessage("Could not resolve URI 's3://" + srcBucket + "/config/LambdaEventsMap.xml");
                 }

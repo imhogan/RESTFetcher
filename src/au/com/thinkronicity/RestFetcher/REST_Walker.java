@@ -20,7 +20,6 @@ import com.amazonaws.auth.DefaultAWSCredentialsProviderChain;
 import com.amazonaws.regions.Regions;
 import com.amazonaws.services.s3.model.CannedAccessControlList;
 
-import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -32,13 +31,10 @@ import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.UUID;
 import java.util.regex.Pattern;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
-import javax.activation.URLDataSource;
-import javax.mail.internet.MimeBodyPart;
 import javax.net.ssl.HttpsURLConnection;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -50,7 +46,7 @@ import org.w3c.dom.NodeList;
  * possibly converted from JSON to XML, and calls one or more methods. Results can be transformed and/or stored, and 
  * converted to PDF via XSL:FO, and emails can be sent to deliver PDF or other reports.
  * 
- * @author Ian Hogan, Ian.Hogan@THINKronicity.com.au
+ * @author Ian Hogan, Ian_MacDonald_Hogan@yahoo.com
  *
  */
 public class REST_Walker {
@@ -211,16 +207,17 @@ public class REST_Walker {
                 NodeList bodyNodes = Utility.getNodesByXPath(commandElement, "cmd:Body", this.commandsNamespaceMap);
                 if (bodyNodes.getLength() == 1) {
                     Element bodyElement = (Element)bodyNodes.item(0);
+                    String contentType = this.walkerConfig.contentType;
                     if (bodyElement.hasAttribute("ContentType")) {
-                        urlConnection.setRequestProperty("Content-Type", bodyElement.getAttribute("ContentType"));
-                    } else {
-                        urlConnection.setRequestProperty("Content-Type", this.walkerConfig.contentType);
-                    }
+                       contentType = bodyElement.getAttribute("ContentType");
+                    } 
+                    
+                    urlConnection.setRequestProperty("Content-Type", contentType);
                     urlConnection.setDoOutput(true);
                     OutputStream os = urlConnection.getOutputStream();
                     String bodyValue = Utility.getParameterValue("Body", bodyElement, this.commandsNamespaceMap, parameters, this.commandsXml.getDocumentElement(), this.walkerConfig.verbose, this.walkerConfig.debug);
                     if (this.walkerConfig.debug || this.walkerConfig.verbose) {
-                        Utility.LogMessage("body is " + bodyValue);
+                        Utility.LogMessage("body of type '"+contentType+"' is " + bodyValue);
                     }
                     os.write(bodyValue.getBytes("UTF-8"));
                     os.close();
@@ -233,8 +230,17 @@ public class REST_Walker {
                     }
                 }
                 
-                // Get the result form the command.
-                restDocument = Utility.readXmlFromStream(urlConnection.getInputStream(), commandElement.getAttribute("IsJSON").toLowerCase().equals("true"));
+                // Get the result from the command response
+                
+                if (commandElement.getAttribute("NoResultBody").toLowerCase().equals("true") || urlConnection.getContentLengthLong() == 0) {
+                    
+                    restDocument = Utility.readXmlFromString("<HTTP_Response><Code>"+(new Integer(urlConnection.getResponseCode())).toString()+"</Code><Message>"+urlConnection.getResponseMessage()+"</Message></HTTP_Response>");
+                    
+                }
+                else {
+                    restDocument = Utility.readXmlFromStream(urlConnection.getInputStream(), commandElement.getAttribute("IsJSON").toLowerCase().equals("true"), commandElement.getAttribute("UseJSON2SafeXML").toLowerCase().equals("true"));
+                }
+
                 String responseXmlFileName = this.walkerConfig.configurationProperties.getProperty("service.responseXml", "");
                 if (!responseXmlFileName.equals("")) {
                     Utility.writeXmlDocument2File(restDocument, responseXmlFileName);
@@ -499,9 +505,21 @@ public class REST_Walker {
             
             // Get the content.
             Document outputDocument = null;
-            NodeList bodyNodes = actionElement.getElementsByTagNameNS(commandsXmlNamespace, "Body");
+            NodeList bodyNodes = Utility.getNodesByXPath(actionElement, "cmd:Body", this.commandsNamespaceMap);
+            // actionElement.getElementsByTagNameNS(commandsXmlNamespace, "Body");
+            
+            // Log information if required.
+            if (this.walkerConfig.debug) {
+	            Utility.LogMessage("S3PUT found " + (new Integer(bodyNodes.getLength())).toString() + " Body nodes.");
+            }
+
             if (bodyNodes.getLength() == 1) {
                 Element bodyElement = (Element)bodyNodes.item(0);
+                
+                if (bodyElement.hasAttribute("ContentType")) {
+                    contentType = bodyElement.getAttribute("ContentType");
+                }
+
                 String bodyContent = Utility.getParameterValue("Body", bodyElement, this.commandsNamespaceMap, actionParameters, contextElement, this.walkerConfig.verbose, this.walkerConfig.debug);
                 outputDocument = Utility.readXmlFromString(bodyContent);
             } else {

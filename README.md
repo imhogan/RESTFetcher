@@ -53,7 +53,9 @@ The following table explains the placeholders used in the above sample JSON.
    
  See https://developer.surveymonkey.com/api/v3/#getting-started for instructions on registering a Survey Monkey App. 
  
+ Good luck!
+ 
  
  Once created, you can use the App in Draft mode for 90 days to test the API functionality.
   
- Ian.Hogan@THINKronicity.com.au
+Ian_MacDonald_Hogan@yahoo.com

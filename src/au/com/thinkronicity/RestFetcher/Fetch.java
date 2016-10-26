@@ -1,22 +1,3 @@
-/*
- * Decompiled with CFR 0_113.
- * 
- * Could not load the following classes:
- *  com.amazonaws.AmazonClientException
- *  com.amazonaws.auth.AWSCredentials
- *  com.amazonaws.auth.EnvironmentVariableCredentialsProvider
- *  com.amazonaws.services.lambda.runtime.Context
- *  com.amazonaws.services.lambda.runtime.LambdaLogger
- *  com.amazonaws.services.lambda.runtime.RequestHandler
- *  com.amazonaws.services.lambda.runtime.events.S3Event
- *  com.amazonaws.services.s3.event.S3EventNotification
- *  com.amazonaws.services.s3.event.S3EventNotification$S3BucketEntity
- *  com.amazonaws.services.s3.event.S3EventNotification$S3Entity
- *  com.amazonaws.services.s3.event.S3EventNotification$S3EventNotificationRecord
- *  com.amazonaws.services.s3.event.S3EventNotification$S3ObjectEntity
- *  org.json.JSONObject
- *  org.json.XML
- */
 package au.com.thinkronicity.RestFetcher;
 
 import au.com.thinkronicity.RestFetcher.AWS_S3_Helper;
@@ -50,7 +31,7 @@ import org.w3c.dom.NodeList;
 /**
  * Class to recursively fetch and process XML (or JSON) data from a REST API in an AWS Lambda context. 
  * 
- * @author Ian Hogan, Ian.Hogan@THINKronicity.com.au
+ * @author Ian Hogan, Ian_MacDonald_Hogan@yahoo.com
  *
  */
 /**
@@ -73,7 +54,7 @@ implements RequestHandler<Object, String> {
     /**
      * Version of this codebase.
      */
-    private static final String version = "2.2.0CE";
+    private static final String version = "2.2.9CE";
     
     /**
      * Namespace for the Commands XML schema. 
@@ -128,6 +109,38 @@ implements RequestHandler<Object, String> {
             }
         }
         return this.myCredentials;
+    }
+
+    /**
+     * processEventMap - process the given event map to work out how to handle an AWS S3 event. 
+     * 
+     * This gets any initial parameter values and the initial command.
+     * 
+     * @param triggerfileURI	- URI of the trigger file.
+     * @param event				- S3 event.
+     * @param eventMatchKey		- key of the S3 file containing the event map.
+     */
+    public void loadTriggerfileParameters(String triggerfileURI, String paramsXPath) {
+        try {
+            Document triggerXml = Utility.readXmlFromURI(triggerfileURI);
+            NodeList triggerNodes = Utility.getNodesByXPath(triggerXml, paramsXPath, null);
+            if (triggerNodes.getLength() > 0) {
+
+                for (int tn = 0; tn < triggerNodes.getLength(); ++tn) {
+                    Element triggerElement = (Element)triggerNodes.item(tn);
+                    
+                    this.input.put(triggerElement.getLocalName(), triggerElement.getTextContent());
+
+                }
+                return;
+            }
+            else {
+                Utility.LogMessage("Warning: Could not find parameter elements in '" + triggerfileURI + "' using XPath '" + paramsXPath + "'.");
+            }
+        }
+        catch (Exception e) {
+            Utility.LogMessage(Utility.GetStackTrace(e));
+        }
     }
 
     /**
@@ -203,10 +216,18 @@ implements RequestHandler<Object, String> {
             String eventMappingURI = AWS_S3_Helper.resolveURI(this.getMyCredentials(), "s3://" + srcBucket + "/config/LambdaEventsMap.xml", 3600);
             if (!eventMappingURI.isEmpty()) {
                 this.processEventMap(eventMappingURI, String.valueOf(record.getEventSource()) + ":" + record.getEventName(), srcKey);
-                // TODO: Read extra event parameters from "s3://" + srcBucket + "/" + srcKey using XPath = /*/*
+                // Read extra event parameters from "s3://" + srcBucket + "/" + srcKey using XPath, if it is an XML file and the
+                // input parameter triggerFileParamsXPath is not empty. Note if the default value is "/*/*" if the parameter is not present,
+                // so an empty parameter is required to suppress this behaviour.
+                String triggerfileXPath = this.input.getOrDefault("triggerFileParamsXPath", "/*/*");
+                if (!triggerfileXPath.equals("") && srcKey.toUpperCase().endsWith(".XML")) {
+                    String triggerfileURI = AWS_S3_Helper.resolveURI(this.getMyCredentials(), "s3://" + srcBucket +  "/" + srcKey, 3600);
+                    this.loadTriggerfileParameters(triggerfileURI, triggerfileXPath);
+                }
             } else {
                 Utility.LogMessage("Could not resolve URI 's3://" + srcBucket + "/config/LambdaEventsMap.xml");
             }
+            eventInput.putAll(this.input);
             return eventInput;
         }
         catch (IOException e) {
@@ -246,6 +267,14 @@ implements RequestHandler<Object, String> {
                 String eventMappingURI = AWS_S3_Helper.resolveURI(this.getMyCredentials(), "s3://" + srcBucket + "/config/LambdaEventsMap.xml", 3600);
                 if (!eventMappingURI.isEmpty()) {
                     this.processEventMap(eventMappingURI, String.valueOf(eventSource) + ":" + eventName, srcKey);
+                    // Read extra event parameters from "s3://" + srcBucket + "/" + srcKey using XPath, if it is an XML file and the
+                    // input parameter triggerFileParamsXPath is not empty. Note if the default value is "/*/*" if the parameter is not present,
+                    // so an empty parameter is required to suppress this behaviour.
+                    String triggerfileXPath = this.input.getOrDefault("triggerFileParamsXPath", "/*/*");
+                    if (!triggerfileXPath.equals("") && srcKey.toUpperCase().endsWith(".XML")) {
+                        String triggerfileURI = AWS_S3_Helper.resolveURI(this.getMyCredentials(), "s3://" + srcBucket +  "/" + srcKey, 3600);
+                        this.loadTriggerfileParameters(triggerfileURI, triggerfileXPath);
+                    }
                 } else {
                     Utility.LogMessage("Could not resolve URI 's3://" + srcBucket + "/config/LambdaEventsMap.xml");
                 }
@@ -259,6 +288,11 @@ implements RequestHandler<Object, String> {
             if (!this.fetchConfig.commandsURI.isEmpty()) {
                 Utility.setFopBaseURI(this.fetchConfig.getParameter("FOP_BASE_URI", Utility.getFopBaseURI()));
                 Utility.setFopConfig(this.fetchConfig.getParameter("FOP_CONFIG", Utility.getFopConfig()));
+                
+                if (this.fetchConfig.getParameter("ENABLE_SSL_LOGGING", "false").toLowerCase().equals("true")) {
+                    System.setProperty("javax.net.debug","all");
+                }
+                
                 REST_Walker walker = new REST_Walker(this.fetchConfig);
                 result = walker.walkServices();
             } else {

@@ -1,0 +1,8 @@
+au/com/thinkronicity/RestFetcher/Configuration.class
+au/com/thinkronicity/RestFetcher/REST_Walker.class
+au/com/thinkronicity/RestFetcher/EmailHelper.class
+au/com/thinkronicity/RestFetcher/MappedNamespaceContext.class
+au/com/thinkronicity/RestFetcher/AWS_S3_Helper.class
+au/com/thinkronicity/RestFetcher/Utility.class
+au/com/thinkronicity/RestFetcher/Fetch.class
+au/com/thinkronicity/RestFetcher/FopHelper.class

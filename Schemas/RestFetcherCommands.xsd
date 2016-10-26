@@ -2,6 +2,11 @@
 <xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" elementFormDefault="qualified"
   targetNamespace="http://THINKronicity.com.au/Schemas/Smirnov/RestFetcherCommands.xsd"
   xmlns="http://THINKronicity.com.au/Schemas/Smirnov/RestFetcherCommands.xsd">
+  <!-- 
+    Schema for RESTFetcher Command & actions file and Lambda Event Maps.
+    
+    Author Ian Hogan, Ian_MacDonald_Hogan@yahoo.com  
+    -->
   <xs:element name="LambdaEventMaps">
     <xs:complexType>
       <xs:sequence>
@@ -87,10 +92,12 @@
       <xs:attribute name="IsInit" type="xs:boolean"/>
       <xs:attribute name="Name" use="required" type="xs:NCName"/>
       <xs:attribute name="IsJSON" type="xs:boolean"/>
+      <xs:attribute name="UseJSON2SafeXML" type="xs:boolean"/>
       <!-- TODO: Add verb types -->
       <xs:attribute name="Verb"/>
       <xs:attribute name="Timeout" type="xs:integer"/>
       <xs:attribute name="IsNOP" type="xs:boolean"/>
+      <xs:attribute name="NoResultBody" type="xs:boolean"/>
     </xs:complexType>
   </xs:element>
   <xs:element name="Headers">

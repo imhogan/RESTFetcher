@@ -65,6 +65,7 @@ import net.sf.saxon.TransformerFactoryImpl;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.ssl.OpenSSL;
 import org.json.JSONObject;
+import org.json.JSONArray;
 import org.json.XML;
 // import com.fasterxml.jackson.databind.ObjectMapper;
 import org.w3c.dom.Document;
@@ -538,7 +539,7 @@ public class Utility {
      * @throws SAXException
      * @throws IOException
      */
-    public static Document readXmlFromStream(InputStream is, Boolean isJSON) throws ParserConfigurationException, SAXException, IOException {
+    public static Document readXmlFromStream(InputStream is, Boolean isJSON, Boolean useJSON2SafeXML) throws ParserConfigurationException, SAXException, IOException {
         Document doc = null;
         if (isJSON) {
             StringBuilder textBuilder;
@@ -558,9 +559,20 @@ public class Utility {
                 }
             }
             in.close();
-            JSONObject jsonData = new JSONObject(textBuilder.toString());
-            String xmlContent = "<?xml version=\"1.0\" encoding=\"ISO-8859-15\"?>\n<root>" + XML.toString((Object)jsonData) + "</root>";
-            doc = Utility.readXmlFromString(xmlContent);
+            String jsonString = sanitizeJson4XML(textBuilder.toString());
+            
+            Utility.LogMessage("jsonString is " + jsonString);
+            
+            JSONObject jsonData = new JSONObject(jsonString);
+            
+            if (useJSON2SafeXML) {
+                
+                doc = Utility.JSON2SafeXML(jsonData, null);
+            }
+            else {
+                String xmlContent = "<?xml version=\"1.0\" encoding=\"ISO-8859-15\"?>\n<root>" + XML.toString((Object)jsonData) + "</root>";
+                doc = Utility.readXmlFromString(xmlContent);
+            }
         } else {
             DocumentBuilderFactory f = DocumentBuilderFactory.newInstance();
             f.setNamespaceAware(true);
@@ -571,6 +583,127 @@ public class Utility {
         return doc;
     }
 
+
+    /**
+     * JSON2SafeXML - Convert a JSONObject to an XML document safely.
+     * 
+     * @param jsonData    - The JSON object to process.
+     * @param xmlElement  - The document to 
+     * @return			  - an "XML safe" JSON string.
+     * 
+     */
+    public static Document JSON2SafeXML(Object jsonData, Element parentElement) 
+    throws ParserConfigurationException
+    {
+        // Map null to empty string     
+        if (jsonData == null) {
+            jsonData = "";
+        }
+        
+        DocumentBuilderFactory icFactory = DocumentBuilderFactory.newInstance();
+        DocumentBuilder icBuilder;
+
+        if (parentElement == null) {
+            
+            icBuilder = icFactory.newDocumentBuilder();
+            Document doc = icBuilder.newDocument();
+            parentElement = doc.createElement("JSON");
+            parentElement.setAttribute("class", jsonData.getClass().getName());
+            doc.appendChild(parentElement);
+        }
+         
+        Document doc = parentElement.getOwnerDocument();
+        
+        
+        if (jsonData instanceof JSONObject) {
+            
+            for (Object key : ((JSONObject)jsonData).keySet()) {
+
+                Element container = doc.createElement("JSONObject");
+                
+                String keyStr = (String)key;
+                Object keyvalue = ((JSONObject)jsonData).get(keyStr);
+                
+                Element keyElement = doc.createElement("key");
+                
+                keyElement.setTextContent(keyStr);
+                
+                container.appendChild(keyElement);
+                
+                Element valueElement = doc.createElement("value");
+    
+                if (keyvalue == null) {
+                    keyvalue = "";
+                } else if (keyvalue.getClass().isArray()) {
+                    keyvalue = new JSONArray(keyvalue);
+                }
+                
+                valueElement.setAttribute("class", keyvalue.getClass().getName());
+
+                if (keyvalue instanceof JSONArray) {
+                    JSON2SafeXML(keyvalue, valueElement);                    
+                }
+                else if (keyvalue instanceof JSONObject) {
+                    JSON2SafeXML(keyvalue, valueElement);                    
+                }
+                else {
+                    valueElement.setTextContent(keyvalue.toString());
+                }
+                
+                container.appendChild(valueElement);
+                
+                parentElement.appendChild(container);
+            }
+        }
+        else if (jsonData instanceof JSONArray) {
+            
+            Element container = doc.createElement("JSONArray");
+            Integer i = 0;
+            for (Object val : (JSONArray)jsonData) {
+                Element rowElement = doc.createElement("row");
+                rowElement.setAttribute("order", i.toString());
+                rowElement.setAttribute("class", val.getClass().getName());
+                JSON2SafeXML(val, rowElement);
+                container.appendChild(rowElement);
+                i++;
+            }
+            parentElement.appendChild(container);
+            
+        }
+        else if (jsonData.getClass().isArray() ) {
+            
+            JSON2SafeXML(new JSONArray(jsonData), parentElement);
+            
+        }
+        else {
+            parentElement.setTextContent(jsonData.toString());
+        }
+        
+        return doc;
+
+    }
+
+    /**
+     * sanitizeJson4XML - Sanitize a JSON string so it converts to XML without error.
+     * 
+     * @param jsonString    - the JSON string to process.
+     * @return			    - an "XML safe" JSON string.
+     * 
+     */
+    public static String sanitizeJson4XML(String jsonString) {
+        
+        // Remove leading & trailing whitespace
+        jsonString = jsonString.trim();
+        
+        // Handle anonymous object results
+        if (!jsonString.startsWith("{")) {
+            
+            jsonString = "{\"Anonymous\":"+jsonString+"}";
+        }
+               
+        return jsonString;
+    }
+    
     /**
      * readXmlFromString - read an XML document from an XML string.
      * 

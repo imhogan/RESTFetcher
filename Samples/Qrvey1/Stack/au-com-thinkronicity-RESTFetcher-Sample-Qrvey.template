@@ -1,0 +1,676 @@
+{
+  "AWSTemplateFormatVersion": "2010-09-09",
+  "Description": "Demonstration stack for the RESTFetcher Lambda Function - built by Ian Hogan - Ian_MacDonald_Hogan@yahoo.com.\nThis sample will deploy the RESTFetcher function from an S3 bucket from my AWS account to make use of the qrvey.com API",
+  "Parameters": {
+    "ProjectPrefix": {
+      "Description": "Project prefix - for reuse with different projects the bucket name will be prefix-target-domain - observe bucket name restrictions - see http://docs.aws.amazon.com/AmazonS3/latest/dev/BucketRestrictions.html",
+      "Type": "String",
+      "Default": "qrvey"
+    },
+    "TargetEnvironment": {
+      "Description": "Target environment - dev, uat or prod, default is prod",
+      "Type": "String",
+      "AllowedValues": [
+        "dev",
+        "uat",
+        "prod"
+      ],
+      "Default": "prod"
+    },
+    "TargetDomain": {
+      "Description": "Target domain - this is used as the final bucket suffix to ensure global uniqueness - typically your internet domain name but use - rather than . as separators.",
+      "Type": "String",
+      "Default": "my-domain-me"
+    },
+    "ProjectZipFilesList": {
+      "Description": "Project Files List",
+      "Type": "CommaDelimitedList",
+      "Default": "au-com-thinkronicity-RestFetcher-QrveySample-V1.0.0.zip"
+    },
+    "EnableDebug": {
+      "Description": "Enable debugging?",
+      "Type": "String",
+      "AllowedValues": [
+        "true",
+        "false"
+      ],
+      "Default": "true"
+    },
+    "SystemName": {
+      "Description": "System name.",
+      "Type": "String",
+      "Default": "Qrvey Demonstration"
+    },
+    "EmailSender": {
+      "Description": "Email address registered with AWS SES in the us-east-1 region. This email address needs to conform to sender validation protocol for email recipients to not block emails.",
+      "Type": "String",
+      "Default": "ses.sender@my.com"
+    },
+    "EmailSenderName": {
+      "Description": "Display name for sent emails.",
+      "Type": "String",
+      "Default": "Qrvey Administrator"
+    },
+    "QrveyAPIKey": {
+      "Description": "Your Qrvey API Key.",
+      "Type": "String",
+      "Default": ""
+    },
+    "QrveyUserEmail": {
+      "Description": "Email for Qrvey user. The Templates list and Qrvey result pages will be emailed to this address.",
+      "Type": "String",
+      "Default": "Somebody@hear.me"
+    },
+    "QrveyUserFirstname": {
+      "Description": "Qrvey user's first name.",
+      "Type": "String",
+      "Default": "Kwer"
+    },
+    "QrveyUserLastname": {
+      "Description": "Qrvey user's last name.",
+      "Type": "String",
+      "Default": "Vay"
+    },
+    "QrveyUserPassword": {
+      "Description": "Qrvey user's password.",
+      "Type": "String",
+      "Default": "ReallySecret",
+      "NoEcho": "true"
+    },
+    "QrveyUserOrganisation": {
+      "Description": "Qrvey user's organisation.",
+      "Type": "String",
+      "Default": "Response Collector"
+    },
+    "QrveyDomain": {
+      "Description": "Qrvey domain for results page.",
+      "Type": "String",
+      "Default": "https://api.qrvey.com"
+    },
+    "RESTFetcherKey": {
+      "Description": "Zip file for REST Fetcher function",
+      "Type": "String",
+      "Default": "au-com-thinkronicity-RestFetcher-V2.2.9CE.zip"
+    },
+    "S3PutFileKey": {
+        "Description": "Zip file for S3 Put File function",
+        "Type": "String",
+        "Default": "au-com-thinkronicity-PutS3File-V1.0.zip"
+    },
+    "S3ZipFileLoaderKey": {
+      "Description": "Zip file for S3 Zip File Loader function",
+      "Type": "String",
+      "Default": "au-com-thinkronicity-S3ZipFileLoader-V1.1.2.zip"
+    }
+  },
+  "Mappings": {
+    "AWSRegion2Bucket": {
+      "us-east-1": {
+        "OpenCode": "au-com-thinkronicity-opencode-usea1",
+        "ClientCode": "au-com-thinkronicity-clientcode-apne1"
+      },
+      "us-east-2": {
+        "OpenCode": "au-com-thinkronicity-opencode-usea2",
+        "ClientCode": "au-com-thinkronicity-clientcode-apne1"
+      },
+      "us-west-2": {
+        "OpenCode": "au-com-thinkronicity-opencode-uswe2",
+        "ClientCode": "au-com-thinkronicity-clientcode-apne1"
+      },
+      "ap-northeast-1": {
+        "OpenCode": "au-com-thinkronicity-opencode-apne1",
+        "ClientCode": "au-com-thinkronicity-clientcode-apne1"
+      },
+      "ap-northeast-2": {
+        "OpenCode": "au-com-thinkronicity-opencode-apne2",
+        "ClientCode": "au-com-thinkronicity-clientcode-apne1"
+      },
+      "ap-southeast-1": {
+        "OpenCode": "au-com-thinkronicity-opencode-apse1",
+        "ClientCode": "au-com-thinkronicity-clientcode-apne1"
+      },
+      "ap-southeast-2": {
+        "OpenCode": "au-com-thinkronicity-opencode-apse2",
+        "ClientCode": "au-com-thinkronicity-clientcode-apne1"
+      },
+      "eu-central-1": {
+        "OpenCode": "au-com-thinkronicity-opencode-euce1",
+        "ClientCode": "au-com-thinkronicity-clientcode-apne1"
+      },
+      "eu-west-1": {
+        "OpenCode": "au-com-thinkronicity-opencode-euwe1",
+        "ClientCode": "au-com-thinkronicity-clientcode-apne1"
+      }
+    }
+  },
+  "Resources": {
+    "LambdaExecutionRole": {
+      "Type": "AWS::IAM::Role",
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Version": "2012-10-17",
+          "Statement": [
+            {
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "lambda.amazonaws.com"
+              },
+              "Action": "sts:AssumeRole"
+            },
+            {
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "apigateway.amazonaws.com"
+              },
+              "Action": "sts:AssumeRole"
+            },
+            {
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "s3.amazonaws.com"
+              },
+              "Action": "sts:AssumeRole"
+            }
+          ]
+        },
+        "Path": {
+          "Fn::Join": [
+            "",
+            [
+              "/",
+              {
+                "Ref": "ProjectPrefix"
+              },
+              "/"
+            ]
+          ]
+        },
+        "Policies": [
+          {
+            "PolicyName": "AccessProjectS3FilesAndSES",
+            "PolicyDocument": {
+              "Version": "2012-10-17",
+              "Statement": [
+                {
+                  "Effect": "Allow",
+                  "Action": [
+                    "s3:*"
+                  ],
+                  "Resource": {
+                    "Fn::Join": [
+                      "",
+                      [
+                        "arn:aws:s3:::",
+                        {
+                          "Ref": "ProjectPrefix"
+                        },
+                        "-",
+                        {
+                          "Ref": "TargetEnvironment"
+                        },
+                        "-files-",
+                        {
+                          "Ref": "TargetDomain"
+                        },
+                        "/*"
+                      ]
+                    ]
+                  }
+                },
+                {
+                  "Effect": "Allow",
+                  "Action": [
+                    "ses:*"
+                  ],
+                  "Resource": "*"
+                },
+                {
+                  "Effect": "Allow",
+                  "Action": [
+                    "logs:CreateLogGroup",
+                    "logs:CreateLogStream",
+                    "logs:PutLogEvents"
+                  ],
+                  "Resource": "arn:aws:logs:*:*:*"
+                }
+              ]
+            }
+          }
+        ]
+      }
+    },
+    "RESTFetcherLambda": {
+      "Type": "AWS::Lambda::Function",
+      "Properties": {
+        "Code": {
+          "S3Bucket": {
+            "Fn::FindInMap": [
+              "AWSRegion2Bucket",
+              {
+                "Ref": "AWS::Region"
+              },
+              "OpenCode"
+            ]
+          },
+          "S3Key": {
+            "Ref": "RESTFetcherKey"
+          }
+        },
+        "Runtime": "java8",
+        "Handler": "au.com.thinkronicity.RestFetcher.Fetch",
+        "Description": "Generic REST processor from https://github.com/imhogan/RESTFetcher",
+        "Timeout": 300,
+        "MemorySize": 512,
+        "Role": {
+          "Fn::GetAtt": [
+            "LambdaExecutionRole",
+            "Arn"
+          ]
+        }
+      }
+    },
+    "RESTFetcherLambdaInvokePermission": {
+      "Type": "AWS::Lambda::Permission",
+      "Properties": {
+        "FunctionName" : { "Fn::GetAtt" : ["RESTFetcherLambda", "Arn"] },
+        "Action": "lambda:InvokeFunction",
+        "Principal": "s3.amazonaws.com",
+        "SourceAccount": { "Ref" : "AWS::AccountId" }
+      },
+      "DependsOn": [
+        "RESTFetcherLambda"
+      ]
+    },
+    "ProjectFilesBucket": {
+      "Type": "AWS::S3::Bucket",
+      "DeletionPolicy": "Retain",
+      "Properties": {
+        "BucketName": {
+          "Fn::Join": [
+            "",
+            [
+              {
+                "Ref": "ProjectPrefix"
+              },
+              "-",
+              {
+                "Ref": "TargetEnvironment"
+              },
+              "-files-",
+              {
+                "Ref": "TargetDomain"
+              }
+            ]
+          ]
+        },
+        "AccessControl": "Private",
+        "VersioningConfiguration": {
+          "Status": "Suspended"
+        },
+        "NotificationConfiguration": {
+          "LambdaConfigurations": [
+            {
+              "Event": "s3:ObjectCreated:Put",
+              "Filter": {
+                "S3Key": {
+                  "Rules": [
+                    {
+                      "Name": "Prefix",
+                      "Value": "config"
+                    },
+                    {
+                      "Name": "Suffix",
+                      "Value": ".properties"
+                    }
+                  ]
+                }
+              },
+              "Function": {
+                "Fn::GetAtt": [
+                  "RESTFetcherLambda",
+                  "Arn"
+                ]
+              }
+            },
+            {
+              "Event": "s3:ObjectCreated:Put",
+              "Filter": {
+                "S3Key": {
+                  "Rules": [
+                    {
+                      "Name": "Prefix",
+                      "Value": "Qrveys"
+                    },
+                    {
+                      "Name": "Suffix",
+                      "Value": "Config.xml"
+                    }
+                  ]
+                }
+              },
+              "Function": {
+                "Fn::GetAtt": [
+                  "RESTFetcherLambda",
+                  "Arn"
+                ]
+              }
+            },
+            {
+              "Event": "s3:ObjectCreated:Copy",
+              "Filter": {
+                "S3Key": {
+                  "Rules": [
+                    {
+                      "Name": "Prefix",
+                      "Value": "config"
+                    },
+                    {
+                      "Name": "Suffix",
+                      "Value": ".properties"
+                    }
+                  ]
+                }
+              },
+              "Function": {
+                "Fn::GetAtt": [
+                  "RESTFetcherLambda",
+                  "Arn"
+                ]
+              }
+            },
+            {
+              "Event": "s3:ObjectCreated:Copy",
+              "Filter": {
+                "S3Key": {
+                  "Rules": [
+                    {
+                      "Name": "Prefix",
+                      "Value": "Qrveys"
+                    },
+                    {
+                      "Name": "Suffix",
+                      "Value": "Config.xml"
+                    }
+                  ]
+                }
+              },
+              "Function": {
+                "Fn::GetAtt": [
+                  "RESTFetcherLambda",
+                  "Arn"
+                ]
+              }
+            }
+          ]
+        }
+      },
+      "DependsOn": [
+        "RESTFetcherLambdaInvokePermission"
+      ]
+    },
+    "S3ZipLoaderLambda": {
+      "Type": "AWS::Lambda::Function",
+      "Properties": {
+        "Code": {
+          "S3Bucket": {
+            "Fn::FindInMap": [
+              "AWSRegion2Bucket",
+              {
+                "Ref": "AWS::Region"
+              },
+              "OpenCode"
+            ]
+          },
+          "S3Key": {
+            "Ref": "S3ZipFileLoaderKey"
+          }
+        },
+        "Runtime": "java8",
+        "Handler": "au.com.thinkronicity.aws.S3ZipFileLoader",
+        "Description": "CloudFormation S3 Zip Loader from https://github.com/imhogan/S3ZipFileLoader",
+        "Timeout": 300,
+        "MemorySize": 768,
+        "Role": {
+          "Fn::GetAtt": [
+            "LambdaExecutionRole",
+            "Arn"
+          ]
+        }
+      }
+    },
+    "ProjectFilesLoad": {
+      "Type": "Custom::S3ZipLoader",
+      "DeletionPolicy": "Retain",
+      "Properties": {
+        "ServiceToken": {
+          "Fn::GetAtt": [
+            "S3ZipLoaderLambda",
+            "Arn"
+          ]
+        },
+        "SourceBucket": {
+          "Fn::FindInMap": [
+            "AWSRegion2Bucket",
+            {
+              "Ref": "AWS::Region"
+            },
+            "OpenCode"
+          ]
+        },
+        "SourceKeys": {
+          "Ref": "ProjectZipFilesList"
+        },
+        "TargetBucket": {
+          "Ref": "ProjectFilesBucket"
+        },
+        "PublicRead": "^(images/|xsl/|xsl/f/|fop/).*$",
+        "Debug": "true"
+      },
+      "DependsOn": [
+        "ProjectFilesBucket"
+      ]
+    },
+    "S3PutFileLambda": {
+        "Type": "AWS::Lambda::Function",
+        "Properties": {
+            "Code": {
+                "S3Bucket": {"Fn::FindInMap": [
+                    "AWSRegion2Bucket",
+                    {"Ref": "AWS::Region"},
+                    "OpenCode"
+                ]},
+                "S3Key": {"Ref": "S3PutFileKey"}
+            },
+            "Runtime": "nodejs4.3",
+            "Handler": "index.handler",
+            "Timeout": "30",
+            "Description": "CloudFormation S3 Put File Helper",
+            "MemorySize": 128,
+            "Role": {"Fn::GetAtt": [
+                "LambdaExecutionRole",
+                "Arn"
+            ]}
+        }
+    },
+    "SavePropertiesForEnvironment": {
+        "Type": "Custom::S3FilePut",
+        "Properties": {
+            "ServiceToken": {"Fn::GetAtt": [
+                "S3PutFileLambda",
+                "Arn"
+            ]},
+            "Source": {
+                "filetext":  {"Fn::Join": [
+                    "\n",
+                    [
+                         "# Qrvey configuration file for RESTFetcher."
+                        ,"#"
+                        ,"# Note ${S3_Bucket} will be replaced by the value of the parameter S3_Bucket, "
+                        ,"# passed in by the caller or from LambdaEventsMap.xml. This allows the bucket "
+                        ,"# name holding the configuration file to be used."
+                        ,"#"
+                        ,"# Author Ian Hogan, Ian_MacDonald_Hogan@yahoo.com"
+                        ,"# Endpoint for web service "
+                        ,"service.endPoint:https://api.qrvey.com"
+                        ,"# Default timeout for REST interface"
+                        ,"service.timeout:10000"
+                        ,"# Debug tracing option"
+                        ,{"Fn::Join": ["",["trace.debug:", {"Ref": "EnableDebug"}]]}
+                        ,"# Depth limit to prevent infinite recursion"
+                        ,"service.depthLimit:5"
+                        ,"# Commands file for RESTFetcher"
+                        ,"service.commandsFile:s3://${S3_Bucket}/config/QrveyCommands.xml"
+                        ,"# Default ContentType for request body"
+                        ,"service.contentType:application/json; charset=UTF-8"
+                        ,"# Region for SES "
+                        ,"parameter.AWS.SES_Region:us-east-1"
+                        ,"# Email sender details"
+                        ,"# Warning: Sender address needs to conform to sender validation protocol for email recipients to not block emails."
+                        ,{"Fn::Join": ["",["parameter.EmailSender:", {"Ref": "EmailSender"}]]}
+                        ,{"Fn::Join": ["",["parameter.EmailSenderName:", {"Ref": "EmailSenderName"}]]}
+                        ,"# System Name"
+                        ,{"Fn::Join": ["",["parameter.System:", {"Ref": "SystemName"}, " ", {"Ref": "TargetEnvironment"}]]}
+                        ,"# Parameters for Apache FOP make sure the region is correct for the S3 Bucket"
+                        ,{"Fn::Join": ["",["parameter.FOP_BASE_URI:https://s3-",{"Ref": "AWS::Region"},".amazonaws.com/${S3_Bucket}/fop"]]}
+                        ,"parameter.FOP_CONFIG:fop-aws.xconf"
+                        ,"# Log folder for debugging."
+                        ,"parameter.REST_Log_Path:REST_Logs"
+                        ,"# API Key for qrvey calls"
+                        ,{"Fn::Join": ["",["parameter.API_KEY:", {"Ref": "QrveyAPIKey"}]]}
+                        ,"# Survey user details"
+                        ,{"Fn::Join": ["",["parameter.UserEmail:", {"Ref": "QrveyUserEmail"}]]}
+                        ,{"Fn::Join": ["",["parameter.UserFirstname:", {"Ref": "QrveyUserFirstname"}]]}
+                        ,{"Fn::Join": ["",["parameter.UserLastname:", {"Ref": "QrveyUserLastname"}]]}
+                        ,{"Fn::Join": ["",["parameter.UserPassword:", {"Ref": "QrveyUserPassword"}]]}
+                        ,{"Fn::Join": ["",["parameter.UserOrganisation:", {"Ref": "QrveyUserOrganisation"}]]}
+                        ,"# Results S3 Bucket Region"
+                        ,{"Fn::Join": ["",["parameter.ResultsBucketRegion:", {"Ref": "AWS::Region"}]]}
+                        ,"# Results S3 Bucket"
+                        ,"parameter.ResultsBucket:${S3_Bucket}"
+                        ,"# Results HTML Pages path"
+                        ,"parameter.ResultsPath:results/"
+                        ,"# Results domain"
+                        ,{"Fn::Join": ["",["parameter.ResultsDomain:", {"Ref": "QrveyDomain"}]]}
+                    ]
+                ]},
+                "contentType": "text/x-java-properties"
+            },
+            "Target": {
+                "Bucket": {"Ref": "ProjectFilesBucket"},
+                "Key": "config/Qrvey1.properties"
+            },
+            "Debug": "true"
+        },
+      "DependsOn": [
+        "ProjectFilesLoad"
+      ]
+    }
+  },
+  "Outputs": {
+    "LambdaExecutionRoleArn": {
+      "Value": {
+        "Fn::GetAtt": [
+          "LambdaExecutionRole",
+          "Arn"
+        ]
+      },
+      "Description": "Unique resource ID of the IAM Role allocated to the Lambda Functions."
+    },
+    "AccessProjectS3FilesBucket": {
+      "Value": {
+        "Fn::Join": [
+          "",
+          [
+            {
+              "Ref": "ProjectPrefix"
+            },
+            "-",
+            {
+              "Ref": "TargetEnvironment"
+            },
+            "-files-",
+            {
+              "Ref": "TargetDomain"
+            }
+          ]
+        ]
+      },
+      "Description": "The generated name of the S3 Bucket, used by subsequent stacks to access the project files."
+    },
+    "SelectedProjectPrefix": {
+      "Value": {
+        "Ref": "ProjectPrefix"
+      },
+      "Description": "The parameter value entered when the stack was created, used in subsequent stacks which build on this one."
+    },
+    "SelectedTargetEnvironment": {
+      "Value": {
+        "Ref": "TargetEnvironment"
+      },
+      "Description": "The parameter value entered when the stack was created, used in subsequent stacks which build on this one."
+    },
+    "SelectedTargetDomain": {
+      "Value": {
+        "Ref": "TargetDomain"
+      },
+      "Description": "The parameter value entered when the stack was created, used in subsequent stacks which build on this one."
+    },
+    "RESTFetcherLambdaArn": {
+      "Value": {
+        "Fn::GetAtt": [
+          "RESTFetcherLambda",
+          "Arn"
+        ]
+      },
+      "Description": "Unique resource ID of the REST Fetcher Lambda Function."
+    },
+    "S3ZipLoaderLambdaArn": {
+      "Value": {
+        "Fn::GetAtt": [
+          "S3ZipLoaderLambda",
+          "Arn"
+        ]
+      },
+      "Description": "Unique resource ID of the S3 Zip Loader Lambda Function."
+    },
+    "S3PutFileLambdaArn": {
+      "Value": {
+        "Fn::GetAtt": [
+          "S3PutFileLambda",
+          "Arn"
+        ]
+      },
+      "Description": "Unique resource ID of the S3 Put File Lambda Function."
+    },
+    "ProjectFilesLoadResult": {
+      "Value": {
+        "Fn::GetAtt": [
+          "ProjectFilesLoad",
+          "SourceZips"
+        ]
+      },
+      "Description": "The result message from the S3 Zip Loader."
+    }
+  },
+  "Metadata": {
+  "AWS::CloudFormation::Interface" : {
+    "ParameterGroups" : [
+      {
+        "Label" : { "default" : "Project Configuration" },
+        "Parameters" : [ "ProjectPrefix", "TargetEnvironment", "TargetDomain", "ProjectZipFilesList", "SystemName", "EmailSender", "EmailSenderName", "EnableDebug"]
+      },
+      {
+        "Label" : { "default": "Qrvey Details" },
+        "Parameters" : [ "QrveyAPIKey", "QrveyUserEmail", "QrveyUserFirstname", "QrveyUserLastname", "QrveyUserPassword", "QrveyUserOrganisation", "QrveyDomain"]
+      },
+      {
+        "Label" : { "default": "Custom Resource Lambda Functions" },
+        "Parameters" : [ "RESTFetcherKey", "S3PutFileKey", "S3ZipFileLoaderKey"]
+      }
+    ],
+    "ParameterLabels" : {
+      "EmailSender" : { "default" : "Email address to send emails from?" }
+    }
+  }
+  }
+}

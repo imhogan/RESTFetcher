@@ -7,7 +7,7 @@ for details on this. Note, to send to non-verified email addresses - eg to send 
 # Sample usage
 
 This example 
-The following CloudFormation template demonstrates this:
+  The following CloudFormation template can be used to run this example in your AWS account using the CloudFormation Create Stack button, or using the AWS CLI.
   
   https://s3-ap-southeast-2.amazonaws.com/au-com-thinkronicity-opencode-apse2/CloudFormation/au-com-thinkronicity-RESTFetcher-Sample-Qrvey1-V1.0.0.template
   
@@ -16,14 +16,14 @@ The following CloudFormation template demonstrates this:
   
   The template loads the code and files from a bucket in the AWS region the Stack is being deployed in.   These buckets are readable by any AWS account.
   
-  The sample implements the commands to allow the creation and management of Qrvey user accounts and Qrveys. 
+  The sample implements commands to allow the creation and management of Qrvey user accounts and Qrveys. 
 
   The CloudFormation template parameters allow you to enter your Qrvey API Key and define system configuration parameters which are stored in file config/Qrvey1.properties in
   an S3 bucket created in your AWS account.
   
   When the CloudFormation script completes you will receive an email with a list of Qrvey templates to choose from and instructions on how to create Qrveys from these templates, and how to delete the Qrvey account created by the template.
   
-  When you create a Qrvey from a template you get instructions on how to send additional invitations and a link to the Qrvey results page is also provded.
+  When you create a Qrvey from a template you will be emailed instructions on how to send additional invitations and emailed a link to the Qrvey results page.
  
  Enjoy!
  

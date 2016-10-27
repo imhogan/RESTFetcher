@@ -13,14 +13,46 @@
             </Parameters>
         </MatchKey>
         <MatchKey Command="AddUserSurveyFromTemplate">
-            <RegExp><![CDATA[^Qrveys/(?<propertyid>[^/]*)/Job_(?<userid>[^_]+)_(?<templateid>[^_]+)_(?<uid>[^_]+)_Config.xml$]]></RegExp>
+            <RegExp><![CDATA[^Qrveys/(?<propertyid>[^/]*)/Job_StartQrvey_(?<userid>[^_]+)_(?<templateid>[^_]+)_(?<uid>[^_]+)_Config.xml$]]></RegExp>
             <Parameters>
                 <Parameter Name="configurationURI">=s3://${S3_Bucket}/config/Qrvey${propertyid}.properties</Parameter>
                 <Parameter Name="UserID">$userid</Parameter>
                 <Parameter Name="TemplateID">$templateid</Parameter>
                 <Parameter Name="triggerFileParamsXPath">/Job/Parameters/*</Parameter>
                 <Parameter Name="JobID">=${propertyid}_${uid}</Parameter>
-                <Parameter Name="JobFile">=Qrveys/${propertyid}/Job_${userid}_${templateid}_${uid}_Config.xml</Parameter>
+                <Parameter Name="JobFile">=Qrveys/${propertyid}/Job_StartQrvey_${userid}_${templateid}_${uid}_Config.xml</Parameter>
+            </Parameters>
+        </MatchKey>
+        <MatchKey Command="SendSurveyInvites">
+            <RegExp><![CDATA[^Qrveys/(?<propertyid>[^/]*)/Job_QrveyInvites_(?<userid>[^_]+)_(?<qrveyid>[^_]+)_(?<uid>[^_]+)_Config.xml$]]></RegExp>
+            <Parameters>
+                <Parameter Name="configurationURI">=s3://${S3_Bucket}/config/Qrvey${propertyid}.properties</Parameter>
+                <Parameter Name="UserID">$userid</Parameter>
+                <Parameter Name="QrveyID">$qrveyid</Parameter>
+                <Parameter Name="triggerFileParamsXPath">/Job/Parameters/*</Parameter>
+                <Parameter Name="JobID">=${propertyid}_${uid}</Parameter>
+                <Parameter Name="JobFile">=Qrveys/${propertyid}/Job_QrveyInvites_${userid}_${templateid}_${uid}_Config.xml</Parameter>
+            </Parameters>
+        </MatchKey>
+        <MatchKey Command="DeleteUserSurvey">
+            <RegExp><![CDATA[^Qrveys/(?<propertyid>[^/]*)/Job_EndQrvey_(?<userid>[^_]+)_(?<qrveyid>[^_]+)_(?<uid>[^_]+)_Config.xml$]]></RegExp>
+            <Parameters>
+                <Parameter Name="configurationURI">=s3://${S3_Bucket}/config/Qrvey${propertyid}.properties</Parameter>
+                <Parameter Name="UserID">$userid</Parameter>
+                <Parameter Name="QrveyID">$qrveyid</Parameter>
+                <Parameter Name="triggerFileParamsXPath"></Parameter>
+                <Parameter Name="JobID">=${propertyid}_${uid}</Parameter>
+                <Parameter Name="JobFile">=Qrveys/${propertyid}/Job_EndQrvey_${userid}_${templateid}_${uid}_Config.xml</Parameter>
+            </Parameters>
+        </MatchKey>
+        <MatchKey Command="DeleteUser">
+            <RegExp><![CDATA[^Qrveys/(?<propertyid>[^/]*)/Job_DeleteUser_(?<userid>[^_]+)_(?<uid>[^_]+)_Config.xml$]]></RegExp>
+            <Parameters>
+                <Parameter Name="configurationURI">=s3://${S3_Bucket}/config/Qrvey${propertyid}.properties</Parameter>
+                <Parameter Name="UserID">$userid</Parameter>
+                <Parameter Name="triggerFileParamsXPath"></Parameter>
+                <Parameter Name="JobID">=${propertyid}_${uid}</Parameter>
+                <Parameter Name="JobFile">=Qrveys/${propertyid}/Job_DeleteUser_${userid}_${uid}_Config.xml</Parameter>
             </Parameters>
         </MatchKey>
     </LambdaEvent>
@@ -33,14 +65,46 @@
             </Parameters>
         </MatchKey>
         <MatchKey Command="AddUserSurveyFromTemplate">
-            <RegExp><![CDATA[^Qrveys/(?<propertyid>[^/]*)/Job_(?<userid>[^_]+)_(?<templateid>[^_]+)_(?<uid>[^_]+)_Config.xml$]]></RegExp>
+            <RegExp><![CDATA[^Qrveys/(?<propertyid>[^/]*)/Job_StartQrvey_(?<userid>[^_]+)_(?<templateid>[^_]+)_(?<uid>[^_]+)_Config.xml$]]></RegExp>
             <Parameters>
                 <Parameter Name="configurationURI">=s3://${S3_Bucket}/config/Qrvey${propertyid}.properties</Parameter>
                 <Parameter Name="UserID">$userid</Parameter>
                 <Parameter Name="TemplateID">$templateid</Parameter>
                 <Parameter Name="triggerFileParamsXPath">/Job/Parameters/*</Parameter>
                 <Parameter Name="JobID">=${propertyid}_${uid}</Parameter>
-                <Parameter Name="JobFile">=Qrveys/${propertyid}/Job_${userid}_${templateid}_${uid}_Config.xml</Parameter>
+                <Parameter Name="JobFile">=Qrveys/${propertyid}/Job_StartQrvey_${userid}_${templateid}_${uid}_Config.xml</Parameter>
+            </Parameters>
+        </MatchKey>
+        <MatchKey Command="SendSurveyInvites">
+            <RegExp><![CDATA[^Qrveys/(?<propertyid>[^/]*)/Job_QrveyInvites_(?<userid>[^_]+)_(?<qrveyid>[^_]+)_(?<uid>[^_]+)_Config.xml$]]></RegExp>
+            <Parameters>
+                <Parameter Name="configurationURI">=s3://${S3_Bucket}/config/Qrvey${propertyid}.properties</Parameter>
+                <Parameter Name="UserID">$userid</Parameter>
+                <Parameter Name="QrveyID">$qrveyid</Parameter>
+                <Parameter Name="triggerFileParamsXPath">/Job/Parameters/*</Parameter>
+                <Parameter Name="JobID">=${propertyid}_${uid}</Parameter>
+                <Parameter Name="JobFile">=Qrveys/${propertyid}/Job_QrveyInvites_${userid}_${templateid}_${uid}_Config.xml</Parameter>
+            </Parameters>
+        </MatchKey>
+        <MatchKey Command="DeleteUserSurvey">
+            <RegExp><![CDATA[^Qrveys/(?<propertyid>[^/]*)/Job_EndQrvey_(?<userid>[^_]+)_(?<qrveyid>[^_]+)_(?<uid>[^_]+)_Config.xml$]]></RegExp>
+            <Parameters>
+                <Parameter Name="configurationURI">=s3://${S3_Bucket}/config/Qrvey${propertyid}.properties</Parameter>
+                <Parameter Name="UserID">$userid</Parameter>
+                <Parameter Name="QrveyID">$qrveyid</Parameter>
+                <Parameter Name="triggerFileParamsXPath"></Parameter>
+                <Parameter Name="JobID">=${propertyid}_${uid}</Parameter>
+                <Parameter Name="JobFile">=Qrveys/${propertyid}/Job_EndQrvey_${userid}_${templateid}_${uid}_Config.xml</Parameter>
+            </Parameters>
+        </MatchKey>
+        <MatchKey Command="DeleteUser">
+            <RegExp><![CDATA[^Qrveys/(?<propertyid>[^/]*)/Job_DeleteUser_(?<userid>[^_]+)_(?<uid>[^_]+)_Config.xml$]]></RegExp>
+            <Parameters>
+                <Parameter Name="configurationURI">=s3://${S3_Bucket}/config/Qrvey${propertyid}.properties</Parameter>
+                <Parameter Name="UserID">$userid</Parameter>
+                <Parameter Name="triggerFileParamsXPath"></Parameter>
+                <Parameter Name="JobID">=${propertyid}_${uid}</Parameter>
+                <Parameter Name="JobFile">=Qrveys/${propertyid}/Job_DeleteUser_${userid}_${uid}_Config.xml</Parameter>
             </Parameters>
         </MatchKey>
     </LambdaEvent>

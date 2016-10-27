@@ -25,7 +25,7 @@
     "ProjectZipFilesList": {
       "Description": "Project Files List",
       "Type": "CommaDelimitedList",
-      "Default": "au-com-thinkronicity-RestFetcher-QrveySample-V1.0.0.zip"
+      "Default": "au-com-thinkronicity-RestFetcher-QrveySample1-V1.0.0.zip"
     },
     "EnableDebug": {
       "Description": "Enable debugging?",

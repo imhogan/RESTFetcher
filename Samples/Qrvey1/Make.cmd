@@ -4,15 +4,15 @@ REM ============================================================================
 REM Make - Script to choreograph the various installation sub-jobs.
 REM
 REM
-REM Written by Ian Hogan, Ian.Hogan@THINKronicity.com.au
+REM Written by Ian Hogan, Ian_MacDonald_Hogan@yahoo.com
 REM
 REM =================================================================================
 SET _ALLOWED_TARGETS=All Zip Templates S3Master S3Replica
 SET __APPLICATION_NAME=Installing files for ReSTFetcher Qrvey Sample
-SET _OPEN_AWS_REGION_MASTER=ap-northeast-1:apne1 
-SET _OPEN_AWS_REGIONS_REPLICA=us-east-1:usea1 us-east-2:usea2 us-west-2:uswe2 ap-northeast-2:apne2 ap-southeast-1:apse1 ap-southeast-2:apse2 eu-west-1:euwe1
-SET _CLIENT_AWS_REGION_MASTER=ap-northeast-1:apne1
-SET _CLIENT_PERMISSIONS=--grants full=emailaddress=Ian.Hogan@THINKronicity.com.au
+SET _OPEN_AWS_REGION_MASTER=ap-southeast-1:apse2 
+SET _OPEN_AWS_REGIONS_REPLICA=us-east-1:usea1 us-east-2:usea2 us-west-2:uswe2 ap-northeast-1:apne1 ap-northeast-2:apne2 ap-southeast-1:apse1 eu-central-1:euce1 eu-west-1:euwe1
+SET _CLIENT_AWS_REGION_MASTER=ap-southeast-1:apse2
+SET _CLIENT_PERMISSIONS=--grants full=emailaddress=Ian_MacDonald_Hogan@yahoo.com
 SET _OPEN_PERMISSIONS=--acl public-read
 
 TITLE %__APPLICATION_NAME%
@@ -29,7 +29,7 @@ SET _MAKE_BUCKET=
 SET _DOMAIN=au-com-thinkronicity
 SET _VERSION=1.0.0
 SET _S3_SOURCE=open* client*
-SET _S3_Payer=Requester
+SET _S3_Payer=BucketOwner
 
 REM =================================================================================
 REM Get parameters
@@ -60,9 +60,9 @@ IF /I "%~1"=="/O" (
     GOTO NEXT_PARAM
 )
 
-IF /I "%~1"=="/BO" (
+IF /I "%~1"=="/BR" (
 
-    SET _S3_Payer=BucketOwner
+    SET _S3_Payer=Requester
     SHIFT
     GOTO NEXT_PARAM
 )
@@ -139,27 +139,9 @@ REM ============================================================================
 
 PUSHD S3Buckets\files
 
-DEL "%_INSTALL_PATH%S3Buckets\opencode\au-com-thinkronicity-RestFetcher-QrveySample-V%_VERSION%.zip"
+DEL "%_INSTALL_PATH%S3Buckets\opencode\au-com-thinkronicity-RestFetcher-QrveySample1-V%_VERSION%.zip"
 
-7za a -r -tZIP "%_INSTALL_PATH%S3Buckets\opencode\au-com-thinkronicity-RestFetcher-QrveySample-V%_VERSION%.zip" *.*
-
-POPD
-
-GOTO NEXT_TARGET
-
-REM =================================================================================
-:Helpers_INSTALL
-REM =================================================================================
-
-PUSHD Helpers\LookupStackOutputs\Code
-
-7za a -r -tZIP "%_INSTALL_PATH%S3Buckets\OpenCode\com-amazon-aws-cloudformation-helper-lookup-v2.zip" *.*
-
-POPD
-
-PUSHD Helpers\CopyS3File\Code
-
-7za a -r -tZIP "%_INSTALL_PATH%S3Buckets\OpenCode\au-com-thinkronicity-CopyS3File-V1.0.zip" *.*
+7za a -r -tZIP "%_INSTALL_PATH%S3Buckets\opencode\au-com-thinkronicity-RestFetcher-QrveySample1-V%_VERSION%.zip" *.*
 
 POPD
 
@@ -343,11 +325,11 @@ FOR %%T IN (%_ALLOWED_TARGETS%) DO ECHO    %%T
 ECHO.
 ECHO and:
 ECHO /P is optionally used to specify an AWS named profile
-ECHO /C is optionally used to specify an only client S3 files need to be copied
-ECHO /O is optionally used to specify an only open code S3 files need to be copied
+ECHO /C is optionally used to specify only client S3 files need to be copied
+ECHO /O is optionally used to specify only open code S3 files need to be copied
 ECHO /D is optionally used to override the default application domain %_DOMAIN%
 ECHO /V is optionally used to override the default version of %_VERSION% 
-ECHO /BO is optionally used to override the default bucket payer of Requester with BucketOwner
+REM ECHO /BR is optionally used to override the default bucket payer of BucketOwner with Requester
 ECHO /B is optionally used to specify the S3 Buckets should be created
 ECHO /F is optionally used to specify a filter for S3 copy operations.
 ECHO.

@@ -18,7 +18,7 @@ This example
   
   The sample implements commands to allow the creation and management of Qrvey user accounts and Qrveys. 
   
-  <img url="https://s3-ap-southeast-2.amazonaws.com/au-com-thinkronicity-opencode-apse2/Qrvey1/img/Sample1Processing.png" title="Sample Overview"/>
+![alt text](https://s3-ap-southeast-2.amazonaws.com/au-com-thinkronicity-opencode-apse2/Qrvey1/img/Sample1Processing.png "Sample Overview")
 
   The CloudFormation template parameters allow you to enter your Qrvey API Key and define system configuration parameters which are stored in file config/Qrvey1.properties in
   an S3 bucket created in your AWS account.

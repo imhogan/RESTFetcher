@@ -17,6 +17,8 @@ This example
   The template loads the code and files from a bucket in the AWS region the Stack is being deployed in.   These buckets are readable by any AWS account.
   
   The sample implements commands to allow the creation and management of Qrvey user accounts and Qrveys. 
+  
+  <img url="https://s3-ap-southeast-2.amazonaws.com/au-com-thinkronicity-opencode-apse2/Qrvey1/img/Sample1Processing.png" title="Sample Overview"/>
 
   The CloudFormation template parameters allow you to enter your Qrvey API Key and define system configuration parameters which are stored in file config/Qrvey1.properties in
   an S3 bucket created in your AWS account.
@@ -28,3 +30,7 @@ This example
  Enjoy!
  
  Ian_MacDonald_Hogan@yahoo.com
+ 
+ # Step by step 
+ 
+ The following screenshots should help to get you started with this sample

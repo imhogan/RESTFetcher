@@ -16,7 +16,7 @@ This example
   
   The template loads the code and files from a bucket in the AWS region the Stack is being deployed in.   These buckets are readable by any AWS account.
   
-  The sample implements commands to allow the creation and management of Qrvey user accounts and Qrveys. 
+  The sample implements commands to allow the creation and management of Qrvey user accounts and Qrveys. The following diagram shows the use of the implemented sample.
   
 ![alt text](https://s3-ap-southeast-2.amazonaws.com/au-com-thinkronicity-opencode-apse2/Qrvey1/img/Sample1Processing.png "Sample Overview")
 
@@ -33,4 +33,30 @@ This example
  
  # Step by step 
  
- The following screenshots should help to get you started with this sample
+ The following screenshots should help to get you started with this sample - good luck!
+ 
+ ![alt text](https://s3-ap-southeast-2.amazonaws.com/au-com-thinkronicity-opencode-apse2/Qrvey1/img/CFStep1.png "Step 1")
+ 
+ ![alt text](https://s3-ap-southeast-2.amazonaws.com/au-com-thinkronicity-opencode-apse2/Qrvey1/img/CFStep2.png "Step 2")
+ 
+ ![alt text](https://s3-ap-southeast-2.amazonaws.com/au-com-thinkronicity-opencode-apse2/Qrvey1/img/CFStep3.png "Step 3")
+ 
+ ![alt text](https://s3-ap-southeast-2.amazonaws.com/au-com-thinkronicity-opencode-apse2/Qrvey1/img/CFStep4.png "Step 4")
+ 
+ ![alt text](https://s3-ap-southeast-2.amazonaws.com/au-com-thinkronicity-opencode-apse2/Qrvey1/img/CFStep5.png "Step 5")
+ 
+ ![alt text](https://s3-ap-southeast-2.amazonaws.com/au-com-thinkronicity-opencode-apse2/Qrvey1/img/CFStep6.png "Step 6")
+ 
+ ![alt text](https://s3-ap-southeast-2.amazonaws.com/au-com-thinkronicity-opencode-apse2/Qrvey1/img/CFStep7.png "Step 7")
+ 
+ ![alt text](https://s3-ap-southeast-2.amazonaws.com/au-com-thinkronicity-opencode-apse2/Qrvey1/img/CFStep8.png "Step 8")
+ 
+ # Results 
+ 
+ In S3 you will find your bucket has been created and populated with the configuration files:
+ 
+ ![alt text](https://s3-ap-southeast-2.amazonaws.com/au-com-thinkronicity-opencode-apse2/Qrvey1/img/CFResults1.png "Results 1")
+ 
+ You should shortly receive an email with instructions:
+ 
+ ![alt text](https://s3-ap-southeast-2.amazonaws.com/au-com-thinkronicity-opencode-apse2/Qrvey1/img/CFResults2.png "Results 2")

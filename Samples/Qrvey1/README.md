@@ -55,8 +55,8 @@ This example
  
  In S3 you will find your bucket has been created and populated with the configuration files:
  
- ![alt text](https://s3-ap-southeast-2.amazonaws.com/au-com-thinkronicity-opencode-apse2/Qrvey1/img/CFResults1.png "Results 1")
+ ![alt text](https://s3-ap-southeast-2.amazonaws.com/au-com-thinkronicity-opencode-apse2/Qrvey1/img/CFResult1.png "Results 1")
  
  You should shortly receive an email with instructions:
  
- ![alt text](https://s3-ap-southeast-2.amazonaws.com/au-com-thinkronicity-opencode-apse2/Qrvey1/img/CFResults2.png "Results 2")
+ ![alt text](https://s3-ap-southeast-2.amazonaws.com/au-com-thinkronicity-opencode-apse2/Qrvey1/img/CFResult2.png "Results 2")

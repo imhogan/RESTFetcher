@@ -1,0 +1,103 @@
+
+CALL :GET_RESPONSE %*
+
+GOTO END
+
+REM =================================================================================
+:GET_RESPONSE
+REM =================================================================================
+
+SET __PROMPT=%~1
+SET __ALLOW_QUIT=
+SET __ALLOW_SKIP=
+SET __REQUIRED=
+SET __RESPONSES_TEXT=
+SET __RESPONSES=
+SET __CASE=
+SET _QUIT=
+SET _SKIP=
+
+:GET_RESPONSE_NEXT_PARAM
+SHIFT 
+
+IF "%~1"=="" GOTO DO_GET_RESPONSE
+
+IF /I "%~1"=="/R" (SET __REQUIRED=Y&& GOTO GET_RESPONSE_NEXT_PARAM)
+IF /I "%~1"=="/P" (SET __REQUIRED=P&& GOTO GET_RESPONSE_NEXT_PARAM)
+IF /I "%~1"=="/I" (SET __CASE=/I&& GOTO GET_RESPONSE_NEXT_PARAM)
+
+
+SET __RT=%~1
+SET __RO=%~1
+
+IF /I "%__RT%"=="Q" (
+
+	SET __ALLOW_QUIT=Y
+	SET __RT=%__RT%{uit}
+	SET __RO=
+
+) ELSE IF /I "%__RT%"=="S" (
+
+	SET __ALLOW_SKIP=Y
+	SET __RT=%__RT%{kip}
+	SET __RO=
+
+) ELSE IF /I "%__RT%"=="Y" (
+
+	SET __RT=%__RT%{es}
+
+) ELSE IF /I "%__RT%"=="N" (
+
+	SET __RT=%__RT%{o}
+
+)
+
+IF DEFINED __RO IF DEFINED __RESPONSES (SET __RESPONSES=%__RESPONSES% %__RO%) ELSE (SET __RESPONSES=%__RO%)
+IF DEFINED __RESPONSES_TEXT (SET __RESPONSES_TEXT=%__RESPONSES_TEXT% %__RT%) ELSE (SET __RESPONSES_TEXT=%__RT%)
+
+IF DEFINED __RO IF NOT DEFINED __REQUIRED SET __REQUIRED=Y
+
+GOTO GET_RESPONSE_NEXT_PARAM
+
+:DO_GET_RESPONSE
+
+IF DEFINED _RESPONSE SET __PROMPT=%__PROMPT%, default is %_RESPONSE%
+
+IF NOT DEFINED __RESPONSES_TEXT GOTO REDO_GET_RESPONSE
+
+SET __RESPONSES_TEXT=%__RESPONSES_TEXT:{=(%
+SET __RESPONSES_TEXT=%__RESPONSES_TEXT:}=)%
+
+SET __PROMPT=%__PROMPT% [%__RESPONSES_TEXT: =/%]
+
+IF DEFINED __RESPONSES IF NOT DEFINED __CASE SET __PROMPT=%__PROMPT% [Case Sensitive]  
+
+:REDO_GET_RESPONSE
+
+SET /P _RESPONSE=%__PROMPT%: 
+
+IF NOT DEFINED _RESPONSE IF DEFINED __REQUIRED GOTO REDO_GET_RESPONSE
+
+IF DEFINED __ALLOW_QUIT IF %__CASE% "%_RESPONSE%"=="Q" (SET _QUIT=Y&& GOTO GET_RESPONSE_EXIT)
+IF DEFINED __ALLOW_SKIP IF %__CASE% "%_RESPONSE%"=="S" (SET _SKIP=Y&& GOTO GET_RESPONSE_EXIT)
+
+IF /I "%__REQUIRED%"=="P" IF NOT EXIST "%_RESPONSE%" (
+    
+    ECHO Path "%_RESPONSE%" does not exist, please try again.
+    GOTO REDO_GET_RESPONSE
+
+) ELSE (
+    GOTO GET_RESPONSE_EXIT
+)
+
+IF DEFINED __RESPONSES FOR %%R IN (%__RESPONSES%) DO IF %__CASE% "%_RESPONSE%"=="%%R" GOTO GET_RESPONSE_EXIT
+
+IF DEFINED __RESPONSES GOTO REDO_GET_RESPONSE
+
+:GET_RESPONSE_EXIT
+
+REM =================================================================================
+GOTO :EOF
+REM =================================================================================
+
+:END

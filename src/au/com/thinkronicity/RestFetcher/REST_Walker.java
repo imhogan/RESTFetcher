@@ -29,6 +29,7 @@ import java.net.URI;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
+import java.security.Security;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.regex.Pattern;
@@ -39,6 +40,7 @@ import javax.net.ssl.HttpsURLConnection;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
 
 
 /**
@@ -108,6 +110,9 @@ public class REST_Walker {
             this.commandsXml = Utility.readXmlFromURI(this.walkerConfig.commandsURI);
             this.commandsNamespaceMap = new HashMap<String, String>();
             this.commandsNamespaceMap.put("cmd", commandsXmlNamespace);
+            
+            // Add BouncyCastleProvider as openjdk runtime does not handle SSL security with EC-based cipher suites
+            Security.addProvider(new BouncyCastleProvider());
         }
         catch (Exception e) {
             Utility.LogMessage(Utility.GetStackTrace(e));

@@ -84,6 +84,7 @@
   <xs:element name="Command">
     <xs:complexType>
       <xs:sequence>
+        <xs:element name="Endpoint" minOccurs="0" maxOccurs="1"/>
         <xs:element ref="Headers" minOccurs="0" maxOccurs="1"/>
         <xs:element ref="Parameters" minOccurs="0" maxOccurs="1"/>
         <xs:element ref="Body" minOccurs="0" maxOccurs="1"/>

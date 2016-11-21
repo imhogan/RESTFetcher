@@ -170,9 +170,18 @@ public class REST_Walker {
                 // In the case of the NOP (No OPeration) command, just return the Commands XML document itself. 
                 restDocument = this.commandsXml;
             } else {
+                
+                // Get the default endpoint
+                String endpoint = this.walkerConfig.serviceEndPoint;
+                
+                NodeList endpointNodes = Utility.getNodesByXPath(commandElement, "cmd:Endpoint", this.commandsNamespaceMap);
+                if (endpointNodes.getLength() == 1) {
+                    
+                    endpoint = Utility.getParameterValue("Endpoint", (Element)endpointNodes.item(0), this.commandsNamespaceMap, parameters, this.commandsXml.getDocumentElement(), this.walkerConfig.verbose, this.walkerConfig.debug);
+                }
             	
             	// Generate the URL for the command using the supplied parameters.
-                String commandURL = this.makeCommandURL(commandName, parameters);
+                String commandURL = this.makeCommandURL(commandName, endpoint, parameters);
                 URL url = new URL(commandURL);
                 
                 // Create a connection for the URL.
@@ -784,13 +793,14 @@ public class REST_Walker {
      * makeCommandURL - make the URL for a given command with the given parameters.
      * 
      * @param commandName	- the name of the command - if missing the first command element will be used.
+     * @param endpoint      - the endpoint for the command.
      * @param parameters	- the parameters for the REST API call.
      * @return				- the URL to call the REST API.
      * 
      * @throws Exception
      */
-    private String makeCommandURL(String commandName, HashMap<String, String> parameters) throws Exception {
-        String result = this.walkerConfig.serviceEndPoint;
+    private String makeCommandURL(String commandName, String endpoint, HashMap<String, String> parameters) throws Exception {
+        String result = endpoint;
         if (this.walkerConfig.debug || this.walkerConfig.verbose) {
             Utility.LogMessage("Making URL for command " + commandName);
         }

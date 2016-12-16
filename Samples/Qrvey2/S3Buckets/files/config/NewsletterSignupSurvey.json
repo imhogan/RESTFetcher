@@ -1,0 +1,44 @@
+
+            
+{
+     "name": "Our Village Monitor Signup"
+    ,"description": "Please fill out this form if you want to join one or more of our village monitor email lists, eg to receive a regular reminder to test your emergency call buttons."
+    ,"introPage": true
+    ,"totalTime": 6
+    ,
+        "questions": {
+            "data": [
+            
+        {
+            "type":"TEXTFIELD"
+            ,"time":"6"
+            ,"id":"d1e34a1310"
+            ,"question":"main"
+            ,"text":"Please enter the email you would like to receive reminders on."
+            
+                ,"answer":"TEXTFIELD"
+                ,"answerid":"d1e34"
+            
+            ,"hasPaths": false
+        }
+      
+            ]
+        }
+    
+    ,"totalQuestions": 1
+    ,"results_visibility": "Private"
+    ,"respondent_email": "Mandatory"
+    ,"emailNotifications": true,"thankYouPage": {
+            "title":"Thank you page title"
+            ,"content":"Thank you page description"
+            ,"link":"https://www.ThankYouPageLink.com"
+            
+            }    
+        ,"duration": {
+            "neverExpires":"true"
+            ,"from":"2016-12-08T19:18:37.885Z"
+            
+            }    
+        
+}    
+        

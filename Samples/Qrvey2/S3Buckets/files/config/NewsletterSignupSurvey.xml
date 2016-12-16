@@ -14,8 +14,7 @@
         </thankYouPage>
     </settings>
     <questions>
-        <question type='email' time='6' id='_AUTOID_' question='main' text='Please enter the email you would like to receive reminders on.'> 
-            
+        <question type='TEXTFIELD' time='6' id='_AUTOID_' question='main' text='Please enter the email you would like to receive reminders on.'> 
         </question>
     </questions>
 </qrvey>

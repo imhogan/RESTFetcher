@@ -109,8 +109,9 @@
                 </xsl:call-template>
             </xsl:when>
             <xsl:when test="$StandardAnswers/Question[@Type=current()/@type]">
-                ,<xsl:call-template name="emitAnswers">
+                ,<xsl:call-template name="emitStandardAnswers">
                     <xsl:with-param name="question" select="$StandardAnswers/Question[@Type=current()/@type]"/>
+                    <xsl:with-param name="idbase" select="generate-id()"/>
                 </xsl:call-template>
             </xsl:when>
             <xsl:otherwise>
@@ -170,7 +171,23 @@
         ]
     </xsl:template>
     
-
+    <xsl:template name="emitStandardAnswers">
+        <xsl:param name="question"/>
+        <xsl:param name="idbase"></xsl:param>
+        "answers": [
+        <xsl:for-each select="$question/answer">
+            <xsl:if test="position() &gt; 1">,</xsl:if>
+            {
+            <xsl:call-template name="attributes2JSON">
+                <xsl:with-param name="attributes" select="@*[not(starts-with(local-name(),'_'))]"/>
+                <xsl:with-param name="autoIdField">answerid</xsl:with-param>
+                <xsl:with-param name="idvalue" select="concat($idbase,string(position()))"/>
+            </xsl:call-template>
+            }
+        </xsl:for-each> 
+        ]
+    </xsl:template>
+    
     <xsl:template name="elements2JSON">
         <xsl:param name="name"/>
         <xsl:param name="elements"/>
@@ -197,10 +214,12 @@
     <xsl:template name="attributes2JSON">
         <xsl:param name="attributes"/>
         <xsl:param name="autoIdField"/>
+        <xsl:param name="idvalue"/>
         <xsl:if test="$attributes">
             <xsl:for-each select="$attributes">
                 <xsl:variable name="value">
                     <xsl:choose>
+                        <xsl:when test=".='_AUTOID_' and $idvalue != ''"><xsl:value-of select="$idvalue"/></xsl:when>
                         <xsl:when test=".='_AUTOID_'"><xsl:value-of select="generate-id()"/></xsl:when>
                         <xsl:otherwise><xsl:value-of select="."/></xsl:otherwise>
                     </xsl:choose>
@@ -208,7 +227,10 @@
                 <xsl:if test="position() &gt; 1">,</xsl:if>"<xsl:value-of select="local-name()"/>":"<xsl:value-of select="$value"/>"
             </xsl:for-each>
             <xsl:if test="$autoIdField != '' and not($attributes[local-name()=$autoIdField])">
-                <xsl:if test="$attributes">,</xsl:if>"<xsl:value-of select="$autoIdField"/>":"<xsl:value-of select="generate-id()"/>"
+                <xsl:if test="$attributes">,</xsl:if>"<xsl:value-of select="$autoIdField"/>":"<xsl:choose>
+                    <xsl:when test="$idvalue != ''"><xsl:value-of select="$idvalue"/></xsl:when>
+                    <xsl:otherwise><xsl:value-of select="generate-id()"/></xsl:otherwise>
+                </xsl:choose>"
             </xsl:if>
         </xsl:if>
     </xsl:template>

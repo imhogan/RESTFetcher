@@ -18,11 +18,11 @@
     <xd:doc>
         <xd:desc>Debug flag.</xd:desc>
     </xd:doc>
-    <xsl:param name="Debug">N</xsl:param>
+    <xsl:param name="Debug">Y</xsl:param>
         
-    <xsl:param name="StyleUser"></xsl:param>
-    <xsl:param name="QrveyUser"></xsl:param>
-    <xsl:param name="StyleCollectionName"></xsl:param>
+    <xsl:param name="StyleUser">ss</xsl:param>
+    <xsl:param name="QrveyUser">qq</xsl:param>
+    <xsl:param name="StyleCollectionName">OurVillage</xsl:param>
     <xd:doc>
         <xd:desc>The URI of the styles file.</xd:desc>
     </xd:doc>
@@ -47,31 +47,30 @@
     
     <xsl:template match="/">
         <xsl:for-each select="qrvey">
-            
-{
-     "name": "<xsl:value-of select="@name"/>"
-    ,"description": "<xsl:value-of select="settings/description"/>"
-    ,"introPage": <xsl:value-of select="settings/properties/@introPage"/>
-    ,"totalTime": <xsl:value-of select="sum(questions/question/@time) + number(concat('0',@extraTime))"/>
-    <xsl:for-each select="$Styles/styleCollection[@name=$StyleCollectionName]/style">
-        "<xsl:value-of select="@type"/>": {
-             "name": "<xsl:value-of select="@name"/>"
+<xsl:text>{</xsl:text>
+    <xsl:text>"name": "</xsl:text><xsl:value-of select="@name"/><xsl:text>"</xsl:text>
+    <xsl:text>,"description": "</xsl:text><xsl:value-of select="settings/description"/><xsl:text>"</xsl:text>
+    <xsl:text>,"introPage": </xsl:text><xsl:value-of select="settings/properties/@introPage"/>
+    <xsl:text>,"totalTime": </xsl:text><xsl:value-of select="sum(questions/question/@time) + number(concat('0',@extraTime))"/>
+    <xsl:for-each select="$Styles//styleCollection[@name=$StyleCollectionName]/style">
+        <xsl:text>"</xsl:text><xsl:value-of select="@type"/><xsl:text>": {</xsl:text>
+             <xsl:text>"name": "</xsl:text><xsl:value-of select="@name"/><xsl:text>"</xsl:text>
              <xsl:call-template name="elements2JSON">
                     <xsl:with-param name="name">style</xsl:with-param>
                     <xsl:with-param name="elements" select="*"/>
              </xsl:call-template>
-            ,"userid": "<xsl:value-of select="$StyleUser"/>"
-            ,"styleid": <xsl:value-of select="@id"/>
-            ,"newChanges": <xsl:value-of select="@newChanges"/>
-         }
+            <xsl:text>,"userid": "</xsl:text><xsl:value-of select="$StyleUser"/>"
+            <xsl:text>,"styleid": </xsl:text><xsl:value-of select="@id"/>
+            <xsl:text>,"newChanges": </xsl:text><xsl:value-of select="@newChanges"/>
+         <xsl:text>}</xsl:text>
     </xsl:for-each>
-    ,<xsl:call-template name="emitQuestions">
+    <xsl:text>,</xsl:text><xsl:call-template name="emitQuestions">
         <xsl:with-param name="questionsGroup" select="questions"/>
     </xsl:call-template>
-    ,"totalQuestions": <xsl:value-of select="count(questions/question)"/>
-    ,"results_visibility": "<xsl:value-of select="settings/properties/@results_visibility"/>"
-    ,"respondent_email": "<xsl:value-of select="settings/properties/@respondent_email"/>"
-    ,"emailNotifications": <xsl:value-of select="settings/properties/@emailNotifications"/>
+    <xsl:text>,"totalQuestions": </xsl:text><xsl:value-of select="count(questions/question)"/>
+    <xsl:text>,"results_visibility": "</xsl:text><xsl:value-of select="settings/properties/@results_visibility"/><xsl:text>"</xsl:text>
+    <xsl:text>,"respondent_email": "</xsl:text><xsl:value-of select="settings/properties/@respondent_email"/><xsl:text>"</xsl:text>
+    <xsl:text>,"emailNotifications": </xsl:text><xsl:value-of select="settings/properties/@emailNotifications"/>
     <xsl:call-template name="elements2JSON">
         <xsl:with-param name="name">thankYouPage</xsl:with-param>
         <xsl:with-param name="elements" select="settings/thankYouPage/*"/>
@@ -80,7 +79,14 @@
         <xsl:with-param name="name">duration</xsl:with-param>
         <xsl:with-param name="elements" select="settings/duration/*"/>
     </xsl:call-template>
-}    
+    <xsl:if test="$Debug='Y'">
+        <xsl:text>,"debug":{</xsl:text>
+        <xsl:text>"StylesAbsURI": "</xsl:text><xsl:value-of select="$StylesAbsURI"/><xsl:text>"</xsl:text>
+        <xsl:text>,"fn:doc-available(StylesAbsURI)": "</xsl:text><xsl:value-of select="if (fn:doc-available($StylesAbsURI)) then 'T' else 'F'"/><xsl:text>"</xsl:text>
+        <xsl:text>,"test2": "</xsl:text><xsl:value-of select="count($Styles//styleCollection)"/><xsl:text>"</xsl:text>
+        <xsl:text>}</xsl:text>
+    </xsl:if>
+    <xsl:text>}</xsl:text>    
         </xsl:for-each>
     </xsl:template>
     
@@ -97,45 +103,45 @@
                 <xsl:otherwise>false</xsl:otherwise>
             </xsl:choose>
         </xsl:variable>
-        {
+        <xsl:text>{</xsl:text>
             <xsl:call-template name="attributes2JSON">
                 <xsl:with-param name="attributes" select="@*[not(starts-with(local-name(),'_'))]"/>
                 <xsl:with-param name="autoIdField">id</xsl:with-param>
             </xsl:call-template>
         <xsl:choose>
             <xsl:when test="answer">
-                ,<xsl:call-template name="emitAnswers">
+                <xsl:text>,</xsl:text><xsl:call-template name="emitAnswers">
                     <xsl:with-param name="question" select="."/>
                 </xsl:call-template>
             </xsl:when>
             <xsl:when test="$StandardAnswers/Question[@Type=current()/@type]">
-                ,<xsl:call-template name="emitStandardAnswers">
+                <xsl:text>,</xsl:text><xsl:call-template name="emitStandardAnswers">
                     <xsl:with-param name="question" select="$StandardAnswers/Question[@Type=current()/@type]"/>
                     <xsl:with-param name="idbase" select="generate-id()"/>
                 </xsl:call-template>
             </xsl:when>
             <xsl:otherwise>
-                ,"answers": [
-                    {
-                         "answer":"<xsl:value-of select="@type"/>"
-                        ,"answerid":"<xsl:value-of select="generate-id(@type)"/>"
-                    }
-                ]
+                <xsl:text>,"answers": [</xsl:text>
+                    <xsl:text>{</xsl:text>
+                         <xsl:text>"answer":"</xsl:text><xsl:value-of select="@type"/><xsl:text>"</xsl:text>
+                        <xsl:text>,"answerid":"</xsl:text><xsl:value-of select="generate-id(@type)"/><xsl:text>"</xsl:text>
+                    <xsl:text>}</xsl:text>
+                <xsl:text>]</xsl:text>
             </xsl:otherwise>
         </xsl:choose>
-            ,"question": "<xsl:value-of select="$mainOrOptional"/>"
-            ,"hasPaths": <xsl:value-of select="$hasPaths"/>
-        }
+            <xsl:text>,"question": "</xsl:text><xsl:value-of select="$mainOrOptional"/>"
+            <xsl:text>,"hasPaths": </xsl:text><xsl:value-of select="$hasPaths"/>
+        <xsl:text>}</xsl:text>
     </xsl:template>
 
     <xsl:template match="answer">
-        {
+        <xsl:text>{</xsl:text>
             <xsl:call-template name="attributes2JSON">
                 <xsl:with-param name="attributes" select="@*[not(starts-with(local-name(),'_'))]"/>
                 <xsl:with-param name="autoIdField">answerid</xsl:with-param>
             </xsl:call-template>
             <xsl:if test="route">
-                ,"route": {
+                <xsl:text>,"route": {</xsl:text>
                     <xsl:call-template name="attributes2JSON">
                         <xsl:with-param name="attributes" select="route/@*[not(starts-with(local-name(),'_'))]"/>
                         <xsl:with-param name="autoIdField">id</xsl:with-param>
@@ -143,49 +149,49 @@
                     ,<xsl:call-template name="emitQuestions">
                         <xsl:with-param name="questionsGroup" select="route"/>
                     </xsl:call-template>
-                }
+                <xsl:text>}</xsl:text>
             </xsl:if>
-        }
+        <xsl:text>}</xsl:text>
     </xsl:template>
     
 
     <xsl:template name="emitQuestions">
         <xsl:param name="questionsGroup"/>
-        "questions": {
-            "data": [
+        <xsl:text>"questions": {</xsl:text>
+            <xsl:text>"data": [</xsl:text>
             <xsl:for-each select="$questionsGroup/question">
                 <xsl:if test="position() &gt; 1">,</xsl:if>
                 <xsl:apply-templates select="."/>
             </xsl:for-each>  
-            ]
+            <xsl:text>]</xsl:text>
         }
     </xsl:template>
 
     <xsl:template name="emitAnswers">
         <xsl:param name="question"/>
-        "answers": [
+        <xsl:text>"answers": [</xsl:text>
             <xsl:for-each select="$question/answer">
                 <xsl:if test="position() &gt; 1">,</xsl:if>
                 <xsl:apply-templates select="."/>
             </xsl:for-each> 
-        ]
+        <xsl:text>]</xsl:text>
     </xsl:template>
     
     <xsl:template name="emitStandardAnswers">
         <xsl:param name="question"/>
         <xsl:param name="idbase"></xsl:param>
-        "answers": [
+        <xsl:text>"answers": [</xsl:text>
         <xsl:for-each select="$question/answer">
             <xsl:if test="position() &gt; 1">,</xsl:if>
-            {
+            <xsl:text>{</xsl:text>
             <xsl:call-template name="attributes2JSON">
                 <xsl:with-param name="attributes" select="@*[not(starts-with(local-name(),'_'))]"/>
                 <xsl:with-param name="autoIdField">answerid</xsl:with-param>
                 <xsl:with-param name="idvalue" select="concat($idbase,string(position()))"/>
             </xsl:call-template>
-            }
+            <xsl:text>}</xsl:text>
         </xsl:for-each> 
-        ]
+        <xsl:text>]</xsl:text>
     </xsl:template>
     
     <xsl:template name="elements2JSON">
@@ -194,7 +200,7 @@
         <xsl:param name="sep">,</xsl:param>
         <xsl:param name="autoIdField"/>
         <xsl:if test="$elements">
-            <xsl:value-of select="$sep"/>"<xsl:value-of select="$name"/>": {
+            <xsl:value-of select="$sep"/>"<xsl:value-of select="$name"/><xsl:text>": {</xsl:text>
             <xsl:for-each select="$elements">
                 <xsl:variable name="value">
                     <xsl:choose>
@@ -207,7 +213,7 @@
             <xsl:if test="$autoIdField != '' and not($elements[local-name()=$autoIdField])">
                 <xsl:if test="$elements">,</xsl:if>"<xsl:value-of select="$autoIdField"/>":"<xsl:value-of select="generate-id()"/>"
             </xsl:if>
-            }    
+            <xsl:text>}</xsl:text>    
         </xsl:if>
     </xsl:template>
 

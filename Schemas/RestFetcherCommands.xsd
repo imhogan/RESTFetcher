@@ -168,6 +168,7 @@
       <xs:attribute name="Root" type="xs:NCName"/>
       <xs:attribute name="Transform" type="xs:NCName"/>
       <xs:attribute name="Type" use="required" type="ActionType"/>
+      <xs:attribute name="XSLTOutputIsText" type="xs:boolean"/>
       <xs:attribute name="ParametersRegExp"/>
     </xs:complexType>
   </xs:element>

@@ -23,6 +23,7 @@ import com.amazonaws.services.s3.model.CannedAccessControlList;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URI;
@@ -593,8 +594,79 @@ public class REST_Walker {
             else {
                  throw new Exception("Action with Type XSLT2 requires a Transform parameter or attribute!");
             }
+            
+            String outputIsText = actionElement.getAttribute("XSLTOutputIsText");
+            if (outputIsText.equals("true")) {
+                
+                //TODO: transform to text file - require output parameters.                
+                // Validate parameters.
+                String missingParams = this.missingParameters("Name", actionParameters);
+                if (!missingParams.isEmpty()) {
+                    throw new Exception("Action with Type XSLT2 and ﻿XSLTOutputIsText=true is missing required parameters " + missingParams + "!");
+                }
+                
+                ByteArrayOutputStream outputStream =  Utility.xsl2Transform2Stream(contextElement.getOwnerDocument(), transformURI, actionParameters, this.walkerConfig.debug || this.walkerConfig.verbose);
+                
+                if (actionParameters.containsKey("Bucket")) {
+                    
+                    // Get the file permissions. 
+                    CannedAccessControlList acl = CannedAccessControlList.Private;
+                    if (actionParameters.containsKey("ACL")) {
+                        acl = CannedAccessControlList.valueOf((String)actionParameters.get("ACL"));
+                    }
+                    
+                    // Get the content type.
+                    String contentType = "application/xml";
+                    if (actionParameters.containsKey("ContentType")) {
+                        contentType = actionParameters.get("ContentType");
+                    }
+                    
 
-            actionDocument =  Utility.xsl2Transform(contextElement.getOwnerDocument(), transformURI, actionParameters, this.walkerConfig.debug || this.walkerConfig.verbose);
+                    String s3FileURL = AWS_S3_Helper.writeStreamToS3File(this.getMyCredentials(), actionParameters.get("Bucket"), actionParameters.get("Name"), outputStream, contentType, acl);
+                    
+                    // Log information if required.
+                    if (this.walkerConfig.debug) {
+        	            Utility.LogMessage("S3PUT to '" + s3FileURL + "'.");
+                    }
+                    
+                }
+                else {
+                    
+                    // Create the folder if required.
+                    String folder = "";
+                    if (actionParameters.containsKey("Folder")) {
+                        folder = actionParameters.get("Folder");
+                        File theDir = new File(folder);
+                        try {
+                            if (!theDir.exists() && !theDir.mkdirs()) {
+                                throw new Exception("Could not create folder " + folder);
+                            }
+                        }
+                        catch (Exception e) {
+                            throw new Exception("Could not create folder " + folder, e);
+                        }
+                    }
+                    
+                    // Create the file.
+                    String fileName = actionParameters.get("Name");
+                    fileName = actionParameters.containsKey("Extension") ? String.valueOf(fileName) + actionParameters.get("Extension") : String.valueOf(fileName) + ".xml";
+                    File outputFile = new File(folder, fileName);
+                    if (this.walkerConfig.debug || this.walkerConfig.verbose) {
+                        Utility.LogMessage("Writing file " + outputFile.getPath());
+                    }
+                    
+                    OutputStream outputFileStream = new FileOutputStream(outputFile, false);
+                    outputStream.writeTo(outputFileStream);
+                    
+                    if (this.walkerConfig.debug) {
+                    	Utility.LogMessage("Wrote file '"+outputFile.getPath()+"'");
+                    }
+                }
+            }
+            else {
+                actionDocument =  Utility.xsl2Transform(contextElement.getOwnerDocument(), transformURI, actionParameters, this.walkerConfig.debug || this.walkerConfig.verbose);
+                
+            }
         }
         else if (actionType.equals("FOP")) {
         	

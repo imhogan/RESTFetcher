@@ -473,6 +473,71 @@ public class Utility {
     }
 
     /**
+     * ﻿xsl2Transform2Stream - Perform an XSLT 2 Transform of the given XML document using the given transform and parameters.
+     * 
+     * @param xmlDocument 			- the XML document to transform.
+     * @param transformURI 			- the URI of the transform file.
+     * @param transformParameters 	- parameters for the transform.
+     * @param trace 				- if true trace messages are emitted.
+     * @return 						- the document resulting from the transform.
+     */
+    public static ByteArrayOutputStream xsl2Transform2Stream(Document xmlDocument, String transformURI, HashMap<String, String> transformParameters, boolean trace) {
+        try {
+            if (trace) {
+                Utility.LogMessage("Transform file:" + transformURI);
+            }
+            xmlDocument.normalize();
+            DOMSource source = new DOMSource(xmlDocument);
+            if (trace) {
+                Utility.LogMessage("source set");
+            }
+            TransformerFactoryImpl factory = new TransformerFactoryImpl();
+            if (trace) {
+                Utility.LogMessage("factory set");
+            }
+            Templates template = factory.newTemplates(new StreamSource(transformURI));
+            if (trace) {
+                Utility.LogMessage("template set");
+            }
+            Transformer xformer = template.newTransformer();
+            if (trace) {
+                Utility.LogMessage("xformer set");
+            }
+            DocumentBuilderFactory f = DocumentBuilderFactory.newInstance();
+            f.setNamespaceAware(true);
+            ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+            StreamResult result = new StreamResult(outputStream);
+            if (trace) {
+                Utility.LogMessage("result stream set");
+            }
+            if (transformParameters != null) {
+                for (Map.Entry<String, String> entry : transformParameters.entrySet()) {
+                    xformer.setParameter(entry.getKey(), entry.getValue());
+                    if (!trace) continue;
+                    Utility.LogMessage("Transform parameter " + entry.getKey() + "=" + entry.getValue());
+                }
+            } else if (trace) {
+                Utility.LogMessage("no parameters");
+            }
+            xformer.transform(source, result);
+            if (trace) {
+                Utility.LogMessage("transform done");
+            }
+            return outputStream;
+        }
+        catch (TransformerConfigurationException e) {
+            Utility.LogMessage("Transformer Configuration Exception: " + e.getMessage());
+        }
+        catch (TransformerException e) {
+            Utility.LogMessage("Transformer Exception: " + e.getMessage());
+        }
+        catch (Exception e) {
+            Utility.LogMessage("Exception: " + e.getMessage());
+        }
+        return null;
+    }
+
+    /**
      * readXmlFromFile - read an XML document from the given file.
      * 
      * @param fileName	- the name of the file to read.

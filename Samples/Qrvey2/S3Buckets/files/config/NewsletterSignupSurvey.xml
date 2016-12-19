@@ -8,13 +8,14 @@
             <from>2016-12-08T19:18:37.885Z</from>
         </duration>
         <thankYouPage>
-            <title>Thank you page title</title>
+            <title>Thanks for signing up!</title>
             <content>Thank you page description</content>
-            <link>https://www.ThankYouPageLink.com</link>
+            <link>https://api-triggerpage</link>
         </thankYouPage>
     </settings>
     <questions>
-        <question type='TEXTFIELD' time='6' id='_AUTOID_' question='main' text='Please enter the email you would like to receive reminders on.'> 
-        </question>
+        <question type='TEXTFIELD' time='6' _required='true' text='Please enter the email you would like to receive reminders on.' maxChar='100'/>
+        <question type='TEXTFIELD' time='10' _required='true' text='Please enter the name of your village.' maxChar='120'/>
+        <question type='NUMERIC' time='3' _required='true' text='Please enter your unit number.' allowDecimals='false' hasMinMax='true' min='1' max='500' numberType='Number'/>
     </questions>
 </qrvey>

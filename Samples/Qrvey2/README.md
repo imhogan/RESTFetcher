@@ -1,15 +1,14 @@
-# Qrvey Sample 1
-This sample demonstrates the use of RESTFetcher to automate survey creation and distribution, using the free tier of the qrvey.com API. To use this you will need
-to get an API Key - see http://www.qrvey.com/ for details on how to do this. You will also need an Amazon Web Services (AWS) account - see https://aws.amazon.com/ - and 
+# Qrvey Sample 2
+This sample demonstrates the use of RESTFetcher to choreograph a collection of microservices to deliver an application for self-sign-up for email subscription to scheduled and ad-hoc surveys.
+This sample uses the free tier of the qrvey.com API. To use this you will need to get an API Key - see http://www.qrvey.com/ for details on how to do this. You will also need an Amazon Web Services (AWS) account - see https://aws.amazon.com/ - and 
 you will need to verify one of your email addresses with AWS SES (Simple Email Service) - see http://docs.aws.amazon.com/ses/latest/DeveloperGuide/verify-email-addresses.html 
 for details on this. Note, to send to non-verified email addresses - eg to send out Qrvey invitations - you will need to move your account out of sandbox mode. See http://docs.aws.amazon.com/ses/latest/DeveloperGuide/request-production-access.html for details on doing that. 
 
-# Sample usage
+# Sample usage -- WARNING - Sample still under construction.
 
-This example 
   The following CloudFormation template can be used to run this example in your AWS account using the CloudFormation Create Stack button, or using the AWS CLI.
   
-  https://s3-ap-southeast-2.amazonaws.com/au-com-thinkronicity-opencode-apse2/CloudFormation/au-com-thinkronicity-RESTFetcher-Sample-Qrvey1-V1.0.1.template
+  https://s3-ap-southeast-2.amazonaws.com/au-com-thinkronicity-opencode-apse2/CloudFormation/au-com-thinkronicity-RESTFetcher-Sample-Qrvey2-V1.0.0.template
   
   This template creates an instance of the RESTFetcher Lambda function along with an S3 Bucket configured with a sample XML and properties file. It also creates instances of the
   S3ZipFileLoader Lambda function (https://github.com/imhogan/S3ZipFileLoader) and S3PutFile Lambda function (https://github.com/imhogan/PutS3File), which are respectively used to extract project files from a ZIP and write configuration data.

@@ -4,7 +4,7 @@
      "name": "Our Village Monitor Signup"
     ,"description": "Please fill out this form if you want to join one or more of our village monitor email lists, eg to receive a regular reminder to test your emergency call buttons."
     ,"introPage": true
-    ,"totalTime": 6
+    ,"totalTime": 19
     ,
         "questions": {
             "data": [
@@ -12,26 +12,71 @@
         {
             "type":"TEXTFIELD"
             ,"time":"6"
-            ,"id":"d1e34a1310"
-            ,"question":"main"
             ,"text":"Please enter the email you would like to receive reminders on."
+            ,"maxChar":"100"
+            ,"id":"d1e34"
             
-                ,"answer":"TEXTFIELD"
-                ,"answerid":"d1e34"
+                ,"answers": [
+                    {
+                         "answer":"TEXTFIELD"
+                        ,"answerid":"d1e34a2273"
+                    }
+                ]
             
+            ,"question": "main"
+            ,"hasPaths": false
+        }
+    ,
+        {
+            "type":"TEXTFIELD"
+            ,"time":"10"
+            ,"text":"Please enter the name of your village."
+            ,"maxChar":"120"
+            ,"id":"d1e36"
+            
+                ,"answers": [
+                    {
+                         "answer":"TEXTFIELD"
+                        ,"answerid":"d1e36a2273"
+                    }
+                ]
+            
+            ,"question": "main"
+            ,"hasPaths": false
+        }
+    ,
+        {
+            "type":"NUMERIC"
+            ,"time":"3"
+            ,"text":"Please enter your unit number."
+            ,"allowDecimals":"false"
+            ,"hasMinMax":"true"
+            ,"min":"1"
+            ,"max":"500"
+            ,"numberType":"Number"
+            ,"id":"d1e38"
+            
+                ,"answers": [
+                    {
+                         "answer":"NUMERIC"
+                        ,"answerid":"d1e38a2273"
+                    }
+                ]
+            
+            ,"question": "main"
             ,"hasPaths": false
         }
       
             ]
         }
     
-    ,"totalQuestions": 1
+    ,"totalQuestions": 3
     ,"results_visibility": "Private"
     ,"respondent_email": "Mandatory"
     ,"emailNotifications": true,"thankYouPage": {
-            "title":"Thank you page title"
+            "title":"Thanks for signing up!"
             ,"content":"Thank you page description"
-            ,"link":"https://www.ThankYouPageLink.com"
+            ,"link":"https://api-triggerpage"
             
             }    
         ,"duration": {

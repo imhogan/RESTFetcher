@@ -13,7 +13,7 @@
             <xd:p></xd:p>
         </xd:desc>
     </xd:doc>
-    <xsl:output method="text" indent="no" />
+    <xsl:output method="text" indent="no" xml:space="default" />
     
     <xd:doc>
         <xd:desc>Debug flag.</xd:desc>
@@ -52,7 +52,7 @@
      "name": "<xsl:value-of select="@name"/>"
     ,"description": "<xsl:value-of select="settings/description"/>"
     ,"introPage": <xsl:value-of select="settings/properties/@introPage"/>
-    ,"totalTime": <xsl:value-of select="sum(number(questions/question/@time)) + number(concat('0',@extraTime))"/>
+    ,"totalTime": <xsl:value-of select="sum(questions/question/@time) + number(concat('0',@extraTime))"/>
     <xsl:for-each select="$Styles/styleCollection[@name=$StyleCollectionName]/style">
         "<xsl:value-of select="@type"/>": {
              "name": "<xsl:value-of select="@name"/>"
@@ -85,6 +85,12 @@
     </xsl:template>
     
     <xsl:template match="question">
+        <xsl:variable name="mainOrOptional">
+            <xsl:choose>
+                <xsl:when test="@_required = 'true'">main</xsl:when>
+                <xsl:otherwise>optional</xsl:otherwise>
+            </xsl:choose>
+        </xsl:variable>
         <xsl:variable name="hasPaths">
             <xsl:choose>
                 <xsl:when test="answer/route">true</xsl:when>
@@ -93,7 +99,7 @@
         </xsl:variable>
         {
             <xsl:call-template name="attributes2JSON">
-                <xsl:with-param name="attributes" select="@*"/>
+                <xsl:with-param name="attributes" select="@*[not(starts-with(local-name(),'_'))]"/>
                 <xsl:with-param name="autoIdField">id</xsl:with-param>
             </xsl:call-template>
         <xsl:choose>
@@ -108,10 +114,15 @@
                 </xsl:call-template>
             </xsl:when>
             <xsl:otherwise>
-                ,"answer":"<xsl:value-of select="@type"/>"
-                ,"answerid":"<xsl:value-of select="generate-id()"/>"
+                ,"answers": [
+                    {
+                         "answer":"<xsl:value-of select="@type"/>"
+                        ,"answerid":"<xsl:value-of select="generate-id(@type)"/>"
+                    }
+                ]
             </xsl:otherwise>
         </xsl:choose>
+            ,"question": "<xsl:value-of select="$mainOrOptional"/>"
             ,"hasPaths": <xsl:value-of select="$hasPaths"/>
         }
     </xsl:template>
@@ -119,13 +130,13 @@
     <xsl:template match="answer">
         {
             <xsl:call-template name="attributes2JSON">
-                <xsl:with-param name="attributes" select="@*"/>
+                <xsl:with-param name="attributes" select="@*[not(starts-with(local-name(),'_'))]"/>
                 <xsl:with-param name="autoIdField">answerid</xsl:with-param>
             </xsl:call-template>
             <xsl:if test="route">
                 ,"route": {
                     <xsl:call-template name="attributes2JSON">
-                        <xsl:with-param name="attributes" select="route/@*"/>
+                        <xsl:with-param name="attributes" select="route/@*[not(starts-with(local-name(),'_'))]"/>
                         <xsl:with-param name="autoIdField">id</xsl:with-param>
                     </xsl:call-template>
                     ,<xsl:call-template name="emitQuestions">

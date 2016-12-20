@@ -598,7 +598,7 @@ public class REST_Walker {
             String outputIsText = actionElement.getAttribute("XSLTOutputIsText");
             if (outputIsText.equals("true")) {
                 
-                //TODO: transform to text file - require output parameters.                
+                // Transform to text file - require output parameters.                
                 // Validate parameters.
                 String missingParams = this.missingParameters("Name", actionParameters);
                 if (!missingParams.isEmpty()) {
@@ -628,6 +628,9 @@ public class REST_Walker {
                     if (this.walkerConfig.debug) {
         	            Utility.LogMessage("S3PUT to '" + s3FileURL + "'.");
                     }
+                    
+                    // The results document specifies the URL of the S3 file.
+                    actionDocument =  Utility.readXmlFromString("<Result><OutputURL><![CDATA[" + s3FileURL + "]]></OutputURL></Result>");
                     
                 }
                 else {
@@ -661,6 +664,9 @@ public class REST_Walker {
                     if (this.walkerConfig.debug) {
                     	Utility.LogMessage("Wrote file '"+outputFile.getPath()+"'");
                     }
+
+                    // The results document specifies the absolute path of the local file.
+                    actionDocument =  Utility.readXmlFromString("<Result><OutputFile><![CDATA[" + (outputFile.getAbsolutePath()) + "]]></OutputURL></Result>");
                 }
             }
             else {

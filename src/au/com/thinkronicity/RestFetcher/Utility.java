@@ -585,7 +585,7 @@ public class Utility {
      * 
      * @throws IOException
      */
-    public static String readStringFromURI(String sourceURL) throws IOException {
+    public static String readStringFromURL(String sourceURL) throws IOException {
         StringBuilder content = new StringBuilder();
     
         // many of these calls can throw exceptions, so i've just
@@ -1090,8 +1090,12 @@ public class Utility {
                 paramValue = new String(authEncBytes);
             } else if (paramType.equals("AuthToken")) {
                 paramValue = "bearer " + paramValue;
+            } else if (paramType.equals("URL")) {
+                paramValue = Utility.readStringFromURL(paramValue);
+            } else if (paramType.equals("LocalFile")) {
+                paramValue = Utility.readStringFromFile(paramValue);
             } else if (!paramType.equals("Text")) {
-                throw new Exception("Unknown type '" + paramType + "' for parameter " + paramName);
+               Utility.LogMessage("Warning: Unknown type '" + paramType + "' for parameter " + paramName);
             }
         }
         

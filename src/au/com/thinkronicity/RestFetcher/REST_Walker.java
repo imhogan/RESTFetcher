@@ -235,15 +235,6 @@ public class REST_Walker {
                         Utility.LogMessage("body of type '"+contentType+"' is " + bodyValue);
                     }
                     
-                    if (bodyElement.hasAttribute("BodyType") && bodyElement.getAttribute("BodyType").equals("URL")) {
-                        bodyValue = Utility.readStringFromURI(bodyValue);
-                        
-                    }
-                    else if (bodyElement.hasAttribute("BodyType") && bodyElement.getAttribute("BodyType").equals("LocalFile")) {
-                        bodyValue = Utility.readStringFromFile(bodyValue);
-                                
-                    }
-                    
                     os.write(bodyValue.getBytes("UTF-8"));
                     os.close();
                 } else {

@@ -79,6 +79,8 @@
       <xs:enumeration value="ActionContent"/>
       <xs:enumeration value="Template"/>
       <xs:enumeration value="Form"/>
+      <xs:enumeration value="URL"/>
+      <xs:enumeration value="LocalFile"/>
     </xs:restriction>
   </xs:simpleType>
   <xs:element name="Command">

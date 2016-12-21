@@ -35,9 +35,12 @@ import java.io.PrintWriter;
 import java.io.StringReader;
 import java.io.StringWriter;
 import java.net.URI;
+import java.net.URL;
+import java.net.URLConnection;
 import java.net.URLEncoder;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.*;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
@@ -572,6 +575,58 @@ public class Utility {
         StreamResult outputTarget = new StreamResult(outputStream);
         TransformerFactory.newInstance().newTransformer().transform(xmlSource, outputTarget);
         return outputStream;
+    }
+
+    /**
+     * readStringFromURL - read the contents of a supplied URL into a string.
+     * 
+     * @param sourceURL - the URL to read from.
+     * @return		    - the string read.
+     * 
+     * @throws IOException
+     */
+    public static String readStringFromURI(String sourceURL) throws IOException {
+        StringBuilder content = new StringBuilder();
+    
+        // many of these calls can throw exceptions, so i've just
+        // wrapped them all in one try/catch statement.
+        try
+        {
+          // create a url object
+          URL url = new URL(sourceURL);
+    
+          // create a urlconnection object
+          URLConnection urlConnection = url.openConnection();
+    
+          // wrap the urlconnection in a bufferedreader
+          BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(urlConnection.getInputStream()));
+    
+          String line;
+    
+          // read from the urlconnection via the bufferedreader
+          while ((line = bufferedReader.readLine()) != null) {
+            content.append(line + "\n");
+          }
+          
+          bufferedReader.close();
+        }
+        catch(Exception e)
+        {
+          e.printStackTrace();
+        }
+        return content.toString();
+    }
+
+    /**
+     * readStringFromFile - read the contents of a supplied filepth into a string.
+     * 
+     * @param sourcePath - the filepath to read from.
+     * @return		     - the string read.
+     * 
+     * @throws IOException
+     */
+    public static String readStringFromFile(String sourcePath) throws Exception {
+        return new String(Files.readAllBytes(Paths.get(sourcePath)));
     }
 
     /**

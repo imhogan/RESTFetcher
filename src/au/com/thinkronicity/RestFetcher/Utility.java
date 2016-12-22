@@ -1091,9 +1091,9 @@ public class Utility {
             } else if (paramType.equals("AuthToken")) {
                 paramValue = "bearer " + paramValue;
             } else if (paramType.equals("URL")) {
-                paramValue = Utility.readStringFromURL(paramValue);
+                paramValue = Utility.replaceParameters(Utility.readStringFromURL(paramValue), contextParameters);
             } else if (paramType.equals("LocalFile")) {
-                paramValue = Utility.readStringFromFile(paramValue);
+                paramValue = Utility.replaceParameters(Utility.readStringFromFile(paramValue), contextParameters);
             } else if (!paramType.equals("Text")) {
                Utility.LogMessage("Warning: Unknown type '" + paramType + "' for parameter " + paramName);
             }

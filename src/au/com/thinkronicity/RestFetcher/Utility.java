@@ -35,9 +35,12 @@ import java.io.PrintWriter;
 import java.io.StringReader;
 import java.io.StringWriter;
 import java.net.URI;
+import java.net.URL;
+import java.net.URLConnection;
 import java.net.URLEncoder;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.*;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
@@ -473,6 +476,71 @@ public class Utility {
     }
 
     /**
+     * ﻿xsl2Transform2Stream - Perform an XSLT 2 Transform of the given XML document using the given transform and parameters.
+     * 
+     * @param xmlDocument 			- the XML document to transform.
+     * @param transformURI 			- the URI of the transform file.
+     * @param transformParameters 	- parameters for the transform.
+     * @param trace 				- if true trace messages are emitted.
+     * @return 						- the document resulting from the transform.
+     */
+    public static ByteArrayOutputStream xsl2Transform2Stream(Document xmlDocument, String transformURI, HashMap<String, String> transformParameters, boolean trace) {
+        try {
+            if (trace) {
+                Utility.LogMessage("Transform file:" + transformURI);
+            }
+            xmlDocument.normalize();
+            DOMSource source = new DOMSource(xmlDocument);
+            if (trace) {
+                Utility.LogMessage("source set");
+            }
+            TransformerFactoryImpl factory = new TransformerFactoryImpl();
+            if (trace) {
+                Utility.LogMessage("factory set");
+            }
+            Templates template = factory.newTemplates(new StreamSource(transformURI));
+            if (trace) {
+                Utility.LogMessage("template set");
+            }
+            Transformer xformer = template.newTransformer();
+            if (trace) {
+                Utility.LogMessage("xformer set");
+            }
+            DocumentBuilderFactory f = DocumentBuilderFactory.newInstance();
+            f.setNamespaceAware(true);
+            ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+            StreamResult result = new StreamResult(outputStream);
+            if (trace) {
+                Utility.LogMessage("result stream set");
+            }
+            if (transformParameters != null) {
+                for (Map.Entry<String, String> entry : transformParameters.entrySet()) {
+                    xformer.setParameter(entry.getKey(), entry.getValue());
+                    if (!trace) continue;
+                    Utility.LogMessage("Transform parameter " + entry.getKey() + "=" + entry.getValue());
+                }
+            } else if (trace) {
+                Utility.LogMessage("no parameters");
+            }
+            xformer.transform(source, result);
+            if (trace) {
+                Utility.LogMessage("transform done");
+            }
+            return outputStream;
+        }
+        catch (TransformerConfigurationException e) {
+            Utility.LogMessage("Transformer Configuration Exception: " + e.getMessage());
+        }
+        catch (TransformerException e) {
+            Utility.LogMessage("Transformer Exception: " + e.getMessage());
+        }
+        catch (Exception e) {
+            Utility.LogMessage("Exception: " + e.getMessage());
+        }
+        return null;
+    }
+
+    /**
      * readXmlFromFile - read an XML document from the given file.
      * 
      * @param fileName	- the name of the file to read.
@@ -507,6 +575,58 @@ public class Utility {
         StreamResult outputTarget = new StreamResult(outputStream);
         TransformerFactory.newInstance().newTransformer().transform(xmlSource, outputTarget);
         return outputStream;
+    }
+
+    /**
+     * readStringFromURL - read the contents of a supplied URL into a string.
+     * 
+     * @param sourceURL - the URL to read from.
+     * @return		    - the string read.
+     * 
+     * @throws IOException
+     */
+    public static String readStringFromURL(String sourceURL) throws IOException {
+        StringBuilder content = new StringBuilder();
+    
+        // many of these calls can throw exceptions, so i've just
+        // wrapped them all in one try/catch statement.
+        try
+        {
+          // create a url object
+          URL url = new URL(sourceURL);
+    
+          // create a urlconnection object
+          URLConnection urlConnection = url.openConnection();
+    
+          // wrap the urlconnection in a bufferedreader
+          BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(urlConnection.getInputStream()));
+    
+          String line;
+    
+          // read from the urlconnection via the bufferedreader
+          while ((line = bufferedReader.readLine()) != null) {
+            content.append(line + "\n");
+          }
+          
+          bufferedReader.close();
+        }
+        catch(Exception e)
+        {
+          e.printStackTrace();
+        }
+        return content.toString();
+    }
+
+    /**
+     * readStringFromFile - read the contents of a supplied filepth into a string.
+     * 
+     * @param sourcePath - the filepath to read from.
+     * @return		     - the string read.
+     * 
+     * @throws IOException
+     */
+    public static String readStringFromFile(String sourcePath) throws Exception {
+        return new String(Files.readAllBytes(Paths.get(sourcePath)));
     }
 
     /**
@@ -970,8 +1090,12 @@ public class Utility {
                 paramValue = new String(authEncBytes);
             } else if (paramType.equals("AuthToken")) {
                 paramValue = "bearer " + paramValue;
+            } else if (paramType.equals("URL")) {
+                paramValue = Utility.replaceParameters(Utility.readStringFromURL(paramValue), contextParameters);
+            } else if (paramType.equals("LocalFile")) {
+                paramValue = Utility.replaceParameters(Utility.readStringFromFile(paramValue), contextParameters);
             } else if (!paramType.equals("Text")) {
-                throw new Exception("Unknown type '" + paramType + "' for parameter " + paramName);
+               Utility.LogMessage("Warning: Unknown type '" + paramType + "' for parameter " + paramName);
             }
         }
         

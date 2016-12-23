@@ -72,6 +72,8 @@
       <xs:enumeration value="Path"/>
       <xs:enumeration value="Query"/>
       <xs:enumeration value="Form"/>
+      <xs:enumeration value="URL"/>
+      <xs:enumeration value="LocalFile"/>
     </xs:restriction>
   </xs:simpleType>
   <xs:simpleType name="BodyType">
@@ -79,6 +81,8 @@
       <xs:enumeration value="ActionContent"/>
       <xs:enumeration value="Template"/>
       <xs:enumeration value="Form"/>
+      <xs:enumeration value="URL"/>
+      <xs:enumeration value="LocalFile"/>
     </xs:restriction>
   </xs:simpleType>
   <xs:element name="Command">
@@ -168,6 +172,7 @@
       <xs:attribute name="Root" type="xs:NCName"/>
       <xs:attribute name="Transform" type="xs:NCName"/>
       <xs:attribute name="Type" use="required" type="ActionType"/>
+      <xs:attribute name="XSLTOutputIsText" type="xs:boolean"/>
       <xs:attribute name="ParametersRegExp"/>
     </xs:complexType>
   </xs:element>

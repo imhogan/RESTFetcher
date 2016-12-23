@@ -1,0 +1,530 @@
+{
+    "AWSTemplateFormatVersion": "2010-09-09",
+    "Metadata": {
+        "AWS::CloudFormation::Designer": {
+            "b759756e-4760-4d81-9577-c42c735c5139": {
+                "size": {
+                    "width": 60,
+                    "height": 60
+                },
+                "position": {
+                    "x": 40,
+                    "y": 50
+                },
+                "z": 0
+            },
+            "29eaccdb-f417-4eba-a945-406b4350779a": {
+                "size": {
+                    "width": 60,
+                    "height": 60
+                },
+                "position": {
+                    "x": 60,
+                    "y": 570
+                },
+                "z": 1,
+                "embeds": []
+            },
+            "5a9792af-27bf-4c6b-b45d-36eda2baa76f": {
+                "size": {
+                    "width": 60,
+                    "height": 60
+                },
+                "position": {
+                    "x": 180,
+                    "y": 570
+                },
+                "z": 1,
+                "embeds": [],
+                "isrelatedto": ["29eaccdb-f417-4eba-a945-406b4350779a"]
+            },
+            "81ec0d1a-dfe6-4aca-99fd-9cac40242b9c": {
+                "size": {
+                    "width": 60,
+                    "height": 60
+                },
+                "position": {
+                    "x": 300,
+                    "y": 570
+                },
+                "z": 1,
+                "embeds": [],
+                "isrelatedto": ["5a9792af-27bf-4c6b-b45d-36eda2baa76f"]
+            },
+            "7d7f1e08-c02c-468e-9793-ca00f0f3642b": {
+                "size": {
+                    "width": 510,
+                    "height": 420
+                },
+                "position": {
+                    "x": 60,
+                    "y": 90
+                },
+                "z": 1,
+                "embeds": [
+                    "ce4d21a4-6fdd-4fab-b255-be4923486ff4",
+                    "6ec3abed-1082-4a42-995d-535796ff9814",
+                    "1e92b51b-b6f7-4a9d-b6d7-443349f81a53",
+                    "2f2db220-0280-44a8-aba3-45ca68ed350b",
+                    "5e95ea81-ff80-46c0-9738-918cf9c3106a",
+                    "bb395e39-a083-4bc4-8800-7ea8c9e4e334"
+                ]
+            },
+            "1e92b51b-b6f7-4a9d-b6d7-443349f81a53": {
+                "size": {
+                    "width": 150,
+                    "height": 150
+                },
+                "position": {
+                    "x": 300,
+                    "y": 150
+                },
+                "z": 2,
+                "parent": "7d7f1e08-c02c-468e-9793-ca00f0f3642b",
+                "embeds": [],
+                "isassociatedwith": ["7d7f1e08-c02c-468e-9793-ca00f0f3642b"]
+            },
+            "2f2db220-0280-44a8-aba3-45ca68ed350b": {
+                "size": {
+                    "width": 60,
+                    "height": 60
+                },
+                "position": {
+                    "x": 90,
+                    "y": 360
+                },
+                "z": 2,
+                "parent": "7d7f1e08-c02c-468e-9793-ca00f0f3642b",
+                "embeds": [],
+                "isrelatedto": ["81ec0d1a-dfe6-4aca-99fd-9cac40242b9c"]
+            },
+            "5e95ea81-ff80-46c0-9738-918cf9c3106a": {
+                "size": {
+                    "width": 60,
+                    "height": 60
+                },
+                "position": {
+                    "x": 210,
+                    "y": 360
+                },
+                "z": 2,
+                "parent": "7d7f1e08-c02c-468e-9793-ca00f0f3642b",
+                "embeds": []
+            },
+            "bb395e39-a083-4bc4-8800-7ea8c9e4e334": {
+                "size": {
+                    "width": 150,
+                    "height": 150
+                },
+                "position": {
+                    "x": 90,
+                    "y": 150
+                },
+                "z": 2,
+                "parent": "7d7f1e08-c02c-468e-9793-ca00f0f3642b",
+                "embeds": [],
+                "isassociatedwith": ["1e92b51b-b6f7-4a9d-b6d7-443349f81a53"]
+            },
+            "6ec3abed-1082-4a42-995d-535796ff9814": {
+                "size": {
+                    "width": 60,
+                    "height": 60
+                },
+                "position": {
+                    "x": 380,
+                    "y": 370
+                },
+                "z": 2,
+                "parent": "7d7f1e08-c02c-468e-9793-ca00f0f3642b",
+                "embeds": [],
+                "isassociatedwith": [
+                    "7d7f1e08-c02c-468e-9793-ca00f0f3642b",
+                    "81ec0d1a-dfe6-4aca-99fd-9cac40242b9c"
+                ],
+                "isrelatedto": ["81ec0d1a-dfe6-4aca-99fd-9cac40242b9c"]
+            },
+            "ce4d21a4-6fdd-4fab-b255-be4923486ff4": {
+                "size": {
+                    "width": 60,
+                    "height": 60
+                },
+                "position": {
+                    "x": 490,
+                    "y": 350
+                },
+                "z": 2,
+                "parent": "7d7f1e08-c02c-468e-9793-ca00f0f3642b",
+                "embeds": [],
+                "isrelatedto": ["81ec0d1a-dfe6-4aca-99fd-9cac40242b9c"]
+            }
+        },
+        "Notes": {"Dependencies": {"ProjectToolsStack": {"THINKonicityS3TriggerLambda": "This Lambda function us invoked by the TPMRMSurveyIdRespondentReportsGet. It's role should allow invocation by API Gateway and access to the S3 bucket."}}}
+    },
+    "Description": "Define API Gateway for survey processing trigger for the Waste Analysis Tool for Think Perform - built by THINKronicity Pty Ltd..",
+    "Parameters": {
+        "APIName": {
+            "Description": "The name of the API",
+            "Type": "String",
+            "MinLength": 1,
+            "MaxLength": 255,
+            "AllowedPattern": "^[a-zA-Z][-a-zA-Z0-9]*$",
+            "Default": "ThinkPerformReportsTrigger"
+        },
+        "DeployApi": {
+          "Description": "Deploy the API",
+          "Type": "String",
+          "AllowedValues": [
+            "Yes",
+            "No"
+          ],
+          "Default": "Yes"
+        },
+        "CorsOrigin": {
+            "Description": "The domain from which the endpoint will be called.",
+            "Type": "String",
+            "MinLength": 1,
+            "MaxLength": 255,
+            "AllowedPattern": "^http[s]?:\\/\\/[^:\\/\\s]+$",
+            "Default": "http://www.thinkperform.com.au"
+        },
+        "ProjectToolsStack": {
+            "Description": "The stack containing the tool resources.",
+            "Type": "String",
+            "MinLength": 1,
+            "MaxLength": 255,
+            "AllowedPattern": "^[a-zA-Z][-a-zA-Z0-9]*$",
+            "Default": "watreports-tools-stack"
+        },
+        "LookupFunctionLambdaKey": {
+            "Description": "Lookup Function key name",
+            "Type": "String",
+            "MinLength": 1,
+            "MaxLength": 255,
+            "AllowedPattern": "^[a-zA-Z][-a-zA-Z0-9.]*$",
+            "Default": "com-amazon-aws-cloudformation-helper-lookup-v2.zip"
+        }
+    },
+    "Mappings": {"AWSRegion2Bucket": {
+        "us-east-1": {
+            "OpenCode": "au-com-thinkronicity-opencode-usea1",
+            "ClientCode": "au-com-thinkronicity-clientcode-apne1"
+        },
+        "us-west-2": {
+            "OpenCode": "au-com-thinkronicity-opencode-uswe2",
+            "ClientCode": "au-com-thinkronicity-clientcode-apne1"
+        },
+        "eu-west-1": {
+            "OpenCode": "au-com-thinkronicity-opencode-euwe1",
+            "ClientCode": "au-com-thinkronicity-clientcode-apne1"
+        },
+        "ap-northeast-1": {
+            "OpenCode": "au-com-thinkronicity-opencode-apne1",
+            "ClientCode": "au-com-thinkronicity-clientcode-apne1"
+        }
+    }},
+    "Conditions" : {
+        "DeployApiYes" : {"Fn::Equals" : [{"Ref" : "DeployApi"}, "Yes"]}
+    },
+    "Resources": {
+        "TPMRMApi": {
+            "Type": "AWS::ApiGateway::RestApi",
+            "Properties": {
+                "Name": {"Ref": "APIName"},
+                "Description": "An API to allow the Survey Response page to trigger production of reports."
+            },
+            "Metadata": {"AWS::CloudFormation::Designer": {"id": "7d7f1e08-c02c-468e-9793-ca00f0f3642b"}}
+        },
+        "TPMRMSurveyResource": {
+            "Type": "AWS::ApiGateway::Resource",
+            "Properties": {
+                "RestApiId": {"Ref": "TPMRMApi"},
+                "ParentId": {"Fn::GetAtt": [
+                    "TPMRMApi",
+                    "RootResourceId"
+                ]},
+                "PathPart": "survey"
+            },
+            "Metadata": {"AWS::CloudFormation::Designer": {"id": "1e92b51b-b6f7-4a9d-b6d7-443349f81a53"}}
+        },
+        "TPMRMSurveyIdResource": {
+            "Type": "AWS::ApiGateway::Resource",
+            "Properties": {
+                "RestApiId": {"Ref": "TPMRMApi"},
+                "ParentId": {"Ref": "TPMRMSurveyResource"},
+                "PathPart": "{id}"
+            },
+            "Metadata": {"AWS::CloudFormation::Designer": {"id": "bb395e39-a083-4bc4-8800-7ea8c9e4e334"}}
+        },
+        "TPMRMSurveyIdRespondentReportsOptions": {
+            "Type": "AWS::ApiGateway::Method",
+            "Properties": {
+                "RestApiId": {"Ref": "TPMRMApi"},
+                "ResourceId": {"Ref": "TPMRMSurveyIdResource"},
+                "HttpMethod": "OPTIONS",
+                "AuthorizationType": "NONE",
+                "Integration": {
+                    "Type": "MOCK",
+                    "RequestTemplates": {"application/json": "{\"statusCode\":200}"},
+                    "IntegrationResponses": [{
+                        "ResponseParameters": {
+                            "method.response.header.Access-Control-Allow-Headers": "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,x-amz-security-token'",
+                            "method.response.header.Access-Control-Allow-Origin": {"Fn::Join": [
+                                "",
+                                [
+                                    "'",
+                                    {"Ref": "CorsOrigin"},
+                                    "'"
+                                ]
+                            ]},
+                            "method.response.header.Access-Control-Allow-Expose-Headers": "'Access-Control-Allow-Origin'",
+                            "method.response.header.Access-Control-Allow-Methods": "'GET,OPTIONS'"
+                        },
+                        "SelectionPattern": "",
+                        "StatusCode": "200"
+                    }]
+                },
+                "MethodResponses": [{
+                    "ResponseParameters": {
+                        "method.response.header.Access-Control-Allow-Headers": true,
+                        "method.response.header.Access-Control-Allow-Origin": true,
+                        "method.response.header.Access-Control-Allow-Expose-Headers": true,
+                        "method.response.header.Access-Control-Allow-Methods": true
+                    },
+                    "StatusCode": "200"
+                }]
+            },
+            "Metadata": {"AWS::CloudFormation::Designer": {"id": "5e95ea81-ff80-46c0-9738-918cf9c3106a"}}
+        },
+        "TPMRMSurveyIdRespondentReportsGet": {
+            "Type": "AWS::ApiGateway::Method",
+            "Properties": {
+                "RestApiId": {"Ref": "TPMRMApi"},
+                "ResourceId": {"Ref": "TPMRMSurveyIdResource"},
+                "HttpMethod": "GET",
+                "AuthorizationType": "NONE",
+                "RequestParameters": {
+                    "method.request.querystring.report": true,
+                    "method.request.querystring.project": true,
+                    "method.request.path.id": true
+                },
+                "Integration": {
+                    "Type": "AWS",
+                    "IntegrationHttpMethod": "POST",
+                    "Uri": {"Fn::Join": [
+                        "",
+                        [
+                            "arn:aws:apigateway:",
+                            {"Ref": "AWS::Region"},
+                            ":lambda:path/2015-03-31/functions/",
+                            {"Fn::GetAtt": [
+                                "ProjectToolsStackInfo",
+                                "THINKonicityS3TriggerLambdaArn"
+                            ]},
+                            "/invocations"
+                        ]
+                    ]},
+                    "RequestTemplates": {"application/json": {"Fn::Join": [
+                        "\n",
+                        [
+                            "#set($inputRoot = $input.path('$'))",
+                            "{",
+                            "\"bucketname\": \"$input.params('project')-${stageVariables.mode}-files-${stageVariables.domain}\"",
+                            ",\"keyname\": \"Surveys/$input.params('id')/Request_${context.requestId}_$input.params('report')_Job\"",
+                            ",\"extension\": \"xml\"",
+                            ",\"contentType\": \"application/xml\"",
+                            ",\"filetext\": \"<AsyncJob><survey_id><![CDATA[$input.params('id')]]><\/survey_id><event_id><![CDATA[${context.requestId}]]><\/event_id><ReportVariant><![CDATA[$input.params('report')]]><\/ReportVariant><\/AsyncJob>\"",
+                            ",\"successMessage\": \"Processing started for survey $input.params('id')\"",
+                            ",\"failMessage\": \"Could not start processing for survey $input.params('id')\"",
+                            "}"
+                        ]
+                    ]}},
+                    "IntegrationResponses": [{
+                        "ResponseParameters": {"method.response.header.Access-Control-Allow-Origin": {"Fn::Join": [
+                            "",
+                            [
+                                "'",
+                                {"Ref": "CorsOrigin"},
+                                "'"
+                            ]
+                        ]}},
+                        "SelectionPattern": "",
+                        "StatusCode": "200"
+                    }]
+                },
+                "MethodResponses": [{
+                    "ResponseParameters": {"method.response.header.Access-Control-Allow-Origin": true},
+                    "StatusCode": "200"
+                }]
+            },
+            "Metadata": {"AWS::CloudFormation::Designer": {"id": "2f2db220-0280-44a8-aba3-45ca68ed350b"}}
+        },
+        "TPMRMApiDeployment": {
+            "Type": "AWS::ApiGateway::Deployment",
+            "DependsOn" : ["TPMRMSurveyIdRespondentReportsOptions", "TPMRMSurveyIdRespondentReportsGet"],
+            "Condition" : "DeployApiYes",
+            "Properties": {
+                "Description": "Initial Deployment",
+                "RestApiId": {"Ref": "TPMRMApi"},
+                "StageDescription": {
+                    "Variables": {
+                        "mode": {"Fn::GetAtt": [
+                            "ProjectToolsStackInfo",
+                            "SelectedTargetEnvironment"
+                        ]},
+                        "domain": {"Fn::GetAtt": [
+                            "ProjectToolsStackInfo",
+                            "SelectedTargetDomain"
+                        ]}
+                    },
+                    "MethodSettings": [
+                        {
+                          "ResourcePath": "/survey/{id}",
+                          "HttpMethod": "GET"
+                        }, 
+                        {
+                          "ResourcePath": "/survey/{id}",
+                          "HttpMethod": "OPTIONS"
+                        }
+                    ]
+                },
+                "StageName": {"Fn::GetAtt": [
+                    "ProjectToolsStackInfo",
+                    "SelectedTargetEnvironment"
+                ]}
+            },
+            "Metadata": {"AWS::CloudFormation::Designer": {"id": "6ec3abed-1082-4a42-995d-535796ff9814"}}
+        },
+        "ProjectToolsStackInfo": {
+            "Type": "Custom::LookupInfo",
+            "Properties": {
+                "ServiceToken": {"Fn::GetAtt": [
+                    "LookupStackOutputsLambda",
+                    "Arn"
+                ]},
+                "StackName": {"Ref": "ProjectToolsStack"}
+            },
+            "Metadata": {"AWS::CloudFormation::Designer": {"id": "81ec0d1a-dfe6-4aca-99fd-9cac40242b9c"}}
+        },
+        "LookupStackOutputsLambda": {
+            "Type": "AWS::Lambda::Function",
+            "Properties": {
+                "Handler": "index.handler",
+                "Role": {"Fn::GetAtt": [
+                    "LookupStackLambdaExecutionRole",
+                    "Arn"
+                ]},
+                "Code": {
+                    "S3Bucket": {"Fn::FindInMap": [
+                        "AWSRegion2Bucket",
+                        {"Ref": "AWS::Region"},
+                        "OpenCode"
+                    ]},
+                    "S3Key": {"Ref": "LookupFunctionLambdaKey"}
+                },
+                "Runtime": "nodejs4.3",
+                "Description": "CloudFormation Lookup Stack Outputs from AWS",
+                "Timeout": "30"
+            },
+            "Metadata": {"AWS::CloudFormation::Designer": {"id": "5a9792af-27bf-4c6b-b45d-36eda2baa76f"}}
+        },
+        "LookupStackLambdaExecutionRole": {
+            "Type": "AWS::IAM::Role",
+            "Properties": {
+                "AssumeRolePolicyDocument": {
+                    "Version": "2012-10-17",
+                    "Statement": [{
+                        "Effect": "Allow",
+                        "Principal": {"Service": ["lambda.amazonaws.com"]},
+                        "Action": ["sts:AssumeRole"]
+                    }]
+                },
+                "Path": "/",
+                "Policies": [{
+                    "PolicyName": "root",
+                    "PolicyDocument": {
+                        "Version": "2012-10-17",
+                        "Statement": [
+                            {
+                                "Effect": "Allow",
+                                "Action": [
+                                    "logs:CreateLogGroup",
+                                    "logs:CreateLogStream",
+                                    "logs:PutLogEvents"
+                                ],
+                                "Resource": "arn:aws:logs:*:*:*"
+                            },
+                            {
+                                "Effect": "Allow",
+                                "Action": ["cloudformation:DescribeStacks"],
+                                "Resource": "*"
+                            }
+                        ]
+                    }
+                }]
+            },
+            "Metadata": {"AWS::CloudFormation::Designer": {"id": "29eaccdb-f417-4eba-a945-406b4350779a"}}
+        },
+        "LambdaInvokePermission": {
+          "Type": "AWS::Lambda::Permission",
+          "Properties": {
+            "FunctionName" : {"Fn::GetAtt": [
+                                "ProjectToolsStackInfo",
+                                "THINKonicityS3TriggerLambdaArn"
+                            ]},
+            "Action": "lambda:InvokeFunction",
+            "Principal": "apigateway.amazonaws.com",
+            "SourceArn": {"Fn::Join": [
+                        "",
+                        [
+                            "arn:aws:execute-api:",
+                            {"Ref": "AWS::Region"},
+                            ":",
+                            {"Ref": "AWS::AccountId"},
+                            ":",
+                            {"Ref": "TPMRMApi"},
+                            "/*/GET/survey/*"
+                        ]
+                    ]}
+          }
+        }        
+    },
+    "Outputs": {
+        "TPMRMApiName": {
+            "Value": {"Ref": "APIName"},
+             "Description": "The name given to the API when the stack was created."
+         },
+        "StartReportURL": {
+            "Value": {"Fn::Join": 
+                    [
+                            "",
+                            [
+                                "https://",
+                                {"Ref": "TPMRMApi"},
+                                ".execute-api.",
+                                {"Ref": "AWS::Region"},
+                                ".amazonaws.com/",
+                                {"Fn::GetAtt": ["ProjectToolsStackInfo", "SelectedTargetEnvironment"]},
+                                "/survey/{Survey_id}?project=",
+                                {"Fn::GetAtt": ["ProjectToolsStackInfo", "SelectedProjectPrefix"]},
+                                "&report={Report_Style}"
+                            ]
+                    ]
+            },
+            "Description": "The generated API endpoint URL to be used in the invocation JavaScript."
+        },
+        "LookupStackOutputsLambdaArn": {
+            "Value": {"Fn::GetAtt": [
+                "LookupStackOutputsLambda",
+                "Arn"
+            ]},
+            "Description": "Unique resource ID of the Lookup Stack Outputs Lamba Function."
+        },
+        "LookupStackLambdaExecutionRoleArn": {
+            "Value": {"Fn::GetAtt": [
+                "LookupStackLambdaExecutionRole",
+                "Arn"
+            ]},
+            "Description": "Unique resource ID of the IAM Role allocated to the Lookup Stack Outputs Lambda Functions."
+        }
+    }
+}

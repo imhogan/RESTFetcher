@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Emails>
+    <Email>
+        <To>Ian_MacDonald_Hogan@yahoo.com</To>
+        <Firstname>Ian</Firstname>
+        <Lastname>Hogan</Lastname>
+        <Salutation>Hi</Salutation>
+    </Email>
+</Emails>

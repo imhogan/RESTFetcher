@@ -18,7 +18,7 @@
     <xd:doc>
         <xd:desc>Debug flag.</xd:desc>
     </xd:doc>
-    <xsl:param name="Debug">Y</xsl:param>
+    <xsl:param name="Debug">N</xsl:param>
         
     <xsl:param name="StyleUser">ss</xsl:param>
     <xsl:param name="QrveyUser">qq</xsl:param>
@@ -53,14 +53,14 @@
     <xsl:text>,"introPage": </xsl:text><xsl:value-of select="settings/properties/@introPage"/>
     <xsl:text>,"totalTime": </xsl:text><xsl:value-of select="sum(questions/question/@time) + number(concat('0',@extraTime))"/>
     <xsl:for-each select="$Styles//styleCollection[@name=$StyleCollectionName]/style">
-        <xsl:text>"</xsl:text><xsl:value-of select="@type"/><xsl:text>": {</xsl:text>
+        <xsl:text>,"</xsl:text><xsl:value-of select="@type"/><xsl:text>": {</xsl:text>
              <xsl:text>"name": "</xsl:text><xsl:value-of select="@name"/><xsl:text>"</xsl:text>
              <xsl:call-template name="elements2JSON">
                     <xsl:with-param name="name">style</xsl:with-param>
                     <xsl:with-param name="elements" select="*"/>
              </xsl:call-template>
-            <xsl:text>,"userid": "</xsl:text><xsl:value-of select="$StyleUser"/>"
-            <xsl:text>,"styleid": </xsl:text><xsl:value-of select="@id"/>
+        <xsl:text>,"userid": "</xsl:text><xsl:value-of select="$StyleUser"/><xsl:text>"</xsl:text>
+        <xsl:text>,"styleid": "</xsl:text><xsl:value-of select="@id"/><xsl:text>"</xsl:text>
             <xsl:text>,"newChanges": </xsl:text><xsl:value-of select="@newChanges"/>
          <xsl:text>}</xsl:text>
     </xsl:for-each>
@@ -137,7 +137,7 @@
     <xsl:template match="answer">
         <xsl:text>{</xsl:text>
             <xsl:call-template name="attributes2JSON">
-                <xsl:with-param name="attributes" select="@*[not(starts-with(local-name(),'_'))]"/>
+                <xsl:with-param name="attributes" select="@*[not(starts-with(local-name(),'_'))] | ."/>
                 <xsl:with-param name="autoIdField">answerid</xsl:with-param>
             </xsl:call-template>
             <xsl:if test="route">

@@ -9,6 +9,7 @@
 		Author Ian Hogan, Ian_MacDonald_Hogan@yahoo.com
 	-->
     <Command Name="DoNothing" IsNOP="true">
+        <!-- This command does nothing, so if no command, or an unknown command, is specified this command will be invoked. -->
         <Actions>
             <Action Type="AddResult">
                 <Parameters>
@@ -44,7 +45,7 @@
                     <Parameter Name="Result">=Added user ${UserID}</Parameter>
                 </Parameters>
             </Action>
-            <Action Type="Command" Command="ListTemplatesForNewUser" Match="//userid">
+            <Action Type="Command" Command="AddSignupQrvey" Match="//userid">
                 <Parameters>
                     <Parameter Name="UserID" XPath="."/>
                 </Parameters>
@@ -60,79 +61,29 @@
             </Action>
         </Actions>
     </Command>
-    <Command Name="ListTemplatesForNewUser" Verb="GET" IsJSON="true">
-        <Headers>
-            <Header Name="x-api-key">$API_KEY</Header>
-        </Headers>
-        <Parameters>
-            <Parameter Name="entity">survey</Parameter>
-            <Parameter Name="subentity">templates</Parameter>
-        </Parameters>
+    <Command Name="AddSignupQrvey" IsNOP="true">
         <Actions>
-            <Action Type="S3PUT" Mode="debug">
+            <Action Type="XSLT2" XSLTOutputIsText="true">
                 <Parameters>
+                    <Parameter Name="Transform" Function="S3URL">=${S3_Bucket},config/QrveyXML2JSON.xsl,3600</Parameter>
+                    <Parameter Name="StylesURI" Function="S3URL">=${S3_Bucket},config/QrveyStyles.xml,3600</Parameter>
+                    <Parameter Name="QrveyUser">$UserID</Parameter>
+                    <Parameter Name="StyleUser">$UserID</Parameter>
                     <Parameter Name="Bucket">$S3_Bucket</Parameter>
-                    <Parameter Name="Name">=${REST_Log_Path}/ListTemplatesForNewUser${UserID}_${JobID}.xml</Parameter>
+                    <Parameter Name="Name">=${REST_Log_Path}/SignupSurvey_${JobID}.json</Parameter>
                 </Parameters>
-            </Action>
-            <Action Type="FOP">
-                <Parameters>
-                    <Parameter Name="Transform" Function="S3URL">=${S3_Bucket},xsl/TemplatesList2FO.xsl</Parameter>
-                    <Parameter Name="Bucket">$S3_Bucket</Parameter>
-                    <Parameter Name="Name">=PDFs/TemplatesList_${UserID}_${JobID}.pdf</Parameter>
-                </Parameters>
-            </Action>
-            <Action Type="eMail">
-                <Parameters>
-                    <Parameter Name="From">$EmailSender</Parameter>
-                    <Parameter Name="Name">$EmailSenderName</Parameter>
-                    <Parameter Name="To">$UserEmail</Parameter>
-                    <Parameter Name="CC">$EmailSender</Parameter>
-                    <Parameter Name="Subject">Here is the templates list.</Parameter>
-                    <Parameter Name="Attachments" Function="S3URL">=${S3_Bucket},PDFs/TemplatesList_${UserID}_${JobID}.pdf</Parameter>
-                </Parameters>
-                <Body ContentType="text/html"><![CDATA[=<html><body>
-                    <p>Hi ${UserFirstname},</p><br/>
-                    <p>here is the list of qrvey templates from ${S3_Bucket}/PDFs/TemplatesList_${UserID}_${JobID}.pdf</p><br/>
-                    <p>Your user id is '${UserID}'.</p><br/>
-                    <p>To create a new qrvey from a template, create a file named s3://${S3_Bucket}/Qrveys/${propertyid}/Job_StartQrvey_${UserID}_<i>templateid</i>_<i>uid</i>_Config.xml, where <i>templateid</i> is the appropriate template id from the attached list, and <i>uid</i> is a unique id for your job.</p><br/>
-                    <p>The contents of the file should be of the form shown below - add as many Email elements as you need, each will receive a survey invitation.</p><br/>
-                    <table><tr><td><pre>&lt;?xml version="1.0" encoding="UTF-8"?&gt;
-&lt;Job&gt;
-    &lt;Parameters&gt;
-        &lt;SurveyName&gt;<i>Survey Title ... </i>&lt;/SurveyName&gt;
-        &lt;SurveyDescription&gt;<i>Survey description ... </i>.&lt;/SurveyDescription&gt;
-    &lt;/Parameters&gt;
-    &lt;Emails&gt;
-        &lt;Email&gt;
-            &lt;To&gt;someone@email.com&lt;/To&gt;
-            &lt;Firstname&gt;Phyrst&lt;/Firstname&gt;
-            &lt;Lastname&gt;Larszt&lt;/Lastname&gt;
-            &lt;Salutation&gt;G'day&lt;/Salutation&gt;
-        &lt;/Email&gt;
-    &lt;/Emails&gt;
-&lt;/Job&gt;</pre></td></tr></table><br/>
-                    <p>To delete this userid, and all associated qrveys, create an empty file named s3://${S3_Bucket}/Qrveys/${propertyid}/Job_DeleteUser_${UserID}_<i>uid</i>_Config.xml, where <i>uid</i> is a unique id for your job.</p><br/>
-                    <p>Enjoy!</p><br/>
-                    </body></html>]]>
-                </Body>
                 <Actions>
-                    <Action Type="AddResult" ParametersRegExp="^EmailResult$">
-                        <Parameters>
-                            <Parameter Name="EmailResult">=Template List sent to ${UserEmail} and ${EmailSender}</Parameter>
-                        </Parameters>
-                    </Action>
-                    <Action Type="S3DELETE" Mode="!debug">
+                    <Action Type="S3PUT" Mode="debug">
                         <Parameters>
                             <Parameter Name="Bucket">$S3_Bucket</Parameter>
-                            <Parameter Name="Name">=PDFs/TemplatesList_${UserID}_${JobID}.pdf</Parameter>
+                            <Parameter Name="Name">=${REST_Log_Path}/SignupSurvey_${JobID}.xml</Parameter>
                         </Parameters>
                     </Action>
                 </Actions>
             </Action>
         </Actions>
     </Command>
-    <Command Name="AddUserSurveyFromTemplate" Verb="POST" IsJSON="true">
+    <Command Name="AddUserSurvey" Verb="POST" IsJSON="true">
         <Headers>
             <Header Name="x-api-key">$API_KEY</Header>
         </Headers>
@@ -202,10 +153,59 @@
                     <Parameter Name="Result">=Activated qrvey ${QrveyID} for user ${UserID} - URL is ${SurveyURL}</Parameter>
                 </Parameters>
             </Action>
-            <Action Type="Command" Command="SendSurveyInvites" Match="//url">
+            <Action Type="Command" Command="SendVillageManagerSurveyDetails" Match="//url">
                 <Parameters>
                     <Parameter Name="SurveyURL" XPath="."/>
                 </Parameters>
+            </Action>
+            <Action Type="eMail">
+                <Parameters>
+                    <Parameter Name="From">$EmailSender</Parameter>
+                    <Parameter Name="Name">$EmailSenderName</Parameter>
+                    <Parameter Name="To">$UserEmail</Parameter>
+                    <Parameter Name="CC">$EmailSender</Parameter>
+                    <Parameter Name="Subject">Here is the templates list.</Parameter>
+                    <Parameter Name="Attachments" Function="S3URL">=${S3_Bucket},PDFs/TemplatesList_${UserID}_${JobID}.pdf</Parameter>
+                    <Parameter Name="SurveyURL" XPath="."/>
+                </Parameters>
+                <Body ContentType="text/html"><![CDATA[=<html><body>
+                    <p>Hi ${UserFirstname},</p><br/>
+                    <p>here is the list of qrvey templates from ${S3_Bucket}/PDFs/TemplatesList_${UserID}_${JobID}.pdf</p><br/>
+                    <p>Your user id is '${UserID}'.</p><br/>
+                    <p>To create a new qrvey from a template, create a file named s3://${S3_Bucket}/Qrveys/${propertyid}/Job_StartQrvey_${UserID}_<i>templateid</i>_<i>uid</i>_Config.xml, where <i>templateid</i> is the appropriate template id from the attached list, and <i>uid</i> is a unique id for your job.</p><br/>
+                    <p>The contents of the file should be of the form shown below - add as many Email elements as you need, each will receive a survey invitation.</p><br/>
+                    <table><tr><td><pre>&lt;?xml version="1.0" encoding="UTF-8"?&gt;
+&lt;Job&gt;
+    &lt;Parameters&gt;
+        &lt;SurveyName&gt;<i>Survey Title ... </i>&lt;/SurveyName&gt;
+        &lt;SurveyDescription&gt;<i>Survey description ... </i>.&lt;/SurveyDescription&gt;
+    &lt;/Parameters&gt;
+    &lt;Emails&gt;
+        &lt;Email&gt;
+            &lt;To&gt;someone@email.com&lt;/To&gt;
+            &lt;Firstname&gt;Phyrst&lt;/Firstname&gt;
+            &lt;Lastname&gt;Larszt&lt;/Lastname&gt;
+            &lt;Salutation&gt;G'day&lt;/Salutation&gt;
+        &lt;/Email&gt;
+    &lt;/Emails&gt;
+&lt;/Job&gt;</pre></td></tr></table><br/>
+                    <p>To delete this userid, and all associated qrveys, create an empty file named s3://${S3_Bucket}/Qrveys/${propertyid}/Job_DeleteUser_${UserID}_<i>uid</i>_Config.xml, where <i>uid</i> is a unique id for your job.</p><br/>
+                    <p>Enjoy!</p><br/>
+                    </body></html>]]>
+                </Body>
+                <Actions>
+                    <Action Type="AddResult" ParametersRegExp="^EmailResult$">
+                        <Parameters>
+                            <Parameter Name="EmailResult">=Template List sent to ${UserEmail} and ${EmailSender}</Parameter>
+                        </Parameters>
+                    </Action>
+                    <Action Type="S3DELETE" Mode="!debug">
+                        <Parameters>
+                            <Parameter Name="Bucket">$S3_Bucket</Parameter>
+                            <Parameter Name="Name">=PDFs/TemplatesList_${UserID}_${JobID}.pdf</Parameter>
+                        </Parameters>
+                    </Action>
+                </Actions>
             </Action>
             <Action Type="Command" Command="SendSurveyResultsPage" Match="//url">
             </Action>

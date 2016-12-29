@@ -1,30 +1,116 @@
 {
     "AWSTemplateFormatVersion": "2010-09-09",
-    "Metadata": {
-        "AWS::CloudFormation::Designer": {"b759756e-4760-4d81-9577-c42c735c5139": {
-            "size": {
-                "width": 60,
-                "height": 60
-            },
-            "position": {
-                "x": 40,
-                "y": 50
-            },
-            "z": 0
-        }},
-        "Notes": {"DONE": ["Updated to use stack lookup to find bucket."]}
-    },
     "Description": "Load the S3 files for the Waste Analysis Tool for Think Perform - built by THINKronicity Pty Ltd.",
+    "Metadata": {"AWS::CloudFormation::Interface": {
+        "ParameterGroups": [
+            {
+                "Label": {"default": "Project Configuration"},
+                "Parameters": [
+                    "ProjectZipFilesList",
+                    "ProjectToolsStack",
+                    "EmailSender",
+                    "EmailSenderName",
+                    "EnableDebug"
+                ]
+            },
+            {
+                "Label": {"default": "Qrvey Details"},
+                "Parameters": [
+                    "QrveyAPIKey",
+                    "QrveyUserEmail",
+                    "QrveyUserFirstname",
+                    "QrveyUserLastname",
+                    "QrveyUserPassword",
+                    "QrveyUserOrganisation",
+                    "QrveyDomain"
+                ]
+            },
+            {
+                "Label": {"default": "Custom Resource Lambda Functions"},
+                "Parameters": [
+                    "LookupFunctionLambdaKey",
+                    "S3PutFileKey",
+                    "S3ZipFileLoaderKey"
+                ]
+            }
+        ],
+        "ParameterLabels": {"EmailSender": {"default": "Email address to send emails from?"}}
+    }},
     "Parameters": {
+        "EmailSender": {
+            "Description": "Email address registered with AWS SES in the selected SES region (EmailRegion). This email address needs to conform to sender validation protocol for email recipients to not block emails.",
+            "Type": "String",
+            "Default": "ses.sender@my.com"
+        },
+        "EmailSenderName": {
+            "Description": "Display name for sent emails.",
+            "Type": "String",
+            "Default": "Qrvey Administrator"
+        },
+        "EmailRegion": {
+            "Description": "The SES Region for sending emails.",
+            "Type": "String",
+            "AllowedValues": [
+              "us-east-1",
+              "us-west-2",
+              "eu-west-1"
+            ],
+            "Default": "us-east-1"
+        },
+        "QrveyAPIKey": {
+            "Description": "Your Qrvey API Key.",
+            "Type": "String",
+            "Default": ""
+        },
+        "QrveyUserEmail": {
+            "Description": "Email for Qrvey user. The Templates list and Qrvey result pages will be emailed to this address.",
+            "Type": "String",
+            "Default": "Somebody@hear.me"
+        },
+        "QrveyUserFirstname": {
+            "Description": "Qrvey user's first name.",
+            "Type": "String",
+            "Default": "Kwer"
+        },
+        "QrveyUserLastname": {
+            "Description": "Qrvey user's last name.",
+            "Type": "String",
+            "Default": "Vay"
+        },
+        "QrveyUserPassword": {
+            "Description": "Qrvey user's password.",
+            "Type": "String",
+            "Default": "ReallySecret",
+            "NoEcho": "true"
+        },
+        "QrveyUserOrganisation": {
+            "Description": "Qrvey user's organisation.",
+            "Type": "String",
+            "Default": "Response Collector"
+        },
+        "QrveyDomain": {
+            "Description": "Qrvey domain for results page.",
+            "Type": "String",
+            "Default": "https://api.qrvey.com"
+        },
+        "EnableDebug": {
+            "Description": "Enable debugging?",
+            "Type": "String",
+            "AllowedValues": [
+                "true",
+                "false"
+            ],
+            "Default": "true"
+        },
         "S3ZipFileLoaderKey": {
             "Description": "Zip file for S3 Zip File Loader function",
             "Type": "String",
             "Default": "au-com-thinkronicity-S3ZipFileLoader-V1.1.2.zip"
         },
-        "S3CopyFileKey": {
-            "Description": "Zip file for S3 Copy File function",
+        "S3PutFileKey": {
+            "Description": "Zip file for S3 Put File function",
             "Type": "String",
-            "Default": "au-com-thinkronicity-CopyS3File-V1.0.zip"
+            "Default": "au-com-thinkronicity-PutS3File-V1.0.zip"
         },
         "LookupFunctionLambdaKey": {
             "Description": "Lookup Function key name",
@@ -37,33 +123,65 @@
         "ProjectZipFilesList": {
             "Description": "Project List Files",
             "Type": "CommaDelimitedList",
-            "Default": "au-com-thinkperform-watreports-files-V2.0.zip"
+            "Default": "au-com-thinkronicity-RestFetcher-QrveySample2-V1.0.0.zip"
         },
         "ProjectToolsStack": {
-            "Description": "The stack containing the base framework for the Waste Analysis Tool for Think Perform.",
+            "Description": "The stack containing the base framework for the system.",
             "Type": "String",
             "MinLength": 1,
             "MaxLength": 255,
             "AllowedPattern": "^[a-zA-Z][-a-zA-Z0-9]*$",
-            "Default": "watreports-tools-stack"
+            "Default": "qrvey-sample-2-tools"
         }
     },
     "Mappings": {"AWSRegion2Bucket": {
         "us-east-1": {
             "OpenCode": "au-com-thinkronicity-opencode-usea1",
-            "ClientCode": "au-com-thinkronicity-clientcode-apne1"
+            "ClientCode": "au-com-thinkronicity-clientcode-apse2"
+        },
+        "us-east-2": {
+            "OpenCode": "au-com-thinkronicity-opencode-usea2",
+            "ClientCode": "au-com-thinkronicity-clientcode-apse2"
+        },
+        "us-west-1": {
+            "OpenCode": "au-com-thinkronicity-opencode-uswe1",
+            "ClientCode": "au-com-thinkronicity-clientcode-apse2"
         },
         "us-west-2": {
             "OpenCode": "au-com-thinkronicity-opencode-uswe2",
-            "ClientCode": "au-com-thinkronicity-clientcode-apne1"
+            "ClientCode": "au-com-thinkronicity-clientcode-apse2"
         },
-        "eu-west-1": {
-            "OpenCode": "au-com-thinkronicity-opencode-euwe1",
-            "ClientCode": "au-com-thinkronicity-clientcode-apne1"
+        "sa-east-1": {
+            "OpenCode": "au-com-thinkronicity-opencode-saea1",
+            "ClientCode": "au-com-thinkronicity-clientcode-apse2"
         },
         "ap-northeast-1": {
             "OpenCode": "au-com-thinkronicity-opencode-apne1",
-            "ClientCode": "au-com-thinkronicity-clientcode-apne1"
+            "ClientCode": "au-com-thinkronicity-clientcode-apse2"
+        },
+        "ap-northeast-2": {
+            "OpenCode": "au-com-thinkronicity-opencode-apne2",
+            "ClientCode": "au-com-thinkronicity-clientcode-apse2"
+        },
+        "ap-south-1": {
+            "OpenCode": "au-com-thinkronicity-opencode-aps1",
+            "ClientCode": "au-com-thinkronicity-clientcode-apse2"
+        },
+        "ap-southeast-1": {
+            "OpenCode": "au-com-thinkronicity-opencode-apse1",
+            "ClientCode": "au-com-thinkronicity-clientcode-apse2"
+        },
+        "ap-southeast-2": {
+            "OpenCode": "au-com-thinkronicity-opencode-apse2",
+            "ClientCode": "au-com-thinkronicity-clientcode-apse2"
+        },
+        "eu-central-1": {
+            "OpenCode": "au-com-thinkronicity-opencode-euce1",
+            "ClientCode": "au-com-thinkronicity-clientcode-apse2"
+        },
+        "eu-west-1": {
+            "OpenCode": "au-com-thinkronicity-opencode-euwe1",
+            "ClientCode": "au-com-thinkronicity-clientcode-apse2"
         }
     }},
     "Resources": {
@@ -94,10 +212,7 @@
                     "",
                     [
                         "/",
-                        {"Fn::GetAtt": [
-                            "ProjectFilesBucketInfo",
-                            "SelectedProjectPrefix"
-                        ]},
+                        {"Fn::ImportValue" : {"Fn::Sub" : "${ProjectToolsStack}-SelectedProjectPrefix"}},
                         "/"
                     ]
                 ]},
@@ -113,10 +228,7 @@
                                     "",
                                     [
                                         "arn:aws:s3:::",
-                                        {"Fn::GetAtt": [
-                                            "ProjectFilesBucketInfo",
-                                            "AccessProjectS3FilesBucket"
-                                        ]},
+                                        {"Fn::ImportValue" : {"Fn::Sub" : "${ProjectToolsStack}-AccessProjectS3FilesBucket"}},
                                         "/*"
                                     ]
                                 ]}]
@@ -154,7 +266,7 @@
                 }]
             }
         },
-        "THINKonicityS3ZipLoaderLambda": {
+        "S3ZipLoaderLambda": {
             "Type": "AWS::Lambda::Function",
             "Properties": {
                 "Code": {
@@ -167,7 +279,7 @@
                 },
                 "Runtime": "java8",
                 "Handler": "au.com.thinkronicity.aws.S3ZipFileLoader",
-                "Description": "CloudFormation S3 Zip Loader from THINKronicity.com.au",
+                "Description": "CloudFormation S3 Zip Loader from https://github.com/imhogan/S3ZipFileLoader",
                 "Timeout": 300,
                 "MemorySize": 768,
                 "Role": {"Fn::GetAtt": [
@@ -181,24 +293,21 @@
             "DeletionPolicy": "Retain",
             "Properties": {
                 "ServiceToken": {"Fn::GetAtt": [
-                    "THINKonicityS3ZipLoaderLambda",
+                    "S3ZipLoaderLambda",
                     "Arn"
                 ]},
                 "SourceBucket": {"Fn::FindInMap": [
                     "AWSRegion2Bucket",
                     {"Ref": "AWS::Region"},
-                    "ClientCode"
+                    "OpenCode"
                 ]},
                 "SourceKeys": {"Ref": "ProjectZipFilesList"},
-                "TargetBucket": {"Fn::GetAtt": [
-                    "ProjectFilesBucketInfo",
-                    "AccessProjectS3FilesBucket"
-                ]},
-                "PublicRead": "^(images/|xsl/SurveyReports|xsl/f/).*$",
+                "TargetBucket": {"Fn::ImportValue" : {"Fn::Sub" : "${ProjectToolsStack}-AccessProjectS3FilesBucket"}},
+                "PublicRead": "^(images/|xsl/|xsl/f/|fop/).*$",
                 "Debug": "true"
             }
         },
-        "THINKonicityS3CopyFileLambda": {
+        "S3PutFileLambda": {
             "Type": "AWS::Lambda::Function",
             "Properties": {
                 "Code": {
@@ -207,12 +316,12 @@
                         {"Ref": "AWS::Region"},
                         "OpenCode"
                     ]},
-                    "S3Key": {"Ref": "S3CopyFileKey"}
+                    "S3Key": {"Ref": "S3PutFileKey"}
                 },
                 "Runtime": "nodejs4.3",
                 "Handler": "index.handler",
                 "Timeout": "30",
-                "Description": "CloudFormation S3 Copy File from THINKronicity.com.au",
+                "Description": "CloudFormation S3 Put File Helper",
                 "MemorySize": 128,
                 "Role": {"Fn::GetAtt": [
                     "LambdaExecutionRole",
@@ -220,136 +329,163 @@
                 ]}
             }
         },
-        "SetPropertiesForEnvironment": {
-            "Type": "Custom::S3FileCopy",
-            "DependsOn" : ["ProjectFilesLoad"],
+        "SavePropertiesForEnvironment": {
+            "Type": "Custom::S3FilePut",
             "Properties": {
                 "ServiceToken": {"Fn::GetAtt": [
-                    "THINKonicityS3CopyFileLambda",
+                    "S3PutFileLambda",
                     "Arn"
                 ]},
                 "Source": {
-                    "S3Url":  {"Fn::Join": [
-                        "",
+                    "filetext": {"Fn::Join": [
+                        "\n",
                         [
-                           {"Fn::GetAtt": [
-                                "ProjectFilesBucketInfo",
-                                "AccessProjectS3FilesBucket"
+                            "# Qrvey configuration file for RESTFetcher.",
+                            "#",
+                            "# Note ${S3_Bucket} will be replaced by the value of the parameter S3_Bucket, ",
+                            "# passed in by the caller or from LambdaEventsMap.xml. This allows the bucket ",
+                            "# name holding the configuration file to be used.",
+                            "#",
+                            "# Author Ian Hogan, Ian_MacDonald_Hogan@yahoo.com",
+                            "# Endpoint for web service ",
+                            "service.endPoint:https://api.qrvey.com",
+                            "# Default timeout for REST interface",
+                            "service.timeout:10000",
+                            "# Debug tracing option",
+                            {"Fn::Join": [
+                                "",
+                                [
+                                    "trace.debug:",
+                                    {"Ref": "EnableDebug"}
+                                ]
                             ]},
-                            "/config/SurveyMonkeyProcessing.properties-",
-                            {"Fn::GetAtt": [
-                                "ProjectFilesBucketInfo",
-                                "SelectedTargetEnvironment"
+                            "# Depth limit to prevent infinite recursion",
+                            "service.depthLimit:5",
+                            "# Commands file for RESTFetcher",
+                            "service.commandsFile:s3://${S3_Bucket}/config/QrveyCommands.xml",
+                            "# Default ContentType for request body",
+                            "service.contentType:application/json; charset=UTF-8",
+                            "# Region for SES ",
+                            {"Fn::Join": [
+                                "",
+                                [
+                                    "parameter.AWS.SES_Region:",
+                                    {"Ref": "EmailRegion"}
+                                ]
+                            ]},
+                            "# Email sender details",
+                            "# Warning: Sender address needs to conform to sender validation protocol for email recipients to not block emails.",
+                            {"Fn::Join": [
+                                "",
+                                [
+                                    "parameter.EmailSender:",
+                                    {"Ref": "EmailSender"}
+                                ]
+                            ]},
+                            {"Fn::Join": [
+                                "",
+                                [
+                                    "parameter.EmailSenderName:",
+                                    {"Ref": "EmailSenderName"}
+                                ]
+                            ]},
+                            "# System Name",
+                            {"Fn::Join": [
+                                "",
+                                [
+                                    "parameter.System:",
+                                    {"Ref": "SystemName"},
+                                    " ",
+                                    {"Ref": "TargetEnvironment"}
+                                ]
+                            ]},
+                            "# Parameters for Apache FOP make sure the region is correct for the S3 Bucket",
+                            {"Fn::Join": [
+                                "",
+                                [
+                                    "parameter.FOP_BASE_URI:https://s3-",
+                                    {"Ref": "AWS::Region"},
+                                    ".amazonaws.com/${S3_Bucket}/fop"
+                                ]
+                            ]},
+                            "parameter.FOP_CONFIG:fop-aws.xconf",
+                            "# Log folder for debugging.",
+                            "parameter.REST_Log_Path:REST_Logs",
+                            "# API Key for qrvey calls",
+                            {"Fn::Join": [
+                                "",
+                                [
+                                    "parameter.API_KEY:",
+                                    {"Ref": "QrveyAPIKey"}
+                                ]
+                            ]},
+                            "# Survey user details",
+                            {"Fn::Join": [
+                                "",
+                                [
+                                    "parameter.UserEmail:",
+                                    {"Ref": "QrveyUserEmail"}
+                                ]
+                            ]},
+                            {"Fn::Join": [
+                                "",
+                                [
+                                    "parameter.UserFirstname:",
+                                    {"Ref": "QrveyUserFirstname"}
+                                ]
+                            ]},
+                            {"Fn::Join": [
+                                "",
+                                [
+                                    "parameter.UserLastname:",
+                                    {"Ref": "QrveyUserLastname"}
+                                ]
+                            ]},
+                            {"Fn::Join": [
+                                "",
+                                [
+                                    "parameter.UserPassword:",
+                                    {"Ref": "QrveyUserPassword"}
+                                ]
+                            ]},
+                            {"Fn::Join": [
+                                "",
+                                [
+                                    "parameter.UserOrganisation:",
+                                    {"Ref": "QrveyUserOrganisation"}
+                                ]
+                            ]},
+                            "# Results S3 Bucket Region",
+                            {"Fn::Join": [
+                                "",
+                                [
+                                    "parameter.ResultsBucketRegion:",
+                                    {"Ref": "AWS::Region"}
+                                ]
+                            ]},
+                            "# Results S3 Bucket",
+                            "parameter.ResultsBucket:${S3_Bucket}",
+                            "# Results HTML Pages path",
+                            "parameter.ResultsPath:results/",
+                            "# Results domain",
+                            {"Fn::Join": [
+                                "",
+                                [
+                                    "parameter.ResultsDomain:",
+                                    {"Ref": "QrveyDomain"}
+                                ]
                             ]}
                         ]
-                    ]}
+                    ]},
+                    "contentType": "text/x-java-properties"
                 },
                 "Target": {
-                    "Bucket": {"Fn::GetAtt": [
-                        "ProjectFilesBucketInfo",
-                        "AccessProjectS3FilesBucket"
-                    ]},
-                    "Key": "config/SurveyMonkeyProcessing.properties"
+                    "Bucket": {"Fn::ImportValue" : {"Fn::Sub" : "${ProjectToolsStack}-AccessProjectS3FilesBucket"}},
+                    "Key": "config/Qrvey2.properties"
                 },
                 "Debug": "true"
-            }
-        },
-        "SetJobFileForSurvey": {
-            "Type": "Custom::S3FileCopy",
-            "DependsOn" : ["SetPropertiesForEnvironment"],
-            "Properties": {
-                "ServiceToken": {"Fn::GetAtt": [
-                    "THINKonicityS3CopyFileLambda",
-                    "Arn"
-                ]},
-                "Source": {
-                    "S3Url":  {"Fn::Join": [
-                        "",
-                        [
-                           {"Fn::GetAtt": [
-                                "ProjectFilesBucketInfo",
-                                "AccessProjectS3FilesBucket"
-                            ]},
-                            "/Surveys/73799600/InitialJobFile.xml"
-                        ]
-                    ]}
-                },
-                "Target": {
-                    "Bucket": {"Fn::GetAtt": [
-                        "ProjectFilesBucketInfo",
-                        "AccessProjectS3FilesBucket"
-                    ]},
-                    "Key": "Surveys/73799600/JobFile.xml"
-                },
-                "Debug": "true"
-            }
-        },
-        "ProjectFilesBucketInfo": {
-            "Type": "Custom::LookupInfo",
-            "Properties": {
-                "ServiceToken": {"Fn::GetAtt": [
-                    "LookupStackOutputsLambda",
-                    "Arn"
-                ]},
-                "StackName": {"Ref": "ProjectToolsStack"}
-            }
-        },
-        "LookupStackOutputsLambda": {
-            "Type": "AWS::Lambda::Function",
-            "Properties": {
-                "Handler": "index.handler",
-                "Role": {"Fn::GetAtt": [
-                    "LookupStackLambdaExecutionRole",
-                    "Arn"
-                ]},
-                "Code": {
-                    "S3Bucket": {"Fn::FindInMap": [
-                        "AWSRegion2Bucket",
-                        {"Ref": "AWS::Region"},
-                        "OpenCode"
-                    ]},
-                    "S3Key": {"Ref": "LookupFunctionLambdaKey"}
-                },
-                "Runtime": "nodejs4.3",
-                "Description": "CloudFormation Lookup Stack Outputs from AWS",
-                "Timeout": "30"
-            }
-        },
-        "LookupStackLambdaExecutionRole": {
-            "Type": "AWS::IAM::Role",
-            "Properties": {
-                "AssumeRolePolicyDocument": {
-                    "Version": "2012-10-17",
-                    "Statement": [{
-                        "Effect": "Allow",
-                        "Principal": {"Service": ["lambda.amazonaws.com"]},
-                        "Action": ["sts:AssumeRole"]
-                    }]
-                },
-                "Path": "/",
-                "Policies": [{
-                    "PolicyName": "root",
-                    "PolicyDocument": {
-                        "Version": "2012-10-17",
-                        "Statement": [
-                            {
-                                "Effect": "Allow",
-                                "Action": [
-                                    "logs:CreateLogGroup",
-                                    "logs:CreateLogStream",
-                                    "logs:PutLogEvents"
-                                ],
-                                "Resource": "arn:aws:logs:*:*:*"
-                            },
-                            {
-                                "Effect": "Allow",
-                                "Action": ["cloudformation:DescribeStacks"],
-                                "Resource": "*"
-                            }
-                        ]
-                    }
-                }]
-            }
+            },
+            "DependsOn": ["ProjectFilesLoad"]
         }
     },
     "Outputs": {
@@ -358,14 +494,16 @@
                 "LambdaExecutionRole",
                 "Arn"
             ]},
-            "Description": "Unique resource ID of the IAM Role allocated to the S3 Zip Loader Lambda Functions."
+            "Description": "Unique resource ID of the IAM Role allocated to the S3 Zip Loader Lambda Functions.",
+            "Export" : { "Name" : {"Fn::Sub": "${AWS::StackName}-LambdaExecutionRoleArn" }}
         },
-        "THINKonicityS3ZipLoaderLambdaArn": {
+        "S3ZipLoaderLambdaArn": {
             "Value": {"Fn::GetAtt": [
-                "THINKonicityS3ZipLoaderLambda",
+                "S3ZipLoaderLambda",
                 "Arn"
             ]},
-            "Description": "Unique resource ID of the S3 Zip Loader Lamba Function."
+            "Description": "Unique resource ID of the S3 Zip Loader Lamba Function.",
+            "Export" : { "Name" : {"Fn::Sub": "${AWS::StackName}-S3ZipLoaderLambdaArn" }}
         },
         "ProjectFilesLoadResult": {
             "Value": {"Fn::GetAtt": [
@@ -373,20 +511,6 @@
                 "SourceZips"
             ]},
             "Description": "The result message from the S3 Zip Loader."
-        },
-        "LookupStackOutputsLambdaArn": {
-            "Value": {"Fn::GetAtt": [
-                "LookupStackOutputsLambda",
-                "Arn"
-            ]},
-            "Description": "Unique resource ID of the Lookup Stack Outputs Lamba Function."
-        },
-        "LookupStackLambdaExecutionRoleArn": {
-            "Value": {"Fn::GetAtt": [
-                "LookupStackLambdaExecutionRole",
-                "Arn"
-            ]},
-            "Description": "Unique resource ID of the IAM Role allocated to the Lookup Stack Outputs Lambda Functions."
         }
     }
 }

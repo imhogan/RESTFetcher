@@ -18,7 +18,7 @@
     <xd:doc>
         <xd:desc>Debug flag.</xd:desc>
     </xd:doc>
-    <xsl:param name="Debug">N</xsl:param>
+    <xsl:param name="Debug">Y</xsl:param>
         
     <xsl:param name="StyleUser">ss</xsl:param>
     <xsl:param name="QrveyUser">qq</xsl:param>
@@ -27,6 +27,7 @@
         <xd:desc>The URI of the styles file.</xd:desc>
     </xd:doc>
     <xsl:param name="StylesURI">QrveyStyles.xml</xsl:param>
+    <xsl:param name="ParametersListURI"/>
         
     <xsl:variable name="StylesAbsURI">
         <xsl:call-template name="GetAbsoluteURI">
@@ -45,11 +46,21 @@
         </Question>
     </xsl:variable>
     
+    <xsl:variable name="ParametersListAbsURI">
+        <xsl:call-template name="GetAbsoluteURI">
+            <xsl:with-param name="SourceURI" select="$ParametersListURI"/>
+        </xsl:call-template>
+    </xsl:variable>
+    <xd:doc>
+        <xd:desc>Load the styles or use an empty sequence if there is none.</xd:desc>
+    </xd:doc>
+    <xsl:variable name="Parameters" select="if (fn:doc-available($ParametersListAbsURI)) then fn:doc($ParametersListAbsURI) else ()"></xsl:variable>
+    
     <xsl:template match="/">
         <xsl:for-each select="qrvey">
 <xsl:text>{</xsl:text>
-    <xsl:text>"name": "</xsl:text><xsl:value-of select="@name"/><xsl:text>"</xsl:text>
-    <xsl:text>,"description": "</xsl:text><xsl:value-of select="settings/description"/><xsl:text>"</xsl:text>
+    <xsl:text>"name": "</xsl:text><xsl:call-template name="ReplaceParameters"><xsl:with-param name="value" select="@name"/></xsl:call-template><xsl:text>"</xsl:text>
+            <xsl:text>,"description": "</xsl:text><xsl:call-template name="ReplaceParameters"><xsl:with-param name="value" select="settings/description"/></xsl:call-template><xsl:text>"</xsl:text>
     <xsl:text>,"introPage": </xsl:text><xsl:value-of select="settings/properties/@introPage"/>
     <xsl:text>,"totalTime": </xsl:text><xsl:value-of select="sum(questions/question/@time) + number(concat('0',@extraTime))"/>
     <xsl:for-each select="$Styles//styleCollection[@name=$StyleCollectionName]/style">
@@ -84,6 +95,11 @@
         <xsl:text>"StylesAbsURI": "</xsl:text><xsl:value-of select="$StylesAbsURI"/><xsl:text>"</xsl:text>
         <xsl:text>,"fn:doc-available(StylesAbsURI)": "</xsl:text><xsl:value-of select="if (fn:doc-available($StylesAbsURI)) then 'T' else 'F'"/><xsl:text>"</xsl:text>
         <xsl:text>,"test2": "</xsl:text><xsl:value-of select="count($Styles//styleCollection)"/><xsl:text>"</xsl:text>
+        <xsl:text>,"parameters": [</xsl:text>
+        <xsl:for-each select="$Parameters//Parameter">
+            <xsl:if test="position() &gt; 1">,</xsl:if>{"<xsl:value-of select="@Name"/>":"<xsl:value-of select="replace(.,'&quot;','\\&quot;')"/><xsl:text>"}</xsl:text>
+        </xsl:for-each>
+        <xsl:text>]</xsl:text>
         <xsl:text>}</xsl:text>
     </xsl:if>
     <xsl:text>}</xsl:text>    
@@ -146,7 +162,7 @@
                         <xsl:with-param name="attributes" select="route/@*[not(starts-with(local-name(),'_'))]"/>
                         <xsl:with-param name="autoIdField">id</xsl:with-param>
                     </xsl:call-template>
-                    ,<xsl:call-template name="emitQuestions">
+                <xsl:if test="route/@*[not(starts-with(local-name(),'_'))]">,</xsl:if><xsl:call-template name="emitQuestions">
                         <xsl:with-param name="questionsGroup" select="route"/>
                     </xsl:call-template>
                 <xsl:text>}</xsl:text>
@@ -205,7 +221,7 @@
                 <xsl:variable name="value">
                     <xsl:choose>
                         <xsl:when test=".='_AUTOID_'"><xsl:value-of select="generate-id()"/></xsl:when>
-                        <xsl:otherwise><xsl:value-of select="."/></xsl:otherwise>
+                        <xsl:otherwise><xsl:call-template name="ReplaceParameters"/></xsl:otherwise>
                     </xsl:choose>
                 </xsl:variable>
                 <xsl:if test="position() &gt; 1">,</xsl:if>"<xsl:value-of select="local-name()"/>":"<xsl:value-of select="$value"/>"
@@ -227,7 +243,19 @@
                     <xsl:choose>
                         <xsl:when test=".='_AUTOID_' and $idvalue != ''"><xsl:value-of select="$idvalue"/></xsl:when>
                         <xsl:when test=".='_AUTOID_'"><xsl:value-of select="generate-id()"/></xsl:when>
-                        <xsl:otherwise><xsl:value-of select="."/></xsl:otherwise>
+                        <xsl:when test="self::*">
+                            <xsl:call-template name="ReplaceParameters">
+                                <xsl:with-param name="value">
+                                    <xsl:for-each select="text()[normalize-space(.)]">
+                                        <xsl:if test="position() &gt; 1"><xsl:text> </xsl:text></xsl:if>
+                                        <xsl:value-of select="normalize-space(.)"/>
+                                    </xsl:for-each>
+                                </xsl:with-param>
+                            </xsl:call-template>
+                        </xsl:when>
+                        <xsl:otherwise>
+                            <xsl:call-template name="ReplaceParameters"/>
+                        </xsl:otherwise>
                     </xsl:choose>
                 </xsl:variable>
                 <xsl:if test="position() &gt; 1">,</xsl:if>"<xsl:value-of select="local-name()"/>":"<xsl:value-of select="$value"/>"
@@ -247,6 +275,25 @@
             <xsl:when test="fn:base-uri(/) != ''"><xsl:value-of select="fn:resolve-uri($SourceURI,fn:base-uri(/))"/></xsl:when>
             <xsl:when test="fn:base-uri() != ''"><xsl:value-of select="fn:resolve-uri($SourceURI,fn:base-uri())"/></xsl:when>
             <xsl:otherwise><xsl:value-of select="$SourceURI"/></xsl:otherwise>
+        </xsl:choose>
+    </xsl:template>
+    
+    <xsl:template name="ReplaceParameters">
+        <xsl:param name="value" select="."/>
+        <xsl:param name="paramPos">1</xsl:param>
+        <xsl:choose>
+            <xsl:when test="count($Parameters//Parameter) > $paramPos">
+                <xsl:call-template name="ReplaceParameters">
+                    <xsl:with-param name="value" select="replace($value,concat('\$\{',$Parameters//Parameter[position() = $paramPos]/@Name,'\}'),$Parameters//Parameter[position() = $paramPos])"/>
+                    <xsl:with-param name="paramPos" select="$paramPos + 1"/>
+                </xsl:call-template>
+            </xsl:when>
+            <xsl:when test="$Parameters//Parameter[$paramPos]">
+                <xsl:value-of select="replace($value,concat('\$\{',$Parameters//Parameter[position() = $paramPos]/@Name,'\}'),$Parameters//Parameter[position() = $paramPos])"/>
+            </xsl:when>
+            <xsl:otherwise>
+                <xsl:value-of select="$value"/>
+            </xsl:otherwise>
         </xsl:choose>
     </xsl:template>
 </xsl:stylesheet>

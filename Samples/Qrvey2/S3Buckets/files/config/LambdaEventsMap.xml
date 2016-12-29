@@ -12,6 +12,17 @@
                 <Parameter Name="JobID">=${propertyid}</Parameter>
             </Parameters>
         </MatchKey>
+        <MatchKey Command="AddUserFormFromXML">
+            <RegExp><![CDATA[^Qrveys/(?<propertyid>[^/]*)/Job_StartForm_(?<userid>[^_]+)_(?<uid>[^_]+)_Config.xml$]]></RegExp>
+            <Parameters>
+                <Parameter Name="configurationURI">=s3://${S3_Bucket}/config/Qrvey${propertyid}.properties</Parameter>
+                <Parameter Name="UserID">$userid</Parameter>
+                <Parameter Name="TemplateID">$templateid</Parameter>
+                <Parameter Name="triggerFileParamsXPath">/Job/Parameters/*</Parameter>
+                <Parameter Name="JobID">=${propertyid}_${uid}</Parameter>
+                <Parameter Name="JobFile">=Qrveys/${propertyid}/Job_StartForm_${userid}_${uid}_Config.xml</Parameter>
+            </Parameters>
+        </MatchKey>
         <MatchKey Command="AddUserSurveyFromTemplate">
             <RegExp><![CDATA[^Qrveys/(?<propertyid>[^/]*)/Job_StartQrvey_(?<userid>[^_]+)_(?<templateid>[^_]+)_(?<uid>[^_]+)_Config.xml$]]></RegExp>
             <Parameters>
@@ -62,6 +73,17 @@
             <Parameters>
                 <Parameter Name="configurationURI">=s3://${S3_Bucket}/config/Qrvey${propertyid}.properties</Parameter>
                 <Parameter Name="JobID">=${propertyid}</Parameter>
+            </Parameters>
+        </MatchKey>
+        <MatchKey Command="AddUserFormFromXML">
+            <RegExp><![CDATA[^Qrveys/(?<propertyid>[^/]*)/Job_StartForm_(?<userid>[^_]+)_(?<uid>[^_]+)_Config.xml$]]></RegExp>
+            <Parameters>
+                <Parameter Name="configurationURI">=s3://${S3_Bucket}/config/Qrvey${propertyid}.properties</Parameter>
+                <Parameter Name="UserID">$userid</Parameter>
+                <Parameter Name="TemplateID">$templateid</Parameter>
+                <Parameter Name="triggerFileParamsXPath">/Job/Parameters/*</Parameter>
+                <Parameter Name="JobID">=${propertyid}_${uid}</Parameter>
+                <Parameter Name="JobFile">=Qrveys/${propertyid}/Job_StartForm_${userid}_${uid}_Config.xml</Parameter>
             </Parameters>
         </MatchKey>
         <MatchKey Command="AddUserSurveyFromTemplate">

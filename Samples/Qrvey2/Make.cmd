@@ -11,7 +11,6 @@ SET _ALLOWED_TARGETS=All Zip Templates S3Master
 REM S3Replica - not required as these are propogated by a Lambda function
 SET __APPLICATION_NAME=Installing files for ReSTFetcher Qrvey Sample
 SET _OPEN_AWS_REGION_MASTER=ap-southeast-1:apse2 
-SET _OPEN_AWS_REGIONS_REPLICA=us-east-1:usea1 us-east-2:usea2 us-west-2:uswe2 ap-northeast-1:apne1 ap-northeast-2:apne2 ap-southeast-1:apse1 eu-central-1:euce1 eu-west-1:euwe1
 SET _CLIENT_AWS_REGION_MASTER=ap-southeast-1:apse2
 SET _CLIENT_PERMISSIONS=--grants full=emailaddress=Ian_MacDonald_Hogan@yahoo.com
 SET _OPEN_PERMISSIONS=--acl public-read
@@ -140,9 +139,9 @@ REM ============================================================================
 
 PUSHD S3Buckets\files
 
-DEL "%_INSTALL_PATH%S3Buckets\opencode\au-com-thinkronicity-RestFetcher-QrveySample1-V%_VERSION%.zip"
+DEL "%_INSTALL_PATH%S3Buckets\opencode\au-com-thinkronicity-RestFetcher-QrveySample2-V%_VERSION%.zip"
 
-7za a -r -tZIP "%_INSTALL_PATH%S3Buckets\opencode\au-com-thinkronicity-RestFetcher-QrveySample1-V%_VERSION%.zip" *.*
+7za a -r -tZIP "%_INSTALL_PATH%S3Buckets\opencode\au-com-thinkronicity-RestFetcher-QrveySample2-V%_VERSION%.zip" *.*
 
 POPD
 

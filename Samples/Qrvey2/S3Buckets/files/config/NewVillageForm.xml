@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<qrvey name='New Village Registraion'>
+    <settings>
+        <properties introPage='true' emailNotifications='true' results_visibility="Private" respondent_email="Mandatory"></properties>
+        <description>Please fill out this form to register your village.</description>
+        <duration>
+            <neverExpires>true</neverExpires>
+            <from>2016-12-08T19:18:37.885Z</from>
+        </duration>
+        <thankYouPage>
+            <title>Thanks for registering your village.</title>
+            <content>Please click the link below and you will receive your registration confirmation email.</content>
+            <link>${NewVillageLink}</link>
+        </thankYouPage>
+    </settings>
+    <questions>
+        <question type='TEXTFIELD' time='10' _required='true' text='Please enter the name of your village.' maxChar='120'/>
+        <question type='SINGLE_CHOICE' time='10' _required='true' text='What is the preferred salutation for the primary contact?' otherField='true'>
+            <answer>Dr</answer>
+            <answer>Mr</answer>
+            <answer>Mrs</answer>
+            <answer>Ms</answer>
+        </question>
+        <question type='NAME' time='10' _required='true' text="Please enter the primary contact's name."/>
+        <question type='EMAIL' time='10' _required='true' text="Please enter the primary contact's email address."/>
+        <question type="YES_NO" time='2' _required='true' text='Do you want to register a second contact?'>
+            <answer>Yes
+                <route>
+                    <question type='SINGLE_CHOICE' time='10' _required='true' text='What is the preferred salutation for the second resident?' otherField='true'>
+                        <answer>Dr</answer>
+                        <answer>Mr</answer>
+                        <answer>Mrs</answer>
+                        <answer>Ms</answer>
+                    </question>
+                    <question type='NAME' time='10' _required='true' text="Please enter the first resident's name."/>
+                    <question type='EMAIL' time='10' _required='true' text="Please enter the second resident's email address."/>
+                    <question type="YES_NO" time='2' _required='true' text='Is there a third resident?'>
+                        <answer>Yes
+                            <route>
+                                <question type='SINGLE_CHOICE' time='10' _required='true' text='What is the preferred salutation for the third resident?' otherField='true'>
+                                    <answer>Dr</answer>
+                                    <answer>Mr</answer>
+                                    <answer>Mrs</answer>
+                                    <answer>Ms</answer>
+                                </question>
+                                <question type='NAME' time='10' _required='true' text="Please enter the third resident's name."/>
+                                <question type='EMAIL' time='10' _required='true' text="Please enter the first resident's email address."/>
+                            </route>
+                        </answer>
+                        <answer>No</answer>
+                    </question>
+                </route>
+            </answer>
+            <answer>No</answer>
+        </question>
+        <question type='NUMERIC' time='3' _required='true' text='Please enter the number of units in your village.' allowDecimals='false' hasMinMax='true' min='1' max='500' numberType='Number'/>
+    </questions>
+</qrvey>

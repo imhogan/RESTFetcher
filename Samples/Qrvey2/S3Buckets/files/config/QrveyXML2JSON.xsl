@@ -18,7 +18,7 @@
     <xd:doc>
         <xd:desc>Debug flag.</xd:desc>
     </xd:doc>
-    <xsl:param name="Debug">Y</xsl:param>
+    <xsl:param name="Debug">N</xsl:param>
         
     <xsl:param name="StyleUser">ss</xsl:param>
     <xsl:param name="QrveyUser">qq</xsl:param>

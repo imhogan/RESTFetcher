@@ -17,6 +17,111 @@
             </Action>
         </Actions>
     </Command>
+    <Command Name="InitSystem" Verb="POST" IsJSON="true">
+        <Headers>
+            <Header Name="x-api-key">$API_KEY</Header>
+        </Headers>
+        <Parameters>
+            <Parameter Name="entity">user</Parameter>
+        </Parameters>
+        <Body>=
+            {
+            "email": "${UserEmail}",
+            "password": "${UserPassword}",
+            "first_name": "${UserFirstname}",
+            "last_name": "${UserLastname}",
+            "organization": "${UserOrganisation}"
+            }
+        </Body>
+        <Actions>
+            <Action Type="S3PUT" Mode="debug">
+                <Parameters>
+                    <Parameter Name="Bucket">$S3_Bucket</Parameter>
+                    <Parameter Name="Name">=${REST_Log_Path}/AddUser${JobID}.xml</Parameter>
+                </Parameters>
+            </Action>
+            <Action Type="S3PUT">
+                <Parameters>
+                    <Parameter Name="Bucket">$S3_Bucket</Parameter>
+                    <Parameter Name="Name">=config/UserDetails${JobID}.xml</Parameter>
+                    <Parameter Name="UserID" XPath="//userid"/>
+                </Parameters>
+                <Body ContentType="application/xml"><![CDATA[=
+                    <Parameters>
+                        <Parameter Name="UserID">${UserID}</Parameter>
+                        <Parameter Name="email">${UserEmail}</Parameter>
+                        <Parameter Name="password">${UserPassword}</Parameter>
+                        <Parameter Name="first_name">${UserFirstname}</Parameter>
+                        <Parameter Name="last_name">${UserLastname}</Parameter>
+                        <Parameter Name="organization">${UserOrganisation}</Parameter>
+                    </Parameters>
+                ]]></Body>
+            </Action>
+            <Action Type="S3PUT">
+                <Parameters>
+                    <Parameter Name="Bucket">$S3_Bucket</Parameter>
+                    <Parameter Name="Name">=www/${JobID}/config.xml</Parameter>
+                    <Parameter Name="ACL">PublicRead</Parameter>
+                    <Parameter Name="UserID" XPath="//userid"/>
+                </Parameters>
+                <Body ContentType="application/xml"><![CDATA[=
+                    <Parameters>
+                        <Parameter Name="UserID">${UserID}</Parameter>
+                    </Parameters>
+                ]]></Body>
+            </Action>
+            <Action Type="AddResult">
+                <Parameters>
+                    <Parameter Name="UserID" XPath="//userid"/>
+                    <Parameter Name="Result">=Added user ${UserID}</Parameter>
+                </Parameters>
+            </Action>
+            <Action Type="Command" Command="AddVillageSignupQrvey">
+                <Parameters>
+                    <Parameter Name="UserID" XPath="//userid"/>
+                </Parameters>
+            </Action>
+        </Actions>
+    </Command>
+    <Command Name="AddVillageSignupQrvey" IsNOP="true">
+        <Actions>
+            <Action Type="XSLT2">
+                <Parameters>
+                    <Parameter Name="Transform" Function="S3URL">=${S3_Bucket},config/CopyURL.xslt,3600</Parameter>
+                    <Parameter Name="SourceURI" Function="S3URL">=${S3_Bucket},config/NewVillageForm.xml,3600</Parameter>
+                </Parameters>
+                <Actions>
+                    <Action Type="XSLT2" XSLTOutputIsText="true">
+                        <Parameters>
+                            <Parameter Name="Transform" Function="S3URL">=${S3_Bucket},config/QrveyXML2JSON.xsl,3600</Parameter>
+                            <Parameter Name="StylesURI" Function="S3URL">=${S3_Bucket},config/QrveyStyles.xml,3600</Parameter>
+                            <Parameter Name="ParametersListURI" Function="S3URL">=${S3_Bucket},config/NewVillageForm_Parameters_${JobID}.xml,3600</Parameter>
+                            <Parameter Name="QrveyUser">$UserID</Parameter>
+                            <Parameter Name="StyleUser">$UserID</Parameter>
+                            <Parameter Name="Bucket">$S3_Bucket</Parameter>
+                            <Parameter Name="Name">=${REST_Log_Path}/VillageSignupSurvey_${JobID}.json</Parameter>
+                            <Parameter Name="ContentType">application/json</Parameter>
+                        </Parameters>
+                        <Actions>
+                            <Action Type="S3PUT" Mode="debug">
+                                <Parameters>
+                                    <Parameter Name="Bucket">$S3_Bucket</Parameter>
+                                    <Parameter Name="Name">=${REST_Log_Path}/SignupSurvey_${JobID}.xml</Parameter>
+                                </Parameters>
+                            </Action>
+                            <Action Type="Command" Command="AddSurveyFromJSON">
+                                <Parameters>
+                                    <Parameter Name="SurveyType">survey</Parameter>
+                                    <Parameter Name="JSONURL" Function="S3URL">=${S3_Bucket},${REST_Log_Path}/VillageSignupSurvey_${JobID}.json,3600</Parameter>
+                                    <Parameter Name="Recipients_File">config/VillageDetails.xml</Parameter>
+                                </Parameters>
+                            </Action>
+                        </Actions>
+                    </Action>
+                </Actions>
+            </Action>
+        </Actions>
+    </Command>
     <Command Name="AddNewResidentForm" IsNOP="true">
         <Actions>
             <Action Type="XSLT2">
@@ -177,6 +282,22 @@
                     <Parameter Name="Bucket">$S3_Bucket</Parameter>
                     <Parameter Name="Name">=${REST_Log_Path}/AddUser${JobID}.xml</Parameter>
                 </Parameters>
+            </Action>
+            <Action Type="S3PUT">
+                <Parameters>
+                    <Parameter Name="Bucket">$S3_Bucket</Parameter>
+                    <Parameter Name="Name">=config/UserDetails${JobID}.xml</Parameter>
+                    <Parameter Name="UserID" XPath="//userid"/>
+                </Parameters>
+                <Body ContentType="application/xml"><![CDATA[=
+                    <User ID="${UserID}"$>
+                        <email>${UserEmail}</email>
+                        <password>${UserPassword}</password>
+                        <first_name>${UserFirstname}</first_name>
+                        <last_name>${UserLastname}</last_name>
+                        <organization>${UserOrganisation}</organization>
+                    </User>
+                ]]></Body>
             </Action>
             <Action Type="AddResult">
                 <Parameters>
@@ -354,11 +475,12 @@
                             <Parameter Name="Name">=${REST_Log_Path}/EmailListTest${JobID}.xml</Parameter>
                         </Parameters>
                     </Action>
-                    <Action Type="eMail" Match="/Emails/Email">
+                    <Action Type="eMail" Match="//Emails/Email">
                         <Parameters>
                             <Parameter Name="From">$EmailSender</Parameter>
                             <Parameter Name="Name">$EmailSenderName</Parameter>
                             <Parameter Name="To" XPath="To"/>
+                            <Parameter Name="BCC">$EmailSender</Parameter>
                             <Parameter Name="Subject">=${QrveyName} link details.</Parameter>
                             <Parameter Name="Salutation" XPath="Salutation"/>
                             <Parameter Name="Firstname" XPath="Firstname"/>
@@ -540,6 +662,33 @@ var ResultsConfig = {
             <Action Type="AddResult">
                 <Parameters>
                     <Parameter Name="Result">=Fetched templates to ${REST_Log_Path}/ListTemplates${JobID}.xml</Parameter>
+                </Parameters>
+            </Action>
+        </Actions>
+    </Command>
+    <Command Name="PostProcessNewVillageQrvey" Verb="POST" IsJSON="true">
+        <!-- TODO: For each signup entry after the last processed date, generate the village qrveys and forms, and send details to the given email address(es). -->
+        <Headers>
+            <Header Name="x-api-key">$API_KEY</Header>
+        </Headers>
+        <Parameters>
+            <Parameter Name="entity">user</Parameter>
+            <Parameter Name="userid">$UserID</Parameter>
+            <Parameter Name="subentity">qrvey</Parameter>
+            <Parameter Name="surveyid">$QrveyID</Parameter>
+            <Parameter Name="operation">answers</Parameter>
+        </Parameters>
+        <Body></Body>
+        <Actions>
+            <Action Type="S3PUT">
+                <Parameters>
+                    <Parameter Name="Bucket">$S3_Bucket</Parameter>
+                    <Parameter Name="Name">=${REST_Log_Path}/QrveyAnswers${JobID}_${QrveyID}.xml</Parameter>
+                </Parameters>
+            </Action>
+            <Action Type="AddResult">
+                <Parameters>
+                    <Parameter Name="Result">=Fetched results of qrvey ${QrveyID} to ${REST_Log_Path}/QrveyAnswers${JobID}_${QrveyID}.xml</Parameter>
                 </Parameters>
             </Action>
         </Actions>

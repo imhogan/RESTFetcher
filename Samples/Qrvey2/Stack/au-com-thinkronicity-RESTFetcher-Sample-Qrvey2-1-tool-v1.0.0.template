@@ -40,11 +40,6 @@
         "false"
       ],
       "Default": "true"
-    },
-    "SystemName": {
-      "Description": "System name.",
-      "Type": "String",
-      "Default": "Our Village Services"
     }
   },
   "Mappings": {

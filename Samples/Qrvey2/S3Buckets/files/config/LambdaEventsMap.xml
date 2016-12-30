@@ -5,7 +5,7 @@
     xsi:schemaLocation="http://THINKronicity.com.au/Schemas/Smirnov/RestFetcherCommands.xsd https://github.com/imhogan/RESTFetcher/raw/master/Schemas/RestFetcherCommands.xsd"
     >
     <LambdaEvent Event="aws:s3:ObjectCreated:Copy">
-        <MatchKey Command="AddUser">
+        <MatchKey Command="InitSystem">
             <RegExp><![CDATA[^config/Qrvey(?<propertyid>[^.]*).properties$]]></RegExp>
             <Parameters>
                 <Parameter Name="configurationURI">=s3://${S3_Bucket}/config/Qrvey${propertyid}.properties</Parameter>
@@ -68,7 +68,7 @@
         </MatchKey>
     </LambdaEvent>
     <LambdaEvent Event="aws:s3:ObjectCreated:Put">
-        <MatchKey Command="AddUser">
+        <MatchKey Command="InitSystem">
             <RegExp><![CDATA[^config/Qrvey(?<propertyid>[^.]*).properties$]]></RegExp>
             <Parameters>
                 <Parameter Name="configurationURI">=s3://${S3_Bucket}/config/Qrvey${propertyid}.properties</Parameter>

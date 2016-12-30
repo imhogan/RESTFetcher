@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+    <head>
+        <title>Post processing trigger page.</title>
+        <script type="application/javascript" src="config.js"></script>
+        <script type="application/javascript">//<![CDATA[
+/**
+ * Get the value of a querystring
+ * @param  {String} field The field to get the value of
+ * @param  {String} url   The URL to get the value from (optional)
+ * @return {String}       The field value
+ */
+function getQueryString( field, url ) {
+    var href = url ? url : window.location.href;
+    var reg = new RegExp( '[?&]' + field + '=([^&#]*)', 'i' );
+    var string = reg.exec(href);
+    return string ? string[1] : null;
+};
+
+function loadXMLDocument(dname) {
+    var xhttp = null;
+    if (window.XMLHttpRequest)
+      {
+      xhttp=new XMLHttpRequest();
+      }
+    else
+      {
+      xhttp=new ActiveXObject("Microsoft.XMLHTTP");
+      }
+      
+    if (xhttp) {
+        xhttp.open("GET",dname,false);
+        try {xhttp.responseType="msxml-document"} catch(err) {} // Helping IE
+        xhttp.send("");
+    }
+    return xhttp;
+}
+
+function getConfig(xml) {
+
+     var result = {};
+	  var xmlDoc = xml.responseXML;
+	  
+	  var paramNodes = null;
+	  var xpath = "//Parameters/Parameter";
+	  
+	 /* if (typeof xmlDoc.selectNodes === 'function') {
+	  	  var respondent = xmlDoc.selectNodes(xpath);
+		  if (respondent.length === 1) {
+			  
+			  respondentNode = respondent[0];
+		  }
+		  else {
+		  	  log(" found "+respondent.length+" nodes!");
+			  return;
+		  }
+	  }*/
+	if (window.ActiveXObject || xml.responseType=="msxml-document")
+	{
+		xmlDoc.setProperty("SelectionLanguage","XPath");
+	  
+	  	  var paramNodes = xmlDoc.selectNodes(xpath);
+	  	  
+	  	  for (var p=0; p<paramNodes.length; p++) {
+	  	    result[paramNodes[p].getAttribute('Name')] = paramNodes[p].childNodes[0].nodeValue;
+	  	  }
+		  
+	}
+	  else if (typeof xmlDoc.evaluate === 'function') {
+	  	  var paramNodes = xmlDoc.evaluate(xpath, xmlDoc, null, XPathResult.ANY_TYPE, null);
+	  	  
+	  	  var paramNode = paramNodes.iterateNext();
+	  	  
+	  	  while (paramNode) {
+	  	    result[paramNode.getAttribute('Name')] = paramNode.childNodes[0].nodeValue;
+	  	    paramNode = paramNodes.iterateNext();
+	  	  }
+	  	  
+	  }
+    return result;	  
+}
+
+ var xmlhttp = new XMLHttpRequest();
+
+ var redirect = 'TriggerFired.html';
+
+ xmlhttp.onreadystatechange = function() {
+
+ if (xmlhttp.readyState == 4 && xmlhttp.status == 200 && redirect != '') {
+
+ location.href=redirect;
+
+ }
+
+ };
+ 
+ var myConfig = getConfig(loadXMLDocument("config.xml"));
+ // initial url and project come from config.js, and userid comes from config.xml
+ url += myConfig.UserID+'/';
+ url += '?project='+project;
+ // qrveyid and form are fetched from the referrer querystrings and current page querystrings respectively.
+ url += '&qrveyid='+getQueryString('q',document.referrer);
+ url += '&form='+getQueryString('f');
+
+ xmlhttp.open("GET", url, true);
+
+ xmlhttp.send();
+
+//]]>
+
+</script>
+    </head>
+    <body>
+   <p>Processing your request, please wait ...</p>     
+    </body>
+</html>

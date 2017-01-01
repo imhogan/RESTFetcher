@@ -148,7 +148,7 @@
         "S3PutFileKey": {
             "Description": "Zip file for S3 Put File function",
             "Type": "String",
-            "Default": "au-com-thinkronicity-PutS3File-V1.0.zip"
+            "Default": "au-com-thinkronicity-PutS3File-V1.1.zip"
         },
         "SystemName": {
           "Description": "System name.",
@@ -500,13 +500,13 @@
                 ]},
                 "Source": {
                     "filetext": {"Fn::Join": [
-                        "\n",
+                        "",
                         [
-                        "<Parameters><Parameter Name='NewVillageLink'>",
-                        "https://s3-",
-                        {"Ref": "AWS::Region"},
-                        ".amazonaws.com/${S3_Bucket}/www/2/StartPostProcess.html?f=NewVillageQrvey",
-                        "</Parameter></Parameters>"
+                            "<Parameters><Parameter Name='NewVillageLink'>https://s3-",
+                            {"Ref": "AWS::Region"},
+                            ".amazonaws.com/",
+                            {"Fn::ImportValue" : {"Fn::Sub" : "${ProjectToolsStack}-AccessProjectS3FilesBucket"}},
+                            "/www/2/StartPostProcess.html?f=NewVillageQrvey</Parameter></Parameters>"
                         ]
                     ]},
                     "contentType": "application/xml"
@@ -537,11 +537,38 @@
                 "Target": {
                     "Bucket": {"Fn::ImportValue" : {"Fn::Sub" : "${ProjectToolsStack}-AccessProjectS3FilesBucket"}},
                     "Key": "www/2/StartPostProcess.html",
-                    "ACL": "public-read"
+                    "ACL": "public-read",
+                    "contentType": "text/html"
                 },
                 "Debug": "true"
             },
             "DependsOn": ["SaveParametersForVillageSignup"]
+        },
+        "CreatePostProcessTriggerFired": {
+            "Type": "Custom::S3FilePut",
+            "Properties": {
+                "ServiceToken": {"Fn::GetAtt": [
+                    "S3PutFileLambda",
+                    "Arn"
+                ]},
+                "Source": {
+                    "S3Url":{"Fn::Join": [
+                                "",
+                                [
+                                    {"Fn::ImportValue" : {"Fn::Sub" : "${ProjectToolsStack}-AccessProjectS3FilesBucket"}},
+                                    "/www/TriggerFired.html"
+                                ]
+                            ]}
+                },
+                "Target": {
+                    "Bucket": {"Fn::ImportValue" : {"Fn::Sub" : "${ProjectToolsStack}-AccessProjectS3FilesBucket"}},
+                    "Key": "www/2/TriggerFired.html",
+                    "ACL": "public-read",
+                    "contentType": "text/html"
+                },
+                "Debug": "true"
+            },
+            "DependsOn": ["CreatePostProcessTrigger"]
         },
         "SaveConfigForPostProcessTrigger": {
             "Type": "Custom::S3FilePut",

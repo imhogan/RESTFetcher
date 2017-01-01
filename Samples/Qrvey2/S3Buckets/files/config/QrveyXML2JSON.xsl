@@ -284,12 +284,12 @@
         <xsl:choose>
             <xsl:when test="count($Parameters//Parameter) > $paramPos">
                 <xsl:call-template name="ReplaceParameters">
-                    <xsl:with-param name="value" select="replace($value,concat('\$\{',$Parameters//Parameter[position() = $paramPos]/@Name,'\}'),$Parameters//Parameter[position() = $paramPos])"/>
+                    <xsl:with-param name="value" select="replace($value,concat('[\$]\{',$Parameters//Parameter[position() = $paramPos]/@Name,'\}'),normalize-space($Parameters//Parameter[position() = $paramPos]))"/>
                     <xsl:with-param name="paramPos" select="$paramPos + 1"/>
                 </xsl:call-template>
             </xsl:when>
             <xsl:when test="$Parameters//Parameter[$paramPos]">
-                <xsl:value-of select="replace($value,concat('\$\{',$Parameters//Parameter[position() = $paramPos]/@Name,'\}'),$Parameters//Parameter[position() = $paramPos])"/>
+                <xsl:value-of select="replace($value,concat('[\$]\{',$Parameters//Parameter[position() = $paramPos]/@Name,'\}'),normalize-space($Parameters//Parameter[position() = $paramPos]))"/>
             </xsl:when>
             <xsl:otherwise>
                 <xsl:value-of select="$value"/>

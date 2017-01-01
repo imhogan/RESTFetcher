@@ -120,7 +120,7 @@
         }
     ,"totalQuestions": 6,"results_visibility": "Private","respondent_email": "Mandatory","emailNotifications": true,"thankYouPage": {"title":"Thanks for registering your village."
             ,"content":"Please click the link below and you will receive your registration confirmation email."
-            ,"link":"${NewResidentsLink}"
+            ,"link":"SomeVillageLink"
             },"duration": {"neverExpires":"true"
             ,"from":"2016-12-08T19:18:37.885Z"
-            },"debug":{"StylesAbsURI": "file:/D:/Users/Ian/Documents/SoleTrader/MAMAS/github/RESTFetcher/Samples/Qrvey2/S3Buckets/files/config/QrveyStyles.xml","fn:doc-available(StylesAbsURI)": "T","test2": "1","parameters": [{"NewResidentsLink":"SomeLink"}]}}
+            }}

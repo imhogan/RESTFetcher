@@ -21,30 +21,30 @@
             <answer>Mrs</answer>
             <answer>Ms</answer>
         </question>
-        <question type='NAME' time='10' _required='true' text="Please enter the primary contact's name."/>
-        <question type='EMAIL' time='10' _required='true' text="Please enter the primary contact's email address."/>
+        <question type='TEXTFIELD' time='10' _required='true' text="Please enter the primary contact's name."/>
+        <question type='TEXTFIELD' time='10' _required='true' text="Please enter the primary contact's email address."/>
         <question type="YES_NO" time='2' _required='true' text='Do you want to register a second contact?'>
             <answer>Yes
                 <route>
-                    <question type='SINGLE_CHOICE' time='10' _required='true' text='What is the preferred salutation for the second resident?' otherField='true'>
+                    <question type='SINGLE_CHOICE' time='10' _required='true' text='What is the preferred salutation for the second contact?' otherField='true'>
                         <answer>Dr</answer>
                         <answer>Mr</answer>
                         <answer>Mrs</answer>
                         <answer>Ms</answer>
                     </question>
-                    <question type='NAME' time='10' _required='true' text="Please enter the first resident's name."/>
-                    <question type='EMAIL' time='10' _required='true' text="Please enter the second resident's email address."/>
-                    <question type="YES_NO" time='2' _required='true' text='Is there a third resident?'>
+                    <question type='TEXTFIELD' time='10' _required='true' text="Please enter the second contact's name."/>
+                    <question type='TEXTFIELD' time='10' _required='true' text="Please enter the second contact's email address."/>
+                    <question type="YES_NO" time='2' _required='true' text='Is there a third contact?'>
                         <answer>Yes
                             <route>
-                                <question type='SINGLE_CHOICE' time='10' _required='true' text='What is the preferred salutation for the third resident?' otherField='true'>
+                                <question type='SINGLE_CHOICE' time='10' _required='true' text='What is the preferred salutation for the third contact?' otherField='true'>
                                     <answer>Dr</answer>
                                     <answer>Mr</answer>
                                     <answer>Mrs</answer>
                                     <answer>Ms</answer>
                                 </question>
-                                <question type='NAME' time='10' _required='true' text="Please enter the third resident's name."/>
-                                <question type='EMAIL' time='10' _required='true' text="Please enter the first resident's email address."/>
+                                <question type='TEXTFIELD' time='10' _required='true' text="Please enter the third contact's name."/>
+                                <question type='TEXTFIELD' time='10' _required='true' text="Please enter the third contact's email address."/>
                             </route>
                         </answer>
                         <answer>No</answer>

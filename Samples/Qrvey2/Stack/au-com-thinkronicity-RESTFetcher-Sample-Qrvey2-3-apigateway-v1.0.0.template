@@ -148,7 +148,7 @@
         "S3PutFileKey": {
             "Description": "Zip file for S3 Put File function",
             "Type": "String",
-            "Default": "au-com-thinkronicity-PutS3File-V1.1.zip"
+            "Default": "au-com-thinkronicity-PutS3File-V1.2.zip"
         },
         "SystemName": {
           "Description": "System name.",

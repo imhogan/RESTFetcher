@@ -453,16 +453,12 @@
                 </Parameters>
             </Action>
             <Action Type="S3PUT">
-                <!-- Note: QrveyID is not included in the SurveyURL, so we get the q request variable (qid) from the SurveyURL.
+                <!-- Note: QrveyID is not included in the SurveyURL, so we get the q request variable (qid) from the lookupID value.
                      This is stored in an XML file named "qid.xml". This is used by the start process page to get the QrveyID-->
                 <Parameters>
-                    <Parameter Name="SurveyURL" XPath=".">
-                        <!-- Note: RegExp parameters are named ParameterName.RegExpCaptureGroupName,
-                             so this parameter will be named SurveyURL.qid -->
-                        <RegExp><![CDATA[^https://io.qrvey.com/q/(?<qid>.+)$]]></RegExp>
-                    </Parameter>
+                    <Parameter Name="qid" XPath="//lookupID"/>
                     <Parameter Name="Bucket">$S3_Bucket</Parameter>
-                    <Parameter Name="Name">=www/${JobID}/${SurveyURL.qid}.xml</Parameter>
+                    <Parameter Name="Name">=www/${JobID}/${qid}.xml</Parameter>
                     <Parameter Name="ACL">PublicRead</Parameter>
                 </Parameters>
                 <Body ContentType="application/xml"><![CDATA[=

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<qrvey name='New Village Registraion'>
+<qrvey name='New Village Registration'>
     <settings>
         <properties introPage='true' emailNotifications='true' results_visibility="Private" respondent_email="Mandatory"></properties>
         <description>Please fill out this form to register your village.</description>
@@ -14,37 +14,37 @@
         </thankYouPage>
     </settings>
     <questions>
-        <question type='TEXTFIELD' time='10' _required='true' text='Please enter the name of your village.' maxChar='120'/>
-        <question type='SINGLE_CHOICE' time='10' _required='true' text='What is the preferred salutation for the primary contact?' otherField='true'>
+        <question id='village_name' type='TEXTFIELD' time='10' _required='true' text='Please enter the name of your village.' maxChar='120'/>
+        <question id='contact1_salutation' type='SINGLE_CHOICE' time='10' _required='true' text='What is the preferred salutation for the primary contact?' otherField='true'>
             <answer>Dr</answer>
             <answer>Mr</answer>
             <answer>Mrs</answer>
             <answer>Ms</answer>
         </question>
-        <question type='TEXTFIELD' time='10' _required='true' text="Please enter the primary contact's name."/>
-        <question type='TEXTFIELD' time='10' _required='true' text="Please enter the primary contact's email address."/>
-        <question type="YES_NO" time='2' _required='true' text='Do you want to register a second contact?'>
+        <question id='contact1_name' type='TEXTFIELD' time='10' _required='true' text="Please enter the primary contact's name."/>
+        <question id='contact1_email' type='TEXTFIELD' time='10' _required='true' text="Please enter the primary contact's email address."/>
+        <question id='contact2' type="YES_NO" time='2' _required='true' text='Do you want to register a second contact?'>
             <answer>Yes
                 <route>
-                    <question type='SINGLE_CHOICE' time='10' _required='true' text='What is the preferred salutation for the second contact?' otherField='true'>
+                    <question id='contact2_salutation' type='SINGLE_CHOICE' time='10' _required='true' text='What is the preferred salutation for the second contact?' otherField='true'>
                         <answer>Dr</answer>
                         <answer>Mr</answer>
                         <answer>Mrs</answer>
                         <answer>Ms</answer>
                     </question>
-                    <question type='TEXTFIELD' time='10' _required='true' text="Please enter the second contact's name."/>
-                    <question type='TEXTFIELD' time='10' _required='true' text="Please enter the second contact's email address."/>
-                    <question type="YES_NO" time='2' _required='true' text='Is there a third contact?'>
+                    <question id='contact2_name' type='TEXTFIELD' time='10' _required='true' text="Please enter the second contact's name."/>
+                    <question id='contact2_email' type='TEXTFIELD' time='10' _required='true' text="Please enter the second contact's email address."/>
+                    <question id='contact3' type="YES_NO" time='2' _required='true' text='Is there a third contact?'>
                         <answer>Yes
                             <route>
-                                <question type='SINGLE_CHOICE' time='10' _required='true' text='What is the preferred salutation for the third contact?' otherField='true'>
+                                <question id='contact3_salutation' type='SINGLE_CHOICE' time='10' _required='true' text='What is the preferred salutation for the third contact?' otherField='true'>
                                     <answer>Dr</answer>
                                     <answer>Mr</answer>
                                     <answer>Mrs</answer>
                                     <answer>Ms</answer>
                                 </question>
-                                <question type='TEXTFIELD' time='10' _required='true' text="Please enter the third contact's name."/>
-                                <question type='TEXTFIELD' time='10' _required='true' text="Please enter the third contact's email address."/>
+                                <question id='contact3_name' type='TEXTFIELD' time='10' _required='true' text="Please enter the third contact's name."/>
+                                <question id='contact3_email' type='TEXTFIELD' time='10' _required='true' text="Please enter the third contact's email address."/>
                             </route>
                         </answer>
                         <answer>No</answer>
@@ -53,6 +53,6 @@
             </answer>
             <answer>No</answer>
         </question>
-        <question type='NUMERIC' time='3' _required='true' text='Please enter the number of units in your village.' allowDecimals='false' hasMinMax='true' min='1' max='500' numberType='Number'/>
+        <question id='village_units' type='NUMERIC' time='3' _required='true' text='Please enter the number of units in your village.' allowDecimals='false' hasMinMax='true' min='1' max='500' numberType='Number'/>
     </questions>
 </qrvey>

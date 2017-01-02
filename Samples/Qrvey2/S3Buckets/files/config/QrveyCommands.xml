@@ -452,6 +452,25 @@
                     <Parameter Name="Result">=Activated qrvey ${QrveyID} for user ${UserID} - URL is ${SurveyURL}</Parameter>
                 </Parameters>
             </Action>
+            <Action Type="S3PUT">
+                <!-- Note: QrveyID is not included in the SurveyURL, so we get the q request variable (qid) from the SurveyURL.
+                     This is stored in an XML file named "qid.xml". This is used by the start process page to get the QrveyID-->
+                <Parameters>
+                    <Parameter Name="SurveyURL" XPath=".">
+                        <!-- Note: RegExp parameters are named ParameterName.RegExpCaptureGroupName,
+                             so this parameter will be named SurveyURL.qid -->
+                        <RegExp><![CDATA[^https://io.qrvey.com/q/(?<qid>.+)$]]></RegExp>
+                    </Parameter>
+                    <Parameter Name="Bucket">$S3_Bucket</Parameter>
+                    <Parameter Name="Name">=www/${JobID}/${SurveyURL.qid}.xml</Parameter>
+                    <Parameter Name="ACL">PublicRead</Parameter>
+                </Parameters>
+                <Body ContentType="application/xml"><![CDATA[=
+                    <Parameters>
+                        <Parameter Name="QrveyID">${QrveyID}</Parameter>
+                    </Parameters>
+                ]]></Body>
+            </Action>
             <Action Type="Command" Command="SendSignupLinks" Match="//url">
                 <Parameters>
                     <Parameter Name="SurveyURL" XPath="."/>
@@ -608,12 +627,12 @@ var ResultsConfig = {
             <Action Type="S3PUT">
                 <Parameters>
                     <Parameter Name="Bucket">$S3_Bucket</Parameter>
-                    <Parameter Name="Name">=${REST_Log_Path}/QrveyResults${JobID}_${QrveyID}.xml</Parameter>
+                    <Parameter Name="Name">=${REST_Log_Path}/QrveyResults_${JobID}_${QrveyID}.xml</Parameter>
                 </Parameters>
             </Action>
             <Action Type="AddResult">
                 <Parameters>
-                    <Parameter Name="Result">=Fetched results of qrvey ${QrveyID} to ${REST_Log_Path}/QrveyResults${JobID}_${QrveyID}.xml</Parameter>
+                    <Parameter Name="Result">=Fetched results of qrvey ${QrveyID} to ${REST_Log_Path}/QrveyResults_${JobID}_${QrveyID}.xml</Parameter>
                 </Parameters>
             </Action>
         </Actions>
@@ -634,12 +653,12 @@ var ResultsConfig = {
             <Action Type="S3PUT">
                 <Parameters>
                     <Parameter Name="Bucket">$S3_Bucket</Parameter>
-                    <Parameter Name="Name">=${REST_Log_Path}/QrveyAnswers${JobID}_${QrveyID}.xml</Parameter>
+                    <Parameter Name="Name">=${REST_Log_Path}/QrveyAnswers_${JobID}_${QrveyID}.xml</Parameter>
                 </Parameters>
             </Action>
             <Action Type="AddResult">
                 <Parameters>
-                    <Parameter Name="Result">=Fetched results of qrvey ${QrveyID} to ${REST_Log_Path}/QrveyAnswers${JobID}_${QrveyID}.xml</Parameter>
+                    <Parameter Name="Result">=Fetched results of qrvey ${QrveyID} to ${REST_Log_Path}/QrveyAnswers_${JobID}_${QrveyID}.xml</Parameter>
                 </Parameters>
             </Action>
         </Actions>
@@ -683,12 +702,64 @@ var ResultsConfig = {
             <Action Type="S3PUT">
                 <Parameters>
                     <Parameter Name="Bucket">$S3_Bucket</Parameter>
-                    <Parameter Name="Name">=${REST_Log_Path}/QrveyAnswers${JobID}_${QrveyID}.xml</Parameter>
+                    <Parameter Name="Name">=${REST_Log_Path}/QrveyAnswers_${JobID}_${QrveyID}.xml</Parameter>
                 </Parameters>
             </Action>
             <Action Type="AddResult">
                 <Parameters>
-                    <Parameter Name="Result">=Fetched results of qrvey ${QrveyID} to ${REST_Log_Path}/QrveyAnswers${JobID}_${QrveyID}.xml</Parameter>
+                    <Parameter Name="Result">=Fetched results of qrvey ${QrveyID} to ${REST_Log_Path}/QrveyAnswers_${JobID}_${QrveyID}.xml</Parameter>
+                </Parameters>
+            </Action>
+        </Actions>
+    </Command>
+    <Command Name="PostProcessNewVillageQrvey2" Verb="POST" IsJSON="true" UseJSON2SafeXML="true">
+        <Headers>
+            <Header Name="x-api-key">$API_KEY</Header>
+        </Headers>
+        <Parameters>
+            <Parameter Name="entity">user</Parameter>
+            <Parameter Name="userid">$UserID</Parameter>
+            <Parameter Name="subentity">qrvey</Parameter>
+            <Parameter Name="surveyid">$QrveyID</Parameter>
+            <Parameter Name="operation">results</Parameter>
+        </Parameters>
+        <Body></Body>
+        <Actions>
+            <Action Type="S3PUT">
+                <Parameters>
+                    <Parameter Name="Bucket">$S3_Bucket</Parameter>
+                    <Parameter Name="Name">=${REST_Log_Path}/QrveyResults_${JobID}_${QrveyID}.xml</Parameter>
+                </Parameters>
+            </Action>
+            <Action Type="AddResult">
+                <Parameters>
+                    <Parameter Name="Result">=Fetched results of qrvey ${QrveyID} to ${REST_Log_Path}/QrveyResults_${JobID}_${QrveyID}.xml</Parameter>
+                </Parameters>
+            </Action>
+        </Actions>
+    </Command>
+    <Command Name="PostProcessNewVillageQrvey3" Verb="GET" IsJSON="true" UseJSON2SafeXML="true">
+        <!-- TODO: For each signup entry after the last processed date, generate the village qrveys and forms, and send details to the given email address(es). -->
+        <Headers>
+            <Header Name="x-api-key">$API_KEY</Header>
+        </Headers>
+        <Parameters>
+            <Parameter Name="entity">user</Parameter>
+            <Parameter Name="userid">$UserID</Parameter>
+            <Parameter Name="subentity">survey</Parameter>
+            <Parameter Name="surveyid">$QrveyID</Parameter>
+            <Parameter Name="operation">results</Parameter>
+        </Parameters>
+        <Actions>
+            <Action Type="S3PUT">
+                <Parameters>
+                    <Parameter Name="Bucket">$S3_Bucket</Parameter>
+                    <Parameter Name="Name">=${REST_Log_Path}/QrveyAnswers_${JobID}_${QrveyID}.xml</Parameter>
+                </Parameters>
+            </Action>
+            <Action Type="AddResult">
+                <Parameters>
+                    <Parameter Name="Result">=Fetched results of qrvey ${QrveyID} to ${REST_Log_Path}/QrveyAnswers_${JobID}_${QrveyID}.xml</Parameter>
                 </Parameters>
             </Action>
         </Actions>

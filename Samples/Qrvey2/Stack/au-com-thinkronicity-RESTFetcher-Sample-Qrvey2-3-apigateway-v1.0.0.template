@@ -452,7 +452,7 @@
         "LambdaInvokePermission": {
           "Type": "AWS::Lambda::Permission",
           "Properties": {
-            "FunctionName" : {"Fn::ImportValue" : {"Fn::Sub" : "${ProjectToolsStack}-S3TriggerLambdaArn"}},
+            "FunctionName" : {"Fn::ImportValue" : {"Fn::Sub" : "${ProjectToolsStack}-RESTFetcherLambdaArn"}},
             "Action": "lambda:InvokeFunction",
             "Principal": "apigateway.amazonaws.com",
             "SourceArn": {"Fn::Join": [

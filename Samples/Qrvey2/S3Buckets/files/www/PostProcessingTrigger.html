@@ -4,113 +4,152 @@
         <title>Post processing trigger page.</title>
         <script type="application/javascript" src="config.js"></script>
         <script type="application/javascript">//<![CDATA[
-/**
- * Get the value of a querystring
- * @param  {String} field The field to get the value of
- * @param  {String} url   The URL to get the value from (optional)
- * @return {String}       The field value
- */
-function getQueryString( field, url ) {
-    var href = url ? url : window.location.href;
-    var reg = new RegExp( '[?&]' + field + '=([^&#]*)', 'i' );
-    var string = reg.exec(href);
-    return string ? string[1] : null;
-};
 
-function loadXMLDocument(dname) {
-    var xhttp = null;
-    if (window.XMLHttpRequest)
-      {
-      xhttp=new XMLHttpRequest();
-      }
-    else
-      {
-      xhttp=new ActiveXObject("Microsoft.XMLHTTP");
-      }
-      
-    if (xhttp) {
-        xhttp.open("GET",dname,false);
-        try {xhttp.responseType="msxml-document"} catch(err) {} // Helping IE
-        xhttp.send("");
-    }
-    return xhttp;
-}
+function TriggerPostProcess() {
+    // TODO: Remove debug always on.
+	var debug =  getQueryString('debug') === 'Y' || true;
 
-function getConfig(xml) {
-
-     var result = {};
-	  var xmlDoc = xml.responseXML;
-	  
-	  var paramNodes = null;
-	  var xpath = "//Parameters/Parameter";
-	  
-	 /* if (typeof xmlDoc.selectNodes === 'function') {
-	  	  var respondent = xmlDoc.selectNodes(xpath);
-		  if (respondent.length === 1) {
-			  
-			  respondentNode = respondent[0];
-		  }
-		  else {
-		  	  log(" found "+respondent.length+" nodes!");
-			  return;
-		  }
-	  }*/
-	if (window.ActiveXObject || xml.responseType=="msxml-document")
-	{
-		xmlDoc.setProperty("SelectionLanguage","XPath");
-	  
-	  	  var paramNodes = xmlDoc.selectNodes(xpath);
-	  	  
-	  	  for (var p=0; p<paramNodes.length; p++) {
-	  	    result[paramNodes[p].getAttribute('Name')] = paramNodes[p].childNodes[0].nodeValue;
-	  	  }
+    /**
+     * Simple logger - log to traceLog span.
+     * @param  {String} message The message to log.
+     * @param  {Object} err  Error object(optional).
+     */
+    function log(message, err) {
+	  if (debug) {
+		  document.getElementById("traceLog").innerHTML += '<p>'+message+'</p>';
 		  
-	}
-	  else if (typeof xmlDoc.evaluate === 'function') {
-	  	  var paramNodes = xmlDoc.evaluate(xpath, xmlDoc, null, XPathResult.ANY_TYPE, null);
-	  	  
-	  	  var paramNode = paramNodes.iterateNext();
-	  	  
-	  	  while (paramNode) {
-	  	    result[paramNode.getAttribute('Name')] = paramNode.childNodes[0].nodeValue;
-	  	    paramNode = paramNodes.iterateNext();
-	  	  }
-	  	  
+		  if(err) {
+		  
+		      document.getElementById("error").innerHTML += '<p>Error '+err.name+': '+err.description+'</p>';
+		 }
 	  }
-    return result;	  
+	}
+            
+    /**
+     * Get the value of a specified querystring field.
+     * @param  {String} field The field to get the value of.
+     * @param  {String} url   The URL to get the value from (optional).
+     * @return {String}       The field value.
+     */
+    function getQueryString( field, url ) {
+        var href = url ? url : window.location.href;
+        var reg = new RegExp( '[?&]' + field + '=([^&#]*)', 'i' );
+        var string = reg.exec(href);
+        return string ? string[1] : null;
+    };
+    
+    /**
+     * Get the value of a querystring
+     * @param  {String} dname The name of the file to load.
+     * @return {Object}       The loaded XML document.
+     */
+    function loadXMLDocument(dname) {
+        log('Loading document '+dname);
+        var xhttp = null;
+        if (window.XMLHttpRequest)
+        {
+          xhttp=new XMLHttpRequest();
+        }
+        else
+        {
+          xhttp=new ActiveXObject("Microsoft.XMLHTTP");
+        }
+          
+        if (xhttp) {
+            xhttp.open("GET",dname,false);
+            try {xhttp.responseType="msxml-document"} catch(err) {log('xhttp.responseType="msxml-document" failed!',err);} // Helping IE
+            xhttp.send("");
+        }
+        return xhttp;
+    }
+    
+    /**
+     * Load configuration parameters from 
+     * @param  {String} dname The name of the file to load.
+     * @return {Object}       The loaded XML document.
+     */
+    function getConfig(xml, config, xpath) {
+    
+        // Set default input config
+        if (typeof config !== 'object') {
+        
+            config = {};
+        }
+        
+        // Set default xpath
+        if (typeof xpath !== 'string') {
+        
+            xpath = "//Parameters/Parameter";
+        }
+
+        var xmlDoc = xml.responseXML;
+    	  
+    	var paramNodes = null;
+    	  
+    	if (window.ActiveXObject || xml.responseType=="msxml-document")
+    	{
+    		xmlDoc.setProperty("SelectionLanguage","XPath");
+    	  
+    	  	  var paramNodes = xmlDoc.selectNodes(xpath);
+    	  	  log('found '+paramNodes.length+' parameter nodes.');
+    	  	  for (var p=0; p<paramNodes.length; p++) {
+    	  	    log('Parameter '+p+': '+paramNodes[p].getAttribute('Name')+'='+paramNodes[p].childNodes[0].nodeValue);
+    	  	    config[paramNodes[p].getAttribute('Name')] = paramNodes[p].childNodes[0].nodeValue;
+    	  	  }
+    		  
+    	}
+   	    else if (typeof xmlDoc.evaluate === 'function') {
+    	  	  var paramNodes = xmlDoc.evaluate(xpath, xmlDoc, null, XPathResult.ANY_TYPE, null);
+    	  	  
+    	  	  var paramNode = paramNodes.iterateNext();
+    	  	  
+    	  	  while (paramNode) {
+    	  	    log('Iterate: '+paramNode.getAttribute('Name')+'='+paramNode.childNodes[0].nodeValue);
+    	  	    config[paramNode.getAttribute('Name')] = paramNode.childNodes[0].nodeValue;
+    	  	    paramNode = paramNodes.iterateNext();
+    	  	  }
+    	  	  
+    	}
+        return config;	  
+    }
+    
+     var xmlhttp = new XMLHttpRequest();
+     var redirect = 'TriggerFired.html';
+    
+     xmlhttp.onreadystatechange = function() {
+    
+         if (xmlhttp.readyState == 4 && xmlhttp.status == 200 && redirect != '') {
+        
+             if(!debug) {
+                location.href=redirect;
+             }
+             else {
+                log('The trigger has been fired!');
+             }
+         }
+     };
+     
+     var myConfig = getConfig(loadXMLDocument(getQueryString('q',document.referrer)+".xml"),getConfig(loadXMLDocument("config.xml")));
+     log('document.referrer is "'+document.referrer+'"');
+     // initial url and project come from config.js, and userid comes from config.xml
+     url += myConfig.UserID+'/';
+     url += '?project='+project;
+     // qrveyid and form are fetched from the referrer querystrings and current page querystrings respectively.
+     url += '&qrveyid='+myConfig.QrveyID;
+     url += '&form='+getQueryString('f');
+     
+     log('TriggerURL is '+url);
+    
+     xmlhttp.open("GET", url, true);
+    
+     xmlhttp.send();
 }
-
- var xmlhttp = new XMLHttpRequest();
-
- var redirect = 'TriggerFired.html';
-
- xmlhttp.onreadystatechange = function() {
-
- if (xmlhttp.readyState == 4 && xmlhttp.status == 200 && redirect != '') {
-
- location.href=redirect;
-
- }
-
- };
- 
- var myConfig = getConfig(loadXMLDocument("config.xml"));
- // initial url and project come from config.js, and userid comes from config.xml
- url += myConfig.UserID+'/';
- url += '?project='+project;
- // qrveyid and form are fetched from the referrer querystrings and current page querystrings respectively.
- url += '&qrveyid='+getQueryString('q',document.referrer);
- url += '&form='+getQueryString('f');
-
- xmlhttp.open("GET", url, true);
-
- xmlhttp.send();
-
 //]]>
 
 </script>
     </head>
-    <body>
-   <p>Processing your request, please wait ...</p>     
+    <body onload="TriggerPostProcess()">
+        <p>Processing your request, please wait ...</p>     
+        <span id="traceLog"></span><br/>
     </body>
 </html>

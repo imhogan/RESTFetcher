@@ -644,7 +644,7 @@
                                 ]
                             ]},
                             "# Depth limit to prevent infinite recursion",
-                            "service.depthLimit:5",
+                            "service.depthLimit:20",
                             "# Commands file for RESTFetcher",
                             "service.commandsFile:s3://${S3_Bucket}/config/QrveyCommands.xml",
                             "# Default ContentType for request body",

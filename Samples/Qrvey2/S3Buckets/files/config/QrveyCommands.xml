@@ -536,12 +536,12 @@ var ResultsConfig = {
                     </Action>
                 </Actions>
             </Action> 
-            <Action Type="S3DELETE" Mode="!debug">
+            <!--<Action Type="S3DELETE" Mode="!debug">
                 <Parameters>
                     <Parameter Name="Bucket">$S3_Bucket</Parameter>
                     <Parameter Name="Name">$DeleteFile</Parameter>
                 </Parameters>
-            </Action>
+            </Action>-->
         </Actions>
     </Command>
     <Command Name="ProcessLatestNewVillageQrveyResponses" Verb="POST" IsJSON="true">
@@ -612,7 +612,7 @@ var ResultsConfig = {
                             <Action Type="S3PUT">
                                 <Parameters>
                                     <Parameter Name="Bucket">$S3_Bucket</Parameter>
-                                    <Parameter Name="LastResponseTimeURI" Function="S3URL">=${S3_Bucket},Forms/${QrveyID}/LastResponseTime.xml,3600</Parameter>
+                                    <Parameter Name="Name" Function="S3URL">=${S3_Bucket},Forms/${QrveyID}/LastResponseTime.xml,3600</Parameter>
                                 </Parameters>
                             </Action>
                         </Actions>
@@ -670,7 +670,7 @@ var ResultsConfig = {
             <Action Type="XSLT2">
                 <Parameters>
                     <Parameter Name="Transform" Function="S3URL">=${S3_Bucket},xsl/CopyURL.xslt,3600</Parameter>
-                    <Parameter Name="SourceURI" Function="S3URL">=${S3_Bucket},config/NewVillageForm.xml,3600</Parameter>
+                    <Parameter Name="SourceURI" Function="S3URL">=${S3_Bucket},config/NewResidentsForm.xml,3600</Parameter>
                 </Parameters>
                 <Actions>
                     <Action Type="XSLT2" XSLTOutputIsText="true">
@@ -681,7 +681,7 @@ var ResultsConfig = {
                             <Parameter Name="QrveyUser">$UserID</Parameter>
                             <Parameter Name="StyleUser">$UserID</Parameter>
                             <Parameter Name="Bucket">$S3_Bucket</Parameter>
-                            <Parameter Name="Name">=Forms/${QrveyID}/RegisterVillageForm_${JobID}.json</Parameter>
+                            <Parameter Name="Name">=Forms/${QrveyID}/RegisterVillageResidentsForm_${JobID}.json</Parameter>
                             <Parameter Name="ContentType">application/json</Parameter>
                         </Parameters>
                         <Actions>
@@ -694,8 +694,8 @@ var ResultsConfig = {
                             <Action Type="Command" Command="AddSurveyFromJSON">
                                 <Parameters>
                                     <Parameter Name="SurveyType">onlineform</Parameter>
-                                    <Parameter Name="JSONURL" Function="S3URL">=${S3_Bucket},Forms/${QrveyID}/RegisterVillageForm_${JobID}.json,3600</Parameter>
-                                    <Parameter Name="Recipients_File">Forms/${QrveyID}/RegisterVillage_Recipients_${JobID}.xml</Parameter>
+                                    <Parameter Name="JSONURL" Function="S3URL">=${S3_Bucket},Forms/${QrveyID}/RegisterVillageResidentsForm_${JobID}.json,3600</Parameter>
+                                    <Parameter Name="Recipients_File">=Forms/${QrveyID}/RegisterVillage_Recipients_${JobID}.xml</Parameter>
                                 </Parameters>
                             </Action>
                         </Actions>

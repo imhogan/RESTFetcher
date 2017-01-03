@@ -21,7 +21,8 @@
             <answer>Mrs</answer>
             <answer>Ms</answer>
         </question>
-        <question id='contact1_name' type='TEXTFIELD' time='10' _required='true' text="Please enter the primary contact's name."/>
+        <question id='contact1_firstname' type='TEXTFIELD' time='10' _required='true' text="Please enter the primary contact's first name."/>
+        <question id='contact1_lastname' type='TEXTFIELD' time='10' _required='true' text="Please enter the primary contact's last name."/>
         <question id='contact1_email' type='TEXTFIELD' time='10' _required='true' text="Please enter the primary contact's email address."/>
         <question id='contact2' type="YES_NO" time='2' _required='true' text='Do you want to register a second contact?'>
             <answer>Yes
@@ -32,7 +33,8 @@
                         <answer>Mrs</answer>
                         <answer>Ms</answer>
                     </question>
-                    <question id='contact2_name' type='TEXTFIELD' time='10' _required='true' text="Please enter the second contact's name."/>
+                    <question id='contact2_firstname' type='TEXTFIELD' time='10' _required='true' text="Please enter the second contact's first name."/>
+                    <question id='contact2_lastname' type='TEXTFIELD' time='10' _required='true' text="Please enter the second contact's last name."/>
                     <question id='contact2_email' type='TEXTFIELD' time='10' _required='true' text="Please enter the second contact's email address."/>
                     <question id='contact3' type="YES_NO" time='2' _required='true' text='Is there a third contact?'>
                         <answer>Yes
@@ -43,7 +45,8 @@
                                     <answer>Mrs</answer>
                                     <answer>Ms</answer>
                                 </question>
-                                <question id='contact3_name' type='TEXTFIELD' time='10' _required='true' text="Please enter the third contact's name."/>
+                                <question id='contact3_firstname' type='TEXTFIELD' time='10' _required='true' text="Please enter the third contact's first name."/>
+                                <question id='contact3_lastname' type='TEXTFIELD' time='10' _required='true' text="Please enter the third contact's last name."/>
                                 <question id='contact3_email' type='TEXTFIELD' time='10' _required='true' text="Please enter the third contact's email address."/>
                             </route>
                         </answer>

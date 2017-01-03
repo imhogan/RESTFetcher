@@ -14,37 +14,37 @@
         </thankYouPage>
     </settings>
     <questions>
-        <question type='NUMERIC' time='3' _required='true' text='Please enter the unit number for the new resident(s).' allowDecimals='false' hasMinMax='true' min='1' max='500' numberType='Number'/>
-        <question type='SINGLE_CHOICE' time='10' _required='true' text='What is the preferred salutation for the first resident?' otherField='true'>
+        <question id='Unit' type='NUMERIC' time='3' _required='true' text='Please enter the unit number for the new resident(s).' allowDecimals='false' hasMinMax='true' min='1' max='${VillageUnits}' numberType='Number'/>
+        <question id='resident1_salutation' type='SINGLE_CHOICE' time='10' _required='true' text='What is the preferred salutation for the first resident?' otherField='true'>
             <answer>Dr</answer>
             <answer>Mr</answer>
             <answer>Mrs</answer>
             <answer>Ms</answer>
         </question>
-        <question type='NAME' time='10' _required='true' text="Please enter the first resident's name."/>
-        <question type='EMAIL' time='10' _required='true' text="Please enter the first resident's email address."/>
-        <question type="YES_NO" time='2' _required='true' text='Is there a second resident?'>
+        <question id='resident1_name' type='NAME' time='10' _required='true' text="Please enter the first resident's name."/>
+        <question id='resident1_email' type='EMAIL' time='10' _required='true' text="Please enter the first resident's email address."/>
+        <question id='resident2' type="YES_NO" time='2' _required='true' text='Is there a second resident?'>
             <answer>Yes
                 <route>
-                    <question type='SINGLE_CHOICE' time='10' _required='true' text='What is the preferred salutation for the second resident?' otherField='true'>
+                    <question id='resident2_salutation' type='SINGLE_CHOICE' time='10' _required='true' text='What is the preferred salutation for the second resident?' otherField='true'>
                         <answer>Dr</answer>
                         <answer>Mr</answer>
                         <answer>Mrs</answer>
                         <answer>Ms</answer>
                     </question>
-                    <question type='NAME' time='10' _required='true' text="Please enter the first resident's name."/>
-                    <question type='EMAIL' time='10' _required='true' text="Please enter the second resident's email address."/>
-                    <question type="YES_NO" time='2' _required='true' text='Is there a third resident?'>
+                    <question id='resident2_name' type='NAME' time='10' _required='true' text="Please enter the second resident's name."/>
+                    <question id='resident2_email' type='EMAIL' time='10' _required='true' text="Please enter the second resident's email address."/>
+                    <question id='resident3' type="YES_NO" time='2' _required='true' text='Is there a third resident?'>
                         <answer>Yes
                             <route>
-                                <question type='SINGLE_CHOICE' time='10' _required='true' text='What is the preferred salutation for the third resident?' otherField='true'>
+                                <question id='resident3_salutation' type='SINGLE_CHOICE' time='10' _required='true' text='What is the preferred salutation for the third resident?' otherField='true'>
                                     <answer>Dr</answer>
                                     <answer>Mr</answer>
                                     <answer>Mrs</answer>
                                     <answer>Ms</answer>
                                 </question>
-                                <question type='NAME' time='10' _required='true' text="Please enter the third resident's name."/>
-                                <question type='EMAIL' time='10' _required='true' text="Please enter the first resident's email address."/>
+                                <question id='resident3_name' type='NAME' time='10' _required='true' text="Please enter the third resident's name."/>
+                                <question id='resident3_email' type='EMAIL' time='10' _required='true' text="Please enter the third resident's email address."/>
                             </route>
                         </answer>
                         <answer>No</answer>
@@ -53,6 +53,6 @@
             </answer>
             <answer>No</answer>
         </question>
-        <question type='LONGTEXT' time='30' _required='false' text="Please enter any additional welcome notes."/>
+        <question id='resident_notes' type='LONGTEXT' time='30' _required='false' text="Please enter any additional welcome notes."/>
     </questions>
 </qrvey>

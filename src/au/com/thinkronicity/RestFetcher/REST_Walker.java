@@ -37,6 +37,7 @@ import java.util.regex.Pattern;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
+import java.net.HttpURLConnection;
 import javax.net.ssl.HttpsURLConnection;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -112,8 +113,11 @@ public class REST_Walker {
             this.commandsNamespaceMap = new HashMap<String, String>();
             this.commandsNamespaceMap.put("cmd", commandsXmlNamespace);
             
-            // Add BouncyCastleProvider as openjdk runtime does not handle SSL security with EC-based cipher suites
-            Security.addProvider(new BouncyCastleProvider());
+            if (appConfig.configurationProperties.getProperty("service.enableBouncyCastle", "true").equals("true")){
+                // Add BouncyCastleProvider as openjdk runtime does not handle SSL security with EC-based cipher suites
+                Security.addProvider(new BouncyCastleProvider());
+            }
+
         }
         catch (Exception e) {
             Utility.LogMessage(Utility.GetStackTrace(e));
@@ -186,7 +190,7 @@ public class REST_Walker {
                 URL url = new URL(commandURL);
                 
                 // Create a connection for the URL.
-                HttpsURLConnection urlConnection = (HttpsURLConnection)url.openConnection();
+                HttpURLConnection urlConnection = (HttpURLConnection)url.openConnection();
                 
                 // Set the timeout
                 if (commandElement.hasAttribute("TimeOut")) {
@@ -267,6 +271,11 @@ public class REST_Walker {
                 if (this.walkerConfig.debug || this.walkerConfig.verbose) {
                     Utility.LogMessage("Received " + Utility.writeXmlToString(restDocument));
                 }
+                
+                if ((this.walkerConfig.debug || this.walkerConfig.verbose) && url.getProtocol().equals("HTTPS")) {
+                    Utility.LogMessage("HTTPS cipher suite is " + ((HttpsURLConnection)urlConnection).getCipherSuite());
+                }
+                urlConnection.disconnect();
             }
             
             // Apply the actions for this command to the results returned from the REST API.

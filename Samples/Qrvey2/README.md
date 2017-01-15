@@ -21,3 +21,10 @@ for details on this. Note, to send to non-verified email addresses - eg to send 
  
  *To be continued ...*
  https://s3-ap-southeast-2.amazonaws.com/au-com-thinkronicity-opencode-apse2/au-com-thinkronicity-RestFetcher-QrveySample2-V1.0.0.zip
+ 
+ 
+ TODO: 
+ * Deactivate debug mode in post-processing page
+ * Document and test installation procedure
+ * Add simple handler for New Residents form - issue PDF letter?
+ 

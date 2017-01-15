@@ -483,39 +483,12 @@
                 "Runtime": "nodejs4.3",
                 "Handler": "index.handler",
                 "Timeout": "30",
-                "Description": "CloudFormation S3 Put File Helper",
+                "Description": "CloudFormation S3 Put File Helper from https://github.com/imhogan/PutS3File",
                 "MemorySize": 128,
                 "Role": {"Fn::GetAtt": [
                     "LambdaExecutionRole",
                     "Arn"
                 ]}
-            }
-        },
-        "SaveParametersForVillageSignup": {
-            "Type": "Custom::S3FilePut",
-            "Properties": {
-                "ServiceToken": {"Fn::GetAtt": [
-                    "S3PutFileLambda",
-                    "Arn"
-                ]},
-                "Source": {
-                    "filetext": {"Fn::Join": [
-                        "",
-                        [
-                            "<Parameters><Parameter Name='NewVillageLink'>https://s3-",
-                            {"Ref": "AWS::Region"},
-                            ".amazonaws.com/",
-                            {"Fn::ImportValue" : {"Fn::Sub" : "${ProjectToolsStack}-AccessProjectS3FilesBucket"}},
-                            "/www/2/StartPostProcess.html?f=NewVillageQrvey</Parameter></Parameters>"
-                        ]
-                    ]},
-                    "contentType": "application/xml"
-                },
-                "Target": {
-                    "Bucket": {"Fn::ImportValue" : {"Fn::Sub" : "${ProjectToolsStack}-AccessProjectS3FilesBucket"}},
-                    "Key": "config/NewVillageForm_Parameters_2.xml"
-                },
-                "Debug": "true"
             }
         },
         "CreatePostProcessTrigger": {
@@ -541,8 +514,7 @@
                     "contentType": "text/html"
                 },
                 "Debug": "true"
-            },
-            "DependsOn": ["SaveParametersForVillageSignup"]
+            }
         },
         "CreatePostProcessTriggerFired": {
             "Type": "Custom::S3FilePut",
@@ -567,8 +539,7 @@
                     "contentType": "text/html"
                 },
                 "Debug": "true"
-            },
-            "DependsOn": ["CreatePostProcessTrigger"]
+            }
         },
         "SaveConfigForPostProcessTrigger": {
             "Type": "Custom::S3FilePut",
@@ -779,8 +750,7 @@
                     "Key": "config/Qrvey2.properties"
                 },
                 "Debug": "true"
-            },
-            "DependsOn": ["SaveParametersForVillageSignup"]
+            }
         }        
     },
     "Outputs": {

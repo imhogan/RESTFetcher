@@ -22,7 +22,7 @@
             <answer>Ms</answer>
         </question>
         <question id='resident1_name' type='NAME' time='10' _required='true' text="Please enter the first resident's name."/>
-        <question id='resident1_email' type='EMAIL' time='10' _required='true' text="Please enter the first resident's email address."/>
+        <question id='resident1_email' type='EMAIL_FORM' time='10' _required='true' text="Please enter the first resident's email address."/>
         <question id='resident2' type="YES_NO" time='2' _required='true' text='Is there a second resident?'>
             <answer>Yes
                 <route>
@@ -33,7 +33,7 @@
                         <answer>Ms</answer>
                     </question>
                     <question id='resident2_name' type='NAME' time='10' _required='true' text="Please enter the second resident's name."/>
-                    <question id='resident2_email' type='EMAIL' time='10' _required='true' text="Please enter the second resident's email address."/>
+                    <question id='resident2_email' type='EMAIL_FORM' time='10' _required='true' text="Please enter the second resident's email address."/>
                     <question id='resident3' type="YES_NO" time='2' _required='true' text='Is there a third resident?'>
                         <answer>Yes
                             <route>
@@ -44,7 +44,7 @@
                                     <answer>Ms</answer>
                                 </question>
                                 <question id='resident3_name' type='NAME' time='10' _required='true' text="Please enter the third resident's name."/>
-                                <question id='resident3_email' type='EMAIL' time='10' _required='true' text="Please enter the third resident's email address."/>
+                                <question id='resident3_email' type='EMAIL_FORM' time='10' _required='true' text="Please enter the third resident's email address."/>
                             </route>
                         </answer>
                         <answer>No</answer>

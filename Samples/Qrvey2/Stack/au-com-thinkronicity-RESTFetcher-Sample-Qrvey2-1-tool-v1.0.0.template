@@ -1,6 +1,6 @@
 {
   "AWSTemplateFormatVersion": "2010-09-09",
-  "Description": "Demonstration stack for the RESTFetcher Lambda Function - built by Ian Hogan - Ian_MacDonald_Hogan@yahoo.com.\nThis sample will deploy the tools stack from an S3 bucket from my AWS account. See ﻿https://github.com/imhogan/RESTFetcher/tree/master/Samples/Qrvey2 for details.",
+  "Description": "Demonstration stack for the RESTFetcher Lambda Function - built by Ian Hogan - Ian_MacDonald_Hogan@yahoo.com.\nThis sample will deploy the tools stack from an S3 bucket from my AWS account. See https://github.com/imhogan/RESTFetcher/tree/master/Samples/Qrvey2 for details.",
   "Parameters": {
     "RESTFetcherKey": {
       "Description": "Zip file for REST Fetcher function",
@@ -270,6 +270,7 @@
       "Type": "AWS::S3::Bucket",
       "DeletionPolicy" : "Retain",
       "Properties": {
+        "DependsOn": ["RESTFetcherLambda","RESTFetcherLambdaInvokePermission"],
         "BucketName": {
           "Fn::Join": [
             "",

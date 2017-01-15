@@ -6,8 +6,7 @@
         <script type="application/javascript">//<![CDATA[
 
 function TriggerPostProcess() {
-    // TODO: Remove debug always on.
-	var debug =  getQueryString('debug') === 'Y' || true;
+	var debug =  getQueryString('debug') === 'Y';
 
     /**
      * Simple logger - log to traceLog span.

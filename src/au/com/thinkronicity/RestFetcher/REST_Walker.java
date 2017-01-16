@@ -234,7 +234,14 @@ public class REST_Walker {
                     urlConnection.setRequestProperty("Content-Type", contentType);
                     urlConnection.setDoOutput(true);
                     OutputStream os = urlConnection.getOutputStream();
-                    String bodyValue = Utility.getParameterValue("Body", bodyElement, this.commandsNamespaceMap, parameters, this.commandsXml.getDocumentElement(), this.walkerConfig.verbose, this.walkerConfig.debug);
+                    String bodyValue = Utility.getParameterValue(
+                        "Body", 
+                        bodyElement, 
+                        this.commandsNamespaceMap, 
+                        parameters, 
+                        this.commandsXml.getDocumentElement(), 
+                        this.walkerConfig.verbose, this.walkerConfig.debug
+                    ).trim();
                     if (this.walkerConfig.debug || this.walkerConfig.verbose) {
                         Utility.LogMessage("body of type '"+contentType+"' is " + bodyValue);
                     }
@@ -257,8 +264,11 @@ public class REST_Walker {
                     restDocument = Utility.readXmlFromString("<HTTP_Response><Code>"+(new Integer(urlConnection.getResponseCode())).toString()+"</Code><Message>"+urlConnection.getResponseMessage()+"</Message></HTTP_Response>");
                     
                 }
-                else {
+                else if (urlConnection.getResponseCode() < 400) {
                     restDocument = Utility.readXmlFromStream(urlConnection.getInputStream(), commandElement.getAttribute("IsJSON").toLowerCase().equals("true"), commandElement.getAttribute("UseJSON2SafeXML").toLowerCase().equals("true"));
+                }
+                else {
+                    restDocument = Utility.readXmlFromStream(urlConnection.getErrorStream(), commandElement.getAttribute("IsJSON").toLowerCase().equals("true"), commandElement.getAttribute("UseJSON2SafeXML").toLowerCase().equals("true"));
                 }
 
                 String responseXmlFileName = this.walkerConfig.configurationProperties.getProperty("service.responseXml", "");
@@ -351,8 +361,15 @@ public class REST_Walker {
                     // Create the result document with just the root node.
                     actionDocument = Utility.readXmlFromString("<" + rootElementName + "/>");
                     
+                    Utility.loadNamespaces(actionElement, this.commandsNamespaceMap);
+
+                    if (this.walkerConfig.debug) {
+                        for (Map.Entry<String, String> e : this.commandsNamespaceMap.entrySet()) {
+                            Utility.LogMessage("commandsNamespaceMap [" +  e.getKey() + "]: " + e.getValue());                        }
+                    }
+                    
                     NodeList matchedNodes = Utility.getNodesByXPath(contextElement, actionMatch, this.commandsNamespaceMap);
-                    if (matchedNodes.getLength() > 0) {
+                    if (matchedNodes != null && matchedNodes.getLength() > 0) {
                     	
                         // Apply the action to each matched node.
                         for (int match = 0; match < matchedNodes.getLength(); ++match) {

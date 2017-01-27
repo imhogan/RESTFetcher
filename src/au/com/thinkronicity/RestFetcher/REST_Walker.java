@@ -37,6 +37,7 @@ import java.util.regex.Pattern;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
+import java.net.HttpURLConnection;
 import javax.net.ssl.HttpsURLConnection;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -112,8 +113,11 @@ public class REST_Walker {
             this.commandsNamespaceMap = new HashMap<String, String>();
             this.commandsNamespaceMap.put("cmd", commandsXmlNamespace);
             
-            // Add BouncyCastleProvider as openjdk runtime does not handle SSL security with EC-based cipher suites
-            Security.addProvider(new BouncyCastleProvider());
+            if (appConfig.configurationProperties.getProperty("service.enableBouncyCastle", "true").equals("true")){
+                // Add BouncyCastleProvider as openjdk runtime does not handle SSL security with EC-based cipher suites
+                Security.addProvider(new BouncyCastleProvider());
+            }
+
         }
         catch (Exception e) {
             Utility.LogMessage(Utility.GetStackTrace(e));
@@ -186,7 +190,7 @@ public class REST_Walker {
                 URL url = new URL(commandURL);
                 
                 // Create a connection for the URL.
-                HttpsURLConnection urlConnection = (HttpsURLConnection)url.openConnection();
+                HttpURLConnection urlConnection = (HttpURLConnection)url.openConnection();
                 
                 // Set the timeout
                 if (commandElement.hasAttribute("TimeOut")) {
@@ -230,7 +234,14 @@ public class REST_Walker {
                     urlConnection.setRequestProperty("Content-Type", contentType);
                     urlConnection.setDoOutput(true);
                     OutputStream os = urlConnection.getOutputStream();
-                    String bodyValue = Utility.getParameterValue("Body", bodyElement, this.commandsNamespaceMap, parameters, this.commandsXml.getDocumentElement(), this.walkerConfig.verbose, this.walkerConfig.debug);
+                    String bodyValue = Utility.getParameterValue(
+                        "Body", 
+                        bodyElement, 
+                        this.commandsNamespaceMap, 
+                        parameters, 
+                        this.commandsXml.getDocumentElement(), 
+                        this.walkerConfig.verbose, this.walkerConfig.debug
+                    ).trim();
                     if (this.walkerConfig.debug || this.walkerConfig.verbose) {
                         Utility.LogMessage("body of type '"+contentType+"' is " + bodyValue);
                     }
@@ -253,8 +264,11 @@ public class REST_Walker {
                     restDocument = Utility.readXmlFromString("<HTTP_Response><Code>"+(new Integer(urlConnection.getResponseCode())).toString()+"</Code><Message>"+urlConnection.getResponseMessage()+"</Message></HTTP_Response>");
                     
                 }
-                else {
+                else if (urlConnection.getResponseCode() < 400) {
                     restDocument = Utility.readXmlFromStream(urlConnection.getInputStream(), commandElement.getAttribute("IsJSON").toLowerCase().equals("true"), commandElement.getAttribute("UseJSON2SafeXML").toLowerCase().equals("true"));
+                }
+                else {
+                    restDocument = Utility.readXmlFromStream(urlConnection.getErrorStream(), commandElement.getAttribute("IsJSON").toLowerCase().equals("true"), commandElement.getAttribute("UseJSON2SafeXML").toLowerCase().equals("true"));
                 }
 
                 String responseXmlFileName = this.walkerConfig.configurationProperties.getProperty("service.responseXml", "");
@@ -267,6 +281,11 @@ public class REST_Walker {
                 if (this.walkerConfig.debug || this.walkerConfig.verbose) {
                     Utility.LogMessage("Received " + Utility.writeXmlToString(restDocument));
                 }
+                
+                if ((this.walkerConfig.debug || this.walkerConfig.verbose) && url.getProtocol().equals("HTTPS")) {
+                    Utility.LogMessage("HTTPS cipher suite is " + ((HttpsURLConnection)urlConnection).getCipherSuite());
+                }
+                urlConnection.disconnect();
             }
             
             // Apply the actions for this command to the results returned from the REST API.
@@ -342,8 +361,15 @@ public class REST_Walker {
                     // Create the result document with just the root node.
                     actionDocument = Utility.readXmlFromString("<" + rootElementName + "/>");
                     
+                    Utility.loadNamespaces(actionElement, this.commandsNamespaceMap);
+
+                    if (this.walkerConfig.debug) {
+                        for (Map.Entry<String, String> e : this.commandsNamespaceMap.entrySet()) {
+                            Utility.LogMessage("commandsNamespaceMap [" +  e.getKey() + "]: " + e.getValue());                        }
+                    }
+                    
                     NodeList matchedNodes = Utility.getNodesByXPath(contextElement, actionMatch, this.commandsNamespaceMap);
-                    if (matchedNodes.getLength() > 0) {
+                    if (matchedNodes != null && matchedNodes.getLength() > 0) {
                     	
                         // Apply the action to each matched node.
                         for (int match = 0; match < matchedNodes.getLength(); ++match) {

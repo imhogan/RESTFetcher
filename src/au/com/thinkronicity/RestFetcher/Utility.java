@@ -73,6 +73,7 @@ import org.json.XML;
 // import com.fasterxml.jackson.databind.ObjectMapper;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
+import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.InputSource;
@@ -648,6 +649,32 @@ public class Utility {
         return doc;
     }
 
+
+    /**
+     * loadNamespaces - Load namespace nodes from the given node to the supplied namespace map.
+     * 
+     * @param xmlNode 	- the node to get namespaces from.
+     * @param nsMap - the map to add to.
+     */
+    public static void loadNamespaces(Node xmlNode, HashMap<String, String> nsMap) {
+        
+        NamedNodeMap attributes = xmlNode.getAttributes();
+        if (attributes != null)
+        {
+            for (int i = 0; i < attributes.getLength(); i++)
+            {
+                Node node = attributes.item(i);
+                if ( node.getNodeType() == Node.ATTRIBUTE_NODE 
+                  && node.getNodeName() != null && !node.getNodeName().equals("")  
+                  && node.getNamespaceURI() != null && !node.getNamespaceURI().equals("")  
+                )
+                {
+                    nsMap.put(node.getNodeName(), node.getNamespaceURI());
+                }
+            }
+        }
+        
+    }
     /**
      * readXmlFromStream - read an XML document from a given stream. If the stream is a JSON document, convert it to XML first.
      * 

@@ -257,7 +257,7 @@
                 <Parameters>
                     <Parameter Name="qid" XPath="//lookupID"/>
                     <Parameter Name="Bucket">$S3_Bucket</Parameter>
-                    <Parameter Name="Name">=www/${JobID}/${qid}.xml</Parameter>
+                    <Parameter Name="Name">=www/${propertyid}/${qid}.xml</Parameter>
                     <Parameter Name="ACL">PublicRead</Parameter>
                 </Parameters>
                 <Body ContentType="application/xml"><![CDATA[=

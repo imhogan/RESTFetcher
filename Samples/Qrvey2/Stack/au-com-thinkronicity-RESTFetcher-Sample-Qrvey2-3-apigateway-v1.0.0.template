@@ -42,7 +42,7 @@
         "ParameterLabels": {"EmailSender": {"default": "Email address to send emails from?"}}
         },
         "TODO": [
-        "Add html page - which calls generated javascript file containing url of trigger API."
+            "Add html page - which calls generated javascript file containing url of trigger API."
         ]
     },
     "Description": "Define API Gateway for post processing trigger for the Our Village Sample Application.",
@@ -213,6 +213,43 @@
         "CorsOriginIsS3" : {"Fn::Equals" : [{"Ref" : "CorsOrigin"}, ""]}
     },
     "Resources": {
+        "APIToLambdaCredential": {
+            "Type": "AWS::IAM::Role",
+            "Properties": {
+                "AssumeRolePolicyDocument": {
+                    "Version": "2012-10-17",
+                    "Statement": [{
+                        "Effect": "Allow",
+                        "Principal": {
+                            "Service": [
+                            "apigateway.amazonaws.com"
+                            ]
+                        },
+                        "Action": [
+                            "sts:AssumeRole"
+                        ]
+                    }]
+                },
+                "Path": "/",
+                "Policies": [{
+                    "PolicyName": "root",
+                    "PolicyDocument": {
+                        "Version": "2012-10-17",
+                        "Statement": [
+                            {
+                            "Effect": "Allow",
+                            "Action": [
+                            "lambda:InvokeFunction",
+                                "iam:PassRole"
+                            ],
+                            "Resource": [
+                            "*"
+                            ]
+                        }]
+                    }
+                }]
+            }
+        },
         "LambdaExecutionRole": {
             "Type": "AWS::IAM::Role",
             "Properties": {
@@ -380,6 +417,12 @@
                 "Integration": {
                     "Type": "AWS",
                     "IntegrationHttpMethod": "POST",
+                    "Credentials": {
+                      "Fn::GetAtt": [
+                          "APIToLambdaCredential",
+                         "Arn"
+                      ]
+                    },
                     "Uri": {"Fn::Join": [
                         "",
                         [
@@ -409,7 +452,12 @@
                             "",
                             [
                                 "'",
-                                {"Ref": "CorsOrigin"},
+                                {"Fn::If": [
+                                    "CorsOriginIsS3", 
+                                    {"Fn::Sub" : "s3-${AWS::Region}.amazonaws.com"}, 
+                                    {"Ref": "CorsOrigin"}
+                                  ]
+                                },
                                 "'"
                             ]
                         ]}},
@@ -758,25 +806,22 @@
             "Value": {"Ref": "APIName"},
              "Description": "The name given to the API when the stack was created."
          },
-        "PostProcessingURL": {
+        "PostSurveyURL": {
             "Value": {"Fn::Join": 
                     [
                             "",
                             [
                                 "https://",
-                                {"Ref": "OVWSRMApi"},
-                                ".execute-api.",
+                                "s3-",
                                 {"Ref": "AWS::Region"},
                                 ".amazonaws.com/",
-                                {"Fn::ImportValue" : {"Fn::Sub" : "${ProjectToolsStack}-SelectedTargetEnvironment"}},
-                                "/survey/{Survey_id}?project=",
-                                {"Fn::ImportValue" : {"Fn::Sub" : "${ProjectToolsStack}-SelectedProjectPrefix"}},
-                                "&qrveyid={QrveyID}&form={FormName}"
+                                {"Fn::ImportValue" : {"Fn::Sub" : "${ProjectToolsStack}-AccessProjectS3FilesBucket"}},
+                                "/www/2/StartPostProcess.html?f={FormName}"
                             ]
                     ]
             },
-            "Description": "The generated API endpoint URL to be used in the invocation JavaScript.",
-            "Export" : { "Name" : {"Fn::Sub": "${AWS::StackName}-PostProcessingURL" }}
+            "Description": "The URL to use for the survey processing trigger - replace {FormName} with the appropriate form name, ie the corresponding command will be PostProcessFormName.",
+            "Export" : { "Name" : {"Fn::Sub": "${AWS::StackName}-PostSurveyURL" }}
         }
     }
 }

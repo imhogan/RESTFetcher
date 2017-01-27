@@ -1,6 +1,25 @@
 {
   "AWSTemplateFormatVersion": "2010-09-09",
   "Description": "Demonstration stack for the RESTFetcher Lambda Function - built by Ian Hogan - Ian_MacDonald_Hogan@yahoo.com.\nThis sample will deploy the tools stack from an S3 bucket from my AWS account. See https://github.com/imhogan/RESTFetcher/tree/master/Samples/Qrvey2 for details.",
+    "Metadata": {"AWS::CloudFormation::Interface": {
+        "ParameterGroups": [
+            {
+                "Label": {"default": "Project Configuration"},
+                "Parameters": [
+                    "ProjectPrefix",
+                    "TargetEnvironment",
+                    "TargetDomain"
+                ]
+            },
+            {
+                "Label": {"default": "Custom Resource Lambda Functions"},
+                "Parameters": [
+                    "RESTFetcherKey",
+                    "S3TriggerKey"
+                ]
+            }
+        ]
+    }},
   "Parameters": {
     "RESTFetcherKey": {
       "Description": "Zip file for REST Fetcher function",
@@ -31,15 +50,6 @@
       "Description": "Target domain - this is used as the final bucket suffix to ensure global uniqueness - typically your internet domain name but use - rather than . as separators.",
       "Type": "String",
       "Default": "my-domain-me"
-    },
-    "EnableDebug": {
-      "Description": "Enable debugging?",
-      "Type": "String",
-      "AllowedValues": [
-        "true",
-        "false"
-      ],
-      "Default": "true"
     }
   },
   "Mappings": {

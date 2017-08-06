@@ -4,7 +4,7 @@ REM ============================================================================
 REM Make - Script to choreograph the various installation sub-jobs.
 REM
 REM
-REM Written by Ian Hogan, Ian.Hogan@THINKronicity.com.au
+REM Written by Ian Hogan, Ian_MacDonald_Hogan@yahoo.com
 REM
 REM =================================================================================
 SET _ALLOWED_TARGETS=All Zip Templates S3Master S3Replica

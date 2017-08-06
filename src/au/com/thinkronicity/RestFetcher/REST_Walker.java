@@ -1,13 +1,3 @@
-/*
- * Decompiled with CFR 0_113.
- * 
- * Could not load the following classes:
- *  com.amazonaws.AmazonClientException
- *  com.amazonaws.auth.AWSCredentials
- *  com.amazonaws.auth.EnvironmentVariableCredentialsProvider
- *  com.amazonaws.regions.Regions
- *  com.amazonaws.services.s3.model.CannedAccessControlList
- */
 package au.com.thinkronicity.RestFetcher;
 
 import au.com.thinkronicity.RestFetcher.AWS_S3_Helper;

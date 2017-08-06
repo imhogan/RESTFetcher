@@ -1,18 +1,3 @@
-/*
- * Decompiled with CFR 0_113.
- * 
- * Could not load the following classes:
- *  com.amazonaws.auth.AWSCredentials
- *  com.amazonaws.auth.EnvironmentVariableCredentialsProvider
- *  com.amazonaws.services.lambda.runtime.Context
- *  com.amazonaws.services.lambda.runtime.LambdaLogger
- *  com.amazonaws.services.s3.model.CannedAccessControlList
- *  net.sf.saxon.TransformerFactoryImpl
- *  org.apache.commons.codec.binary.Base64
- *  org.apache.commons.ssl.OpenSSL
- *  org.json.JSONObject
- *  org.json.XML
- */
 package au.com.thinkronicity.RestFetcher;
 
 import au.com.thinkronicity.RestFetcher.AWS_S3_Helper;
@@ -70,7 +55,6 @@ import org.apache.commons.ssl.OpenSSL;
 import org.json.JSONObject;
 import org.json.JSONArray;
 import org.json.XML;
-// import com.fasterxml.jackson.databind.ObjectMapper;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NamedNodeMap;
@@ -80,9 +64,9 @@ import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
 /**
- * @author Ian Hogan - Ian.Hogan@THINKronicity.com.au
+ * Utility functions.
  * 
- * Utility functions
+ * @author Ian Hogan, Ian_MacDonald_Hogan@yahoo.com
  *
  */
 public class Utility {

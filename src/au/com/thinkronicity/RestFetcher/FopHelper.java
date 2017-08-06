@@ -1,11 +1,3 @@
-/*
- * Decompiled with CFR 0_113.
- * 
- * Could not load the following classes:
- *  org.apache.fop.apps.FOUserAgent
- *  org.apache.fop.apps.Fop
- *  org.apache.fop.apps.FopFactory
- */
 package au.com.thinkronicity.RestFetcher;
 
 import java.io.ByteArrayOutputStream;

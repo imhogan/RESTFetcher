@@ -20,10 +20,6 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.json.JSONObject;
 import org.json.XML;
-/*
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.xml.XmlMapper;
-*/
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;

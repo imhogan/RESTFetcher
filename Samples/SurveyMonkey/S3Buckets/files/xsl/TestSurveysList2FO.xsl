@@ -10,7 +10,7 @@
 	
 	This takes the list of surveys for a Survey Monkey account and outputs the details of each survey in a table. 
 	
-	Author Ian Hogan, Ian.Hogan@THINKronicity.com.au
+	Author Ian Hogan, Ian_MacDonald_Hogan@yahoo.com
 	
 -->
     

@@ -1,6 +1,3 @@
-/*
- * Decompiled with CFR 0_113.
- */
 package au.com.thinkronicity.RestFetcher;
 
 import java.util.HashMap;

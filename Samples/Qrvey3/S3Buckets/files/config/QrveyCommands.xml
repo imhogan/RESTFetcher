@@ -79,18 +79,18 @@
             <Action Type="S3PUT">
                 <Parameters>
                     <Parameter Name="Bucket">$S3_Bucket</Parameter>
-                    <Parameter Name="Name">=Forms/${QrveyID}/NewVillageForm_Parameters_${JobID}.xml</Parameter>
+                    <Parameter Name="Name">=Forms/${QrveyID}/NewSurveyForm_Parameters_${JobID}.xml</Parameter>
                 </Parameters>
                 <Body ContentType="application/xml"><![CDATA[=
                     <Parameters>
-                        <Parameter Name="NewVillageLink">${PostProcessBase}?f=NewVillageQrvey</Parameter>
+                        <Parameter Name="NewSurveyLink">${PostProcessBase}?f=NewSurveyQrvey</Parameter>
                     </Parameters>
                 ]]></Body>
             </Action>
             <Action Type="S3PUT">
                 <Parameters>
                     <Parameter Name="Bucket">$S3_Bucket</Parameter>
-                    <Parameter Name="Name">=config/NewVillageForm_Recipients_${JobID}.xml</Parameter>
+                    <Parameter Name="Name">=config/NewSurveyForm_Recipients_${JobID}.xml</Parameter>
                 </Parameters>
                 <Body ContentType="application/xml"><![CDATA[=
                                     <Organisation Name='${UserOrganisation}'>
@@ -108,8 +108,8 @@
             <Action Type="Command" Command="PublishQrvey">
                 <Parameters>
                     <Parameter Name="UserID" XPath="//userid"/>
-                    <Parameter Name="FormName">NewVillageForm</Parameter>
-                    <Parameter Name="Recipients_File">=config/NewVillageForm_Recipients_${JobID}.xml</Parameter>
+                    <Parameter Name="FormName">NewSurveyForm</Parameter>
+                    <Parameter Name="Recipients_File">=config/NewSurveyForm_Recipients_${JobID}.xml</Parameter>
                     <Parameter Name="QrveyType">survey</Parameter>
                 </Parameters>
             </Action>
@@ -458,7 +458,7 @@ var ResultsConfig = {
             </Action>
         </Actions>
     </Command>
-    <Command Name="PostProcessNewVillageQrvey" IsNOP="true">
+    <Command Name="PostProcessNewSurveyQrvey" IsNOP="true">
         <Actions>
             <Action Type="XSLT2">
                 <Parameters>
@@ -473,7 +473,7 @@ var ResultsConfig = {
                             <Parameter Name="Name">=Forms/${QrveyID}/LastResponseTime.xml</Parameter>
                         </Parameters>
                     </Action>
-                    <Action Type="Command" Command="ProcessLatestNewVillageQrveyResponses">
+                    <Action Type="Command" Command="ProcessLatestNewSurveyQrveyResponses">
                         <Parameters>
                             <Parameter Name="responses_modified_since" XPath="//ResponsesModifiedTime"/>
                         </Parameters>
@@ -488,7 +488,7 @@ var ResultsConfig = {
             </Action>-->
         </Actions>
     </Command>
-    <Command Name="ProcessLatestNewVillageQrveyResponses" Verb="POST" IsJSON="true">
+    <Command Name="ProcessLatestNewSurveyQrveyResponses" Verb="POST" IsJSON="true">
         <!-- For each signup entry after the last processed date, generate the village qrveys and forms, and send details to the given email address(es). -->
         <Headers>
             <Header Name="x-api-key">$API_KEY</Header>
@@ -526,23 +526,11 @@ var ResultsConfig = {
                             <Parameter Name="Name">=${REST_Log_Path}/QrveyData_${JobID}_${QrveyID}.xml</Parameter>
                         </Parameters>
                     </Action>
-                    <Action Type="Command" Command="RegisterVillage" Match="//Dataset/DataRow">
+                    <Action Type="Command" Command="CreateSurveyFromQrvey" Match="//Dataset/DataRow">
                         <Parameters>
                             <Parameter Name="SubmitterEmail" XPath="MetaData/Item[@Name='email']"/>
-                            <Parameter Name="VillageName" XPath="Item[@Name='village_name']"/>
-                            <Parameter Name="VillageUnits" XPath="Item[@Name='village_units']"/>
-                            <Parameter Name="Contact1.Salutation" XPath="Item[@Name='contact1_salutation']"/>
-                            <Parameter Name="Contact1.FirstName" XPath="Item[@Name='contact1_firstname']"/>
-                            <Parameter Name="Contact1.LastName" XPath="Item[@Name='contact1_lastname']"/>
-                            <Parameter Name="Contact1.Email" XPath="Item[@Name='contact1_email']"/>
-                            <Parameter Name="Contact2.Salutation" XPath="Item[@Name='contact2_salutation']"/>
-                            <Parameter Name="Contact2.FirstName" XPath="Item[@Name='contact2_firstname']"/>
-                            <Parameter Name="Contact2.LastName" XPath="Item[@Name='contact2_lastname']"/>
-                            <Parameter Name="Contact2.Email" XPath="Item[@Name='contact2_email']"/>
-                            <Parameter Name="Contact3.Salutation" XPath="Item[@Name='contact3_salutation']"/>
-                            <Parameter Name="Contact3.FirstName" XPath="Item[@Name='contact3_firstname']"/>
-                            <Parameter Name="Contact3.LastName" XPath="Item[@Name='contact3_lastname']"/>
-                            <Parameter Name="Contact3.Email" XPath="Item[@Name='contact3_email']"/>
+                            <Parameter Name="SurveyName" XPath="Item[@Name='survey_name']/@AnswerId"/>
+                            <Parameter Name="SurveyTitle" XPath="Item[@Name='survey_title']"/>
                         </Parameters>
                     </Action>
                     <Action Type="XSLT2">
@@ -565,9 +553,9 @@ var ResultsConfig = {
             </Action> 
         </Actions>
     </Command>
-    <Command Name="RegisterVillage" IsNOP="true">
+    <Command Name="CreateSurveyFromQrvey" IsNOP="true">
         <Parameters>
-            <Parameter Name="FormName">NewResidentsForm</Parameter>
+            <Parameter Name="FormName">=${SurveyName}Form</Parameter>
         </Parameters>
         <Actions>
             <Action Type="S3PUT">
@@ -577,9 +565,7 @@ var ResultsConfig = {
                 </Parameters>
                 <Body ContentType="application/xml"><![CDATA[=
                     <Parameters>
-                        <Parameter Name="VillageName">${VillageName}</Parameter>
-                        <Parameter Name="VillageUnits">${VillageUnits}</Parameter>
-                        <Parameter Name="NewResidentsLink">${PostProcessBase}?f=NewResidentsForm</Parameter>
+                        <Parameter Name="NewResponseLink">${PostProcessBase}?f=${SurveyName}Form</Parameter>
                     </Parameters>
                 ]]></Body>
             </Action>
@@ -821,199 +807,4 @@ var ResultsConfig = {
             </Action>
         </Actions>
     </Command>
-    <!--<Command Name="AddVillageSignupQrvey" IsNOP="true">
-        <Actions>
-            <Action Type="XSLT2">
-                <Parameters>
-                    <Parameter Name="Transform" Function="S3URL">=${S3_Bucket},xsl/CopyURL.xslt,3600</Parameter>
-                    <Parameter Name="SourceURI" Function="S3URL">=${S3_Bucket},config/NewVillageForm.xml,3600</Parameter>
-                </Parameters>
-                <Actions>
-                    <Action Type="XSLT2" XSLTOutputIsText="true">
-                        <Parameters>
-                            <Parameter Name="Transform" Function="S3URL">=${S3_Bucket},xsl/QrveyXML2JSON.xsl,3600</Parameter>
-                            <Parameter Name="StylesURI" Function="S3URL">=${S3_Bucket},config/QrveyStyles.xml,3600</Parameter>
-                            <Parameter Name="ParametersListURI" Function="S3URL">=${S3_Bucket},config/NewVillageForm_Parameters_${JobID}.xml,3600</Parameter>
-                            <Parameter Name="QrveyUser">$UserID</Parameter>
-                            <Parameter Name="StyleUser">$UserID</Parameter>
-                            <Parameter Name="Bucket">$S3_Bucket</Parameter>
-                            <Parameter Name="Name">=${REST_Log_Path}/VillageSignupSurvey_${JobID}.json</Parameter>
-                            <Parameter Name="ContentType">application/json</Parameter>
-                        </Parameters>
-                        <Actions>
-                            <Action Type="S3PUT" Mode="debug">
-                                <Parameters>
-                                    <Parameter Name="Bucket">$S3_Bucket</Parameter>
-                                    <Parameter Name="Name">=${REST_Log_Path}/SignupSurvey_${JobID}.xml</Parameter>
-                                </Parameters>
-                            </Action>
-                            <Action Type="Command" Command="AddSurveyFromJSON">
-                                <Parameters>
-                                    <Parameter Name="QrveyType">survey</Parameter>
-                                    <Parameter Name="JSONURL" Function="S3URL">=${S3_Bucket},${REST_Log_Path}/VillageSignupSurvey_${JobID}.json,3600</Parameter>
-                                </Parameters>
-                            </Action>
-                        </Actions>
-                    </Action>
-                </Actions>
-            </Action>
-        </Actions>
-    </Command>
-    <Command Name="AddNewResidentForm" IsNOP="true">
-        <Actions>
-            <Action Type="XSLT2">
-                <Parameters>
-                    <Parameter Name="Transform" Function="S3URL">=${S3_Bucket},xsl/CopyURL.xslt,3600</Parameter>
-                    <Parameter Name="SourceURI" Function="S3URL">=${S3_Bucket},${Form_File},3600</Parameter>
-                </Parameters>
-                <Actions>
-                    <Action Type="XSLT2" XSLTOutputIsText="true">
-                        <Parameters>
-                            <Parameter Name="Transform" Function="S3URL">=${S3_Bucket},xsl/QrveyXML2JSON.xsl,3600</Parameter>
-                            <Parameter Name="StylesURI" Function="S3URL">=${S3_Bucket},config/QrveyStyles.xml,3600</Parameter>
-                            <Parameter Name="QrveyUser">$UserID</Parameter>
-                            <Parameter Name="StyleUser">$UserID</Parameter>
-                            <Parameter Name="Bucket">$S3_Bucket</Parameter>
-                            <Parameter Name="Name">=${REST_Log_Path}/SignupSurvey_${JobID}.json</Parameter>
-                            <Parameter Name="ContentType">application/json</Parameter>
-                        </Parameters>
-                        <Actions>
-                            <Action Type="S3PUT" Mode="debug">
-                                <Parameters>
-                                    <Parameter Name="Bucket">$S3_Bucket</Parameter>
-                                    <Parameter Name="Name">=${REST_Log_Path}/NewResidentForm_${JobID}.xml</Parameter>
-                                </Parameters>
-                            </Action>
-                            <Action Type="Command" Command="AddSurveyFromJSON">
-                                <Parameters>
-                                    <Parameter Name="QrveyType">onlineform</Parameter>
-                                    <Parameter Name="JSONURL" Function="S3URL">=${S3_Bucket},${REST_Log_Path}/NewResidentForm_${JobID}.json,3600</Parameter>
-                                </Parameters>
-                            </Action>
-                        </Actions>
-                    </Action>
-                </Actions>
-            </Action>
-        </Actions>
-    </Command>
-    <Command Name="AddSignupQrvey" IsNOP="true">
-        <Actions>
-            <Action Type="XSLT2">
-                <Parameters>
-                    <Parameter Name="Transform" Function="S3URL">=${S3_Bucket},xsl/CopyURL.xslt,3600</Parameter>
-                    <Parameter Name="SourceURI" Function="S3URL">=${S3_Bucket},${Qrvey_File},3600</Parameter>
-                </Parameters>
-                <Actions>
-                    <Action Type="XSLT2" XSLTOutputIsText="true">
-                        <Parameters>
-                            <Parameter Name="Transform" Function="S3URL">=${S3_Bucket},xsl/QrveyXML2JSON.xsl,3600</Parameter>
-                            <Parameter Name="StylesURI" Function="S3URL">=${S3_Bucket},config/QrveyStyles.xml,3600</Parameter>
-                            <Parameter Name="QrveyUser">$UserID</Parameter>
-                            <Parameter Name="StyleUser">$UserID</Parameter>
-                            <Parameter Name="Bucket">$S3_Bucket</Parameter>
-                            <Parameter Name="Name">=${REST_Log_Path}/SignupSurvey_${JobID}.json</Parameter>
-                            <Parameter Name="ContentType">application/json</Parameter>
-                        </Parameters>
-                        <Actions>
-                            <Action Type="S3PUT" Mode="debug">
-                                <Parameters>
-                                    <Parameter Name="Bucket">$S3_Bucket</Parameter>
-                                    <Parameter Name="Name">=${REST_Log_Path}/SignupSurvey_${JobID}.xml</Parameter>
-                                </Parameters>
-                            </Action>
-                            <Action Type="Command" Command="AddSurveyFromJSON">
-                                <Parameters>
-                                    <Parameter Name="QrveyType">survey</Parameter>
-                                    <Parameter Name="JSONURL" Function="S3URL">=${S3_Bucket},${REST_Log_Path}/SignupSurvey_${JobID}.json,3600</Parameter>
-                                </Parameters>
-                            </Action>
-                        </Actions>
-                    </Action>
-                </Actions>
-            </Action>
-        </Actions>
-    </Command>-->
-    <!--     <Command Name="RegisterVillage" IsNOP="true">
-        <Actions>
-            <Action Type="S3PUT">
-                <Parameters>
-                    <Parameter Name="Bucket">$S3_Bucket</Parameter>
-                    <Parameter Name="Name">=Forms/${QrveyID}/RegisterVillage_Parameters_${JobID}.xml</Parameter>
-                </Parameters>
-                <Body ContentType="application/xml"><![CDATA[=
-                    <Parameters>
-                        <Parameter Name="VillageName">${VillageName}</Parameter>
-                        <Parameter Name="VillageUnits">${VillageUnits}</Parameter>
-                        <Parameter Name="NewResidentsLink">${PostProcessBase}?f=NewResidentsForm</Parameter>
-                    </Parameters>
-                ]]></Body>
-            </Action>
-            <Action Type="S3PUT">
-                <Parameters>
-                    <Parameter Name="Bucket">$S3_Bucket</Parameter>
-                    <Parameter Name="Name">=Forms/${QrveyID}/RegisterVillage_Recipients_${JobID}.xml</Parameter>
-                    <Parameter Name="UserID" XPath="//userid"/>
-                </Parameters>
-                <Body ContentType="application/xml"><![CDATA[=
-                    <Village Name='${VillageName}' Units='${VillageUnits}'>
-                        <Emails Type='Contacts'>
-                            <Email Position='Contact1'>
-                                <To>${Contact1.Email}</To>
-                                <Firstname>${Contact1.FirstName}</Firstname>
-                                <Lastname>${Contact1.LastName}</Lastname>
-                                <Salutation>${Contact1.Salutation}</Salutation>
-                            </Email>
-                            <Email Position='Contact2'>
-                                <To>${Contact2.Email}</To>
-                                <Firstname>${Contact2.FirstName}</Firstname>
-                                <Lastname>${Contact2.LastName}</Lastname>
-                                <Salutation>${Contact2.Salutation}</Salutation>
-                            </Email>
-                            <Email Position='Contact3'>
-                                <To>${Contact3.Email}</To>
-                                <Firstname>${Contact3.FirstName}</Firstname>
-                                <Lastname>${Contact3.LastName}</Lastname>
-                                <Salutation>${Contact3.Salutation}</Salutation>
-                            </Email>
-                        </Emails>
-                    </Village>
-                ]]></Body>
-            </Action>
-            <Action Type="XSLT2">
-                <Parameters>
-                    <Parameter Name="Transform" Function="S3URL">=${S3_Bucket},xsl/CopyURL.xslt,3600</Parameter>
-                    <Parameter Name="SourceURI" Function="S3URL">=${S3_Bucket},config/NewResidentsForm.xml,3600</Parameter>
-                </Parameters>
-                <Actions>
-                    <Action Type="XSLT2" XSLTOutputIsText="true">
-                        <Parameters>
-                            <Parameter Name="Transform" Function="S3URL">=${S3_Bucket},xsl/QrveyXML2JSON.xsl,3600</Parameter>
-                            <Parameter Name="StylesURI" Function="S3URL">=${S3_Bucket},config/QrveyStyles.xml,3600</Parameter>
-                            <Parameter Name="ParametersListURI" Function="S3URL">=${S3_Bucket},Forms/${QrveyID}/RegisterVillage_Parameters_${JobID}.xml,3600</Parameter>
-                            <Parameter Name="QrveyUser">$UserID</Parameter>
-                            <Parameter Name="StyleUser">$UserID</Parameter>
-                            <Parameter Name="Bucket">$S3_Bucket</Parameter>
-                            <Parameter Name="Name">=Forms/${QrveyID}/RegisterVillageResidentsForm_${JobID}.json</Parameter>
-                            <Parameter Name="ContentType">application/json</Parameter>
-                        </Parameters>
-                        <Actions>
-                            <Action Type="S3PUT" Mode="debug">
-                                <Parameters>
-                                    <Parameter Name="Bucket">$S3_Bucket</Parameter>
-                                    <Parameter Name="Name">=${REST_Log_Path}/SignupSurvey_${JobID}.xml</Parameter>
-                                </Parameters>
-                            </Action>
-                            <Action Type="Command" Command="AddSurveyFromJSON">
-                                <Parameters>
-                                    <Parameter Name="QrveyType">onlineform</Parameter>
-                                    <Parameter Name="JSONURL" Function="S3URL">=${S3_Bucket},Forms/${QrveyID}/RegisterVillageResidentsForm_${JobID}.json,3600</Parameter>
-                                    <Parameter Name="Recipients_File">=Forms/${QrveyID}/RegisterVillage_Recipients_${JobID}.xml</Parameter>
-                                </Parameters>
-                            </Action>
-                        </Actions>
-                    </Action>
-                </Actions>
-            </Action>
-        </Actions>
-    </Command> -->
 </Commands>

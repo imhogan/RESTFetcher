@@ -25,10 +25,16 @@ PUSHD "%~dp0"
 SET _INSTALL_PATH=%~dp0
 SET _SELF=%~0
 
-SET _7ZIP="C:\Program Files\7-Zip\7z.exe"
+IF DEFINED 7ZIP (SET _7ZIP=%_7ZIP%) ELSE (SET _7ZIP="C:\Program Files\7-Zip\7z.exe")
+
+IF NOT EXIST "%7ZIP%" (
+    ECHO Unable to find 7ZIP application - please set 7ZIP environment variable!
+    GOTO USAGE
+)
+
 SET _MAKE_BUCKET=
 SET _DOMAIN=au-com-thinkronicity
-SET _VERSION=1.0.1
+SET _VERSION=1.0.0
 SET _S3_SOURCE=open* client*
 SET _S3_Payer=BucketOwner
 

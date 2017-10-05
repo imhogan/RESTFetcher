@@ -10,7 +10,7 @@
         <thankYouPage>
             <title>Thanks for registering your interests.</title>
             <content>The Social Committee appreciates the time you have taken to complete this survey..</content>
-            <!--<link>${NewFormLink}</link>-->
+            <!--<link>${NewResponseLink}</link>-->
         </thankYouPage>
     </settings>
     <questions>

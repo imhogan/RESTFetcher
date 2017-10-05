@@ -724,7 +724,14 @@
                             "parameter.FOP_CONFIG:fop-aws.xconf",
                             "# Log folder for debugging.",
                             "parameter.REST_Log_Path:REST_Logs",
-                            "# API Key for bitly calls",
+                            "# API Details for bitly calls",
+                            {"Fn::Join": [
+                                "",
+                                [
+                                    "parameter.BITLY_API_Base:",
+                                    {"Ref": "BitlyAPIBase"}
+                                ]
+                            ]},
                             {"Fn::Join": [
                                 "",
                                 [

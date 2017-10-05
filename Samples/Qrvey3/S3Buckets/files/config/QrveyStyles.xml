@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<styleCollections>
+    <styleCollection name="OurVillage">
+        <style type='customStyle' id='OVS001' name='OurVillageDefault' newChanges='false'>
+            <mainFont>#ffffff</mainFont>
+            <imgSize>150</imgSize>
+            <questionFont>#595959</questionFont>
+            <answerFont>#595959</answerFont>
+            <background>#fafafa</background>
+            <textFieldBackground>#f7f7f7</textFieldBackground>
+            <buttons>#293b49</buttons>
+            <main>#e6773d</main>
+        </style>
+    </styleCollection>
+</styleCollections>

@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Villages>
+    <Village ID='V001' Name='The Links at Waterford' Units='87'>
+        <Emails Type='Staff'>
+            <Email Position='Manager'>
+                <To>Ian_MacDonald_Hogan@yahoo.com</To>
+                <Firstname>Ian</Firstname>
+                <Lastname>Hogan</Lastname>
+                <Salutation>Hi</Salutation>
+            </Email>
+            <Email Position='Assistant'>
+                <To>i_m_hogan@hotmail.com</To>
+                <Firstname>Ian</Firstname>
+                <Lastname>Hogan</Lastname>
+                <Salutation>Dear</Salutation>
+            </Email>
+        </Emails>
+    </Village>
+    <Village ID='V002' Name='Waterford Lakes' Units='200'>
+        <Emails Type='Staff'>
+            <Email Position='Manager'>
+                <To>Ian_MacDonald_Hogan@yahoo.com</To>
+                <Firstname>Ian</Firstname>
+                <Lastname>Hogan</Lastname>
+                <Salutation>Hi</Salutation>
+            </Email>
+            <Email Position='Assistant'>
+                <To>i_m_hogan@hotmail.com</To>
+                <Firstname>Ian</Firstname>
+                <Lastname>Hogan</Lastname>
+                <Salutation>Dear</Salutation>
+            </Email>
+        </Emails>
+    </Village>
+</Villages>

@@ -1,0 +1,190 @@
+{
+  "AWSTemplateFormatVersion": "2010-09-09",
+  "Metadata": {
+    "AWS::CloudFormation::Designer": {
+      "b759756e-4760-4d81-9577-c42c735c5139": {
+        "size": {
+          "width": 60,
+          "height": 60
+        },
+        "position": {
+          "x": 40,
+          "y": 50
+        },
+        "z": 0,
+        "embeds": []
+      }
+    }
+  },
+  "Parameters": {
+    "ProjectPrefix": {
+      "Description": "Project prefix - for reuse with different projects",
+      "Type": "String",
+      "Default": "smirnov"
+    },
+    "TargetEnvironment": {
+      "Description": "Target environment - dev, test or prod, default is dev",
+      "Type": "String",
+      "AllowedValues": [
+        "dev",
+        "test",
+        "prod"
+      ],
+      "Default": "dev"
+    },
+    "ReadCapacityUnits": {
+      "Description": "Provisioned read throughput",
+      "Type": "Number",
+      "Default": "5",
+      "MinValue": "5",
+      "MaxValue": "10000",
+      "ConstraintDescription": "must be between 5 and 10000"
+    },
+    "WriteCapacityUnits": {
+      "Description": "Provisioned write throughput",
+      "Type": "Number",
+      "Default": "10",
+      "MinValue": "5",
+      "MaxValue": "10000",
+      "ConstraintDescription": "must be between 5 and 10000"
+    }
+  },
+  "Resources": {
+    "accountTable": {
+      "Type": "AWS::DynamoDB::Table",
+      "Properties": {
+        "TableName": {
+          "Fn::Join": [
+            "-",
+            [
+              {
+                "Ref": "ProjectPrefix"
+              },
+              {
+                "Ref": "TargetEnvironment"
+              },
+              "sm",
+              "account"
+            ]
+          ]
+        },
+        "AttributeDefinitions": [
+          {
+            "AttributeName": "ID",
+            "AttributeType": "S"
+          },
+          {
+            "AttributeName": "Title",
+            "AttributeType": "S"
+          }
+        ],
+        "KeySchema": [
+          {
+            "AttributeName": "ID",
+            "KeyType": "HASH"
+          },
+          {
+            "AttributeName": "Title",
+            "KeyType": "RANGE"
+          }
+        ],
+        "ProvisionedThroughput": {
+          "ReadCapacityUnits": {
+            "Ref": "ReadCapacityUnits"
+          },
+          "WriteCapacityUnits": {
+            "Ref": "WriteCapacityUnits"
+          }
+        }
+      }
+    },
+    "surveyTable": {
+        "Type": "AWS::DynamoDB::Table",
+        "Properties": {
+          "TableName": {
+            "Fn::Join": [
+              "-",
+              [
+                {
+                  "Ref": "ProjectPrefix"
+                },
+                {
+                  "Ref": "TargetEnvironment"
+                },
+                "sm",
+                "survey"
+              ]
+            ]
+          },
+          "AttributeDefinitions": [
+            {
+              "AttributeName": "ID",
+              "AttributeType": "S"
+            },
+            {
+              "AttributeName": "Title",
+              "AttributeType": "S"
+            }
+          ],
+          "KeySchema": [
+            {
+              "AttributeName": "ID",
+              "KeyType": "HASH"
+            },
+            {
+              "AttributeName": "Title",
+              "KeyType": "RANGE"
+            }
+          ],
+          "ProvisionedThroughput": {
+            "ReadCapacityUnits": {
+              "Ref": "ReadCapacityUnits"
+            },
+            "WriteCapacityUnits": {
+              "Ref": "WriteCapacityUnits"
+            }
+          }
+        }
+     },
+     "propertyTable": {
+         "Type": "AWS::DynamoDB::Table",
+         "Properties": {
+           "TableName": {
+             "Fn::Join": [
+               "-",
+               [
+                 {
+                   "Ref": "ProjectPrefix"
+                 },
+                 {
+                   "Ref": "TargetEnvironment"
+                 },
+                 "sys",
+                 "property"
+               ]
+             ]
+           },
+           "AttributeDefinitions": [
+             {
+               "AttributeName": "Name",
+               "AttributeType": "S"
+             }
+           ],
+           "KeySchema": [
+             {
+               "AttributeName": "Name",
+               "KeyType": "HASH"
+             }
+           ],
+           "ProvisionedThroughput": {
+             "ReadCapacityUnits": {
+               "Ref": "ReadCapacityUnits"
+             },
+             "WriteCapacityUnits": {
+               "Ref": "WriteCapacityUnits"
+             }
+           }
+         }
+       }
+  }
+}

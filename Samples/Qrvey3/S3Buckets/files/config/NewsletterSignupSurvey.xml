@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<qrvey name='Newsletter and Survey Signup for ${VillageName}'>
+    <settings>
+        <properties introPage='true' emailNotifications='true' results_visibility="Private" respondent_email="Mandatory"></properties>
+        <description>Please fill out this form if you want to join one or more of our village monitor email lists, eg to receive a regular reminder to test your emergency call buttons.</description>
+        <duration>
+            <neverExpires>true</neverExpires>
+            <from>2016-12-08T19:18:37.885Z</from>
+        </duration>
+        <thankYouPage>
+            <title>Thanks for signing up!</title>
+            <content>Please click the link below and you will shortly receive an email requesting your confirmation of signing up. Then click on the link in the email to confirm your subscription.</content>
+            <link>${NewsletterSignupLink}</link>
+        </thankYouPage>
+    </settings>
+    <questions>
+        <question type='NUMERIC' time='3' _required='true' text='Please enter your unit number.' allowDecimals='false' hasMinMax='true' min='1' max='500' numberType='Number'/>
+        <question type='MULTIPLE_CHOICE' time='10' _required='true' text='Please select which monitoring service(s) you would like to subscribe to.'>
+            <answer>Monthly Emergency Call Button Reminder</answer>
+            <answer>Monthly Management Satisfaction Survey</answer>
+            <answer>Monthly Residents Action Committee Feedback Questionnaire</answer>
+            <answer>Quarterly Residents Health and Safety Survey</answer>
+            <answer>Occasional Health Research Program Invitations</answer>
+        </question>
+        <question type='SINGLE_CHOICE' time='10' _required='true' text='How did discover this form?' otherField='true'>
+            <answer>Through the village web site.</answer>
+            <answer>Notified by the Village Manager via email.</answer>
+            <answer>Mentioned by another resident.</answer>
+        </question>
+    </questions>
+</qrvey>

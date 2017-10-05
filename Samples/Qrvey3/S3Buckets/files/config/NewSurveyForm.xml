@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<qrvey name='New Village Registration'>
+    <settings>
+        <properties introPage='true' emailNotifications='true' results_visibility="Private" respondent_email="Mandatory"></properties>
+        <description>Please fill out this form to create a new survey.</description>
+        <duration>
+            <neverExpires>true</neverExpires>
+            <from>2016-12-08T19:18:37.885Z</from>
+        </duration>
+        <thankYouPage>
+            <title>Thanks for creating the survey.</title>
+            <content>Please click the link below and you will receive your survey creation confirmation email.</content>
+            <link>${NewSurveyLink}</link>
+        </thankYouPage>
+    </settings>
+    <questions>
+        <question id='survey_name' type='SINGLE_CHOICE' time='10' _required='true' text='Which survey do you want to send?' otherField='true'>
+            <answer answerid='ResidentInterestSurvey'>Resident Interest Survey</answer>
+        </question>
+        <question id='survey_title' type='TEXTFIELD' time='10' _required='true' text='Please enter the title for the survey.' maxChar='120'/>
+    </questions>
+</qrvey>

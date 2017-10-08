@@ -554,6 +554,8 @@ public class REST_Walker {
 
                 String bodyContent = Utility.getParameterValue("Body", bodyElement, this.commandsNamespaceMap, actionParameters, contextElement, this.walkerConfig.verbose, this.walkerConfig.debug);
                 outputDocument = Utility.readXmlFromString(bodyContent);
+            } else if (actionParameters.containsKey("SourceURI")) {
+                outputDocument = Utility.readXmlFromURI(actionParameters.get("SourceURI"));
             } else {
                 outputDocument = contextElement.getOwnerDocument();
             }

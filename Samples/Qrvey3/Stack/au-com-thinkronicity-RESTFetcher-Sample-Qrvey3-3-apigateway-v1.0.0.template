@@ -153,7 +153,7 @@
             "MinLength": 1,
             "MaxLength": 255,
             "AllowedPattern": "^[a-zA-Z][-a-zA-Z0-9]*$",
-            "Default": "qrvey-sample-2-tools"
+            "Default": "qrvey-sample-3-tools"
         },
         "S3PutFileKey": {
             "Description": "Zip file for S3 Put File function",
@@ -449,7 +449,7 @@
                             "#set($inputRoot = $input.path('$'))",
                            "{",
                             "\"S3_Bucket\": \"$input.params('project')-${stageVariables.mode}-files-${stageVariables.domain}\"",
-                            ",\"configurationURI\": \"s3://$input.params('project')-${stageVariables.mode}-files-${stageVariables.domain}/config/Qrvey2.properties\"",
+                            ",\"configurationURI\": \"s3://$input.params('project')-${stageVariables.mode}-files-${stageVariables.domain}/config/Qrvey3.properties\"",
                             ",\"UserID\": \"$input.params('userid')\"",
                             ",\"JobID\": \"${context.requestId}\"",
                             ",\"QrveyID\": \"$input.params('qrveyid')\"",
@@ -567,7 +567,7 @@
                 },
                 "Target": {
                     "Bucket": {"Fn::ImportValue" : {"Fn::Sub" : "${ProjectToolsStack}-AccessProjectS3FilesBucket"}},
-                    "Key": "www/2/StartPostProcess.html",
+                    "Key": "www/3/StartPostProcess.html",
                     "ACL": "public-read",
                     "contentType": "text/html"
                 },
@@ -592,7 +592,7 @@
                 },
                 "Target": {
                     "Bucket": {"Fn::ImportValue" : {"Fn::Sub" : "${ProjectToolsStack}-AccessProjectS3FilesBucket"}},
-                    "Key": "www/2/TriggerFired.html",
+                    "Key": "www/3/TriggerFired.html",
                     "ACL": "public-read",
                     "contentType": "text/html"
                 },
@@ -636,7 +636,7 @@
                 },
                 "Target": {
                     "Bucket": {"Fn::ImportValue" : {"Fn::Sub" : "${ProjectToolsStack}-AccessProjectS3FilesBucket"}},
-                    "Key": "www/2/config.js",
+                    "Key": "www/3/config.js",
                     "ACL": "public-read"
                 },
                 "Debug": "true"
@@ -811,7 +811,7 @@
                                     {"Ref": "AWS::Region"},
                                     ".amazonaws.com/",
                                     {"Fn::ImportValue" : {"Fn::Sub" : "${ProjectToolsStack}-AccessProjectS3FilesBucket"}},
-                                    "/www/2/StartPostProcess.html"
+                                    "/www/3/StartPostProcess.html"
                                 ]
                             ]}
                         ]
@@ -820,7 +820,7 @@
                 },
                 "Target": {
                     "Bucket": {"Fn::ImportValue" : {"Fn::Sub" : "${ProjectToolsStack}-AccessProjectS3FilesBucket"}},
-                    "Key": "config/Qrvey2.properties"
+                    "Key": "config/Qrvey3.properties"
                 },
                 "Debug": "true"
             }
@@ -841,7 +841,7 @@
                                 {"Ref": "AWS::Region"},
                                 ".amazonaws.com/",
                                 {"Fn::ImportValue" : {"Fn::Sub" : "${ProjectToolsStack}-AccessProjectS3FilesBucket"}},
-                                "/www/2/StartPostProcess.html?f={FormName}"
+                                "/www/3/StartPostProcess.html?f={FormName}"
                             ]
                     ]
             },

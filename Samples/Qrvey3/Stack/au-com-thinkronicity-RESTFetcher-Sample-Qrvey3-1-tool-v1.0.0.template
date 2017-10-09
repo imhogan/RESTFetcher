@@ -24,7 +24,7 @@
     "RESTFetcherKey": {
       "Description": "Zip file for REST Fetcher function",
       "Type": "String",
-      "Default": "au-com-thinkronicity-RestFetcher-V2.4.4CE.zip"
+      "Default": "au-com-thinkronicity-RestFetcher-V2.4.8CE.zip"
     },
     "S3TriggerKey": {
       "Description": "Zip file for S3Trigger function",
@@ -279,8 +279,8 @@
     "ProjectFilesBucket": {
       "Type": "AWS::S3::Bucket",
       "DeletionPolicy" : "Retain",
+      "DependsOn": ["RESTFetcherLambda","RESTFetcherLambdaInvokePermission"],
       "Properties": {
-        "DependsOn": ["RESTFetcherLambda","RESTFetcherLambdaInvokePermission"],
         "BucketName": {
           "Fn::Join": [
             "",

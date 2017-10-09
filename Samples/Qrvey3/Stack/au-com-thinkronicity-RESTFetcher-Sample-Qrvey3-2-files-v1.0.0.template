@@ -27,7 +27,7 @@
         "ProjectZipFilesList": {
             "Description": "Project List Files",
             "Type": "CommaDelimitedList",
-            "Default": "au-com-thinkronicity-RestFetcher-QrveySample2-V1.0.1.zip"
+            "Default": "au-com-thinkronicity-RestFetcher-QrveySample3-V1.0.0.zip"
         },
         "ProjectToolsStack": {
             "Description": "The stack containing the base framework for the system.",
@@ -35,7 +35,7 @@
             "MinLength": 1,
             "MaxLength": 255,
             "AllowedPattern": "^[a-zA-Z][-a-zA-Z0-9]*$",
-            "Default": "qrvey-sample-2-tools"
+            "Default": "qrvey-sample-3-tools"
         }
     },
     "Mappings": {"AWSRegion2Bucket": {

@@ -23,18 +23,24 @@ SETLOCAL
 
 PUSHD "%~dp0"
 SET _INSTALL_PATH=%~dp0
+
 SET _SELF=%~0
 
-IF DEFINED 7ZIP (SET _7ZIP=%_7ZIP%) ELSE (SET _7ZIP="C:\Program Files\7-Zip\7z.exe")
+IF DEFINED ZIPPER (
+    SET _7ZIP=%ZIPPER%
+) ELSE (
+    SET _7ZIP="C:\Program Files\7-Zip\7z.exe"
+)
 
-IF NOT EXIST "%7ZIP%" (
-    ECHO Unable to find 7ZIP application - please set 7ZIP environment variable!
+IF NOT EXIST %_7ZIP% (
+    ECHO Unable to find 7ZIP application - please set ZIPPER environment variable!
     GOTO USAGE
 )
 
 SET _MAKE_BUCKET=
 SET _DOMAIN=au-com-thinkronicity
 SET _VERSION=1.0.0
+SET _SampleID=3
 SET _S3_SOURCE=open* client*
 SET _S3_Payer=BucketOwner
 
@@ -146,9 +152,9 @@ REM ============================================================================
 
 PUSHD S3Buckets\files
 
-DEL "%_INSTALL_PATH%S3Buckets\opencode\au-com-thinkronicity-RestFetcher-QrveySample2-V%_VERSION%.zip"
+DEL "%_INSTALL_PATH%S3Buckets\opencode\au-com-thinkronicity-RestFetcher-QrveySample%_SampleID%-V%_VERSION%.zip"
 
-%_7ZIP% a -r -tZIP "%_INSTALL_PATH%S3Buckets\opencode\au-com-thinkronicity-RestFetcher-QrveySample2-V%_VERSION%.zip" *.*
+%_7ZIP% a -r -tZIP "%_INSTALL_PATH%S3Buckets\opencode\au-com-thinkronicity-RestFetcher-QrveySample%_SampleID%-V%_VERSION%.zip" *.*
 
 POPD
 

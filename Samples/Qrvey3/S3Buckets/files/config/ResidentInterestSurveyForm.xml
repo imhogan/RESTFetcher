@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<qrvey name='Resident Interest Survey'>
+<qrvey name='${VillageName} Resident Interest Survey'>
     <settings>
         <properties introPage='true' emailNotifications='true' results_visibility="Private" respondent_email="Mandatory"></properties>
         <description>Please fill out this survey to help the Social Committee plan events to suit your interests. Please note, your responses are anonymous.</description>

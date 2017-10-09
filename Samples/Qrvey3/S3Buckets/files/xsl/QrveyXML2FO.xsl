@@ -21,13 +21,16 @@
     
     <!-- Processing parameters. -->
     <xsl:param name="ApplicationTitle">Qrvey Printable Format</xsl:param>
-    <xsl:param name="ApplicationSubTitle" select="//qrvey/@name"/>
+    <xsl:param name="ApplicationSubTitle">
+        <xsl:call-template name="ReplaceParameters"><xsl:with-param name="value" select="//qrvey/@name"/></xsl:call-template>
+    </xsl:param>
     <xsl:param name="PageLogoURL"/>
     <xsl:param name="PageLogoScale">100%</xsl:param>
     <xsl:param name="EntityImageURIPattern"/>
     <xsl:param name="EntityImageArchivedURIPattern"/>
     <xsl:param name="EntityIconScale">16px</xsl:param>
     <xsl:param name="IconImageURIPattern">../images/-iconPath-</xsl:param>
+    <xsl:param name="ParametersListURI"/>
     <xsl:param name="Debug">No</xsl:param>
     
     <!-- Define format attribute sets. -->
@@ -148,6 +151,16 @@
     <xsl:variable name="LineHeight"           select="'4mm'"              />
     <xsl:variable name="HalfLineHeight"       select="'2mm'"              />
     <xsl:variable name="DoubleLineHeight"     select="'8mm'"              />
+
+    <xsl:variable name="ParametersListAbsURI">
+        <xsl:call-template name="GetAbsoluteURI">
+            <xsl:with-param name="SourceURI" select="$ParametersListURI"/>
+        </xsl:call-template>
+    </xsl:variable>
+    <xd:doc>
+        <xd:desc>Load the styles or use an empty sequence if there is none.</xd:desc>
+    </xd:doc>
+    <xsl:variable name="Parameters" select="if (fn:doc-available($ParametersListAbsURI)) then fn:doc($ParametersListAbsURI) else ()"></xsl:variable>
     
     <xsl:variable name="QuestionIndex">
         <xsl:for-each select="//question">
@@ -308,7 +321,7 @@
                                         <fo:table-cell xsl:use-attribute-sets="questionText stdPadding">
                                             <fo:block-container>
                                                 <fo:block padding-after="2mm">
-                                                    <xsl:value-of select="@text"/>
+                                                    <xsl:call-template name="ReplaceParameters"><xsl:with-param name="value" select="@text"/></xsl:call-template>
                                                     <fo:inline xsl:use-attribute-sets="optionNotes" margin-left="2mm">
                                                         (<xsl:choose>
                                                             <xsl:when test="@type='MULTIPLE_CHOICE'">Please select one or more options.</xsl:when>
@@ -360,7 +373,14 @@
                                                                                             </fo:table-cell>
                                                                                             <fo:table-cell padding-left="2mm">
                                                                                                 <fo:block>
-                                                                                                    <xsl:value-of select="text()"/>
+                                                                                                    <xsl:call-template name="ReplaceParameters">
+                                                                                                        <xsl:with-param name="value">
+                                                                                                            <xsl:for-each select="text()[normalize-space(.)]">
+                                                                                                                <xsl:if test="position() &gt; 1"><xsl:text> </xsl:text></xsl:if>
+                                                                                                                <xsl:value-of select="normalize-space(.)"/>
+                                                                                                            </xsl:for-each>
+                                                                                                        </xsl:with-param>
+                                                                                                    </xsl:call-template>
                                                                                                     <xsl:if test="$Debug='Y'">
                                                                                                         (<xsl:value-of select="if(../@_sort_options='true') then text()[normalize-space()][1] else position()"/>)
                                                                                                     </xsl:if>
@@ -525,7 +545,7 @@
                         </fo:table-cell>
                         <fo:table-cell xsl:use-attribute-sets="subTable">
                             <fo:block xsl:use-attribute-sets="subTableHeader">
-                                <xsl:value-of select="."/>
+                                <xsl:call-template name="ReplaceParameters"><xsl:with-param name="value" select="."/></xsl:call-template>
                             </fo:block>
                         </fo:table-cell>
                     </fo:table-row>
@@ -556,8 +576,35 @@
     </xsl:template>
 
     <xsl:template match="text()">
-        <xsl:value-of select="."/>
+        <xsl:call-template name="ReplaceParameters"><xsl:with-param name="value" select="."/></xsl:call-template>
     </xsl:template>
     
+    <xsl:template name="GetAbsoluteURI">
+        <xsl:param name="SourceURI"></xsl:param>
+        <xsl:choose>
+            <xsl:when test="fn:base-uri(/) != ''"><xsl:value-of select="fn:resolve-uri($SourceURI,fn:base-uri(/))"/></xsl:when>
+            <xsl:when test="fn:base-uri() != ''"><xsl:value-of select="fn:resolve-uri($SourceURI,fn:base-uri())"/></xsl:when>
+            <xsl:otherwise><xsl:value-of select="$SourceURI"/></xsl:otherwise>
+        </xsl:choose>
+    </xsl:template>
+    
+    <xsl:template name="ReplaceParameters">
+        <xsl:param name="value" select="."/>
+        <xsl:param name="paramPos">1</xsl:param>
+        <xsl:choose>
+            <xsl:when test="count($Parameters//Parameter) > $paramPos">
+                <xsl:call-template name="ReplaceParameters">
+                    <xsl:with-param name="value" select="replace($value,concat('[\$]\{',$Parameters//Parameter[position() = $paramPos]/@Name,'\}'),normalize-space($Parameters//Parameter[position() = $paramPos]))"/>
+                    <xsl:with-param name="paramPos" select="$paramPos + 1"/>
+                </xsl:call-template>
+            </xsl:when>
+            <xsl:when test="$Parameters//Parameter[$paramPos]">
+                <xsl:value-of select="replace($value,concat('[\$]\{',$Parameters//Parameter[position() = $paramPos]/@Name,'\}'),normalize-space($Parameters//Parameter[position() = $paramPos]))"/>
+            </xsl:when>
+            <xsl:otherwise>
+                <xsl:value-of select="$value"/>
+            </xsl:otherwise>
+        </xsl:choose>
+    </xsl:template>
 </xsl:stylesheet>
 

@@ -52,7 +52,7 @@
         </xsl:call-template>
     </xsl:variable>
     <xd:doc>
-        <xd:desc>Load the styles or use an empty sequence if there is none.</xd:desc>
+        <xd:desc>Load the parameters list or use an empty sequence if there is none.</xd:desc>
     </xd:doc>
     <xsl:variable name="Parameters" select="if (fn:doc-available($ParametersListAbsURI)) then fn:doc($ParametersListAbsURI) else ()"></xsl:variable>
     

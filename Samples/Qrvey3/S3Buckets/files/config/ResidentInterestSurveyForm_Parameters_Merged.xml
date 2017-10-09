@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Parameters xmlns:xs="http://www.w3.org/2001/XMLSchema">
+   <Parameter Name="NewSurveyLink">SomeLongBase?f=NewSurveyQrveyaa</Parameter>
+   <Parameter Name="VillageName">Some Village</Parameter>
+   <Parameter Name="VillageID">ZZ11</Parameter>
+</Parameters>

@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Parameters>
     <Parameter Name="NewSurveyLink">SomeLongBase?f=NewSurveyQrvey</Parameter>
+    <Parameter Name="VillageName">Some Village</Parameter>
+    <Parameter Name="VillageID">ZZ11</Parameter>
 </Parameters>
 

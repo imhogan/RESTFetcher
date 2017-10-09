@@ -1031,11 +1031,19 @@ public class Utility {
             NodeList parameterURINodes = Utility.getNodesByXPath(parametersElement, parametersExtraXPath, prefMap);
             if (parameterURINodes != null && parameterURINodes.getLength() == 1) {
                 
-                Document paramsDocument = readXmlFromURI(((Element)parameterURINodes.item(0)).getAttribute("ParametersURI"));
-                
-                HashMap<String, String> extraParameters = Utility.loadParameters(false, ((Element)parameterURINodes.item(0)).getAttribute("ParametersXPath"), null, paramsDocument.getDocumentElement(), prefMap, contextParameters, contextElement, verbose, debug);
-                
-                 result.putAll(extraParameters);
+                try {
+                    Document paramsDocument = readXmlFromURI(((Element)parameterURINodes.item(0)).getAttribute("ParametersURI"));
+                    
+                    HashMap<String, String> extraParameters = Utility.loadParameters(false, ((Element)parameterURINodes.item(0)).getAttribute("ParametersXPath"), null, paramsDocument.getDocumentElement(), prefMap, contextParameters, contextElement, verbose, debug);
+                    
+                    result.putAll(extraParameters);
+                }
+                catch (Exception e) {
+                    if (debug || verbose) {
+            	        Utility.LogMessage("Exception when loading parameters from '" + ((Element)parameterURINodes.item(0)).getAttribute("ParametersURI") + "': " + e.getMessage());
+                    }
+                }
+
                 
             }
         }

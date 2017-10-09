@@ -169,7 +169,7 @@ implements RequestHandler<Object, String> {
                                     String groupName = m.group(1);
                                     this.input.put(groupName, resolver.group(groupName));
                                 }
-                                HashMap<String, String> eventParameters = Utility.loadParameters(false, "../cmd:Parameters/cmd:Parameter", regExpElement, this.commandsNamespaceMap, this.input, null, false, debug);
+                                HashMap<String, String> eventParameters = Utility.loadParameters(false, "../cmd:Parameters/cmd:Parameter", "cmd:Parameters/cmd:ExtraParameters", regExpElement, this.commandsNamespaceMap, this.input, null, false, debug);
                                 NodeList matchNodes = Utility.getNodesByXPath(regExpElement, "..", this.commandsNamespaceMap);
                                 this.input.put("command", ((Element)matchNodes.item(0)).getAttribute("Command"));
                                 this.input.putAll(eventParameters);

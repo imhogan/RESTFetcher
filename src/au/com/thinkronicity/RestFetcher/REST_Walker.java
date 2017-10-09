@@ -190,7 +190,7 @@ public class REST_Walker {
                 }
                 
                 // Add the headers to the connection.
-                HashMap<String, String> commandHeaders = Utility.loadParameters(false, "cmd:Headers/cmd:Header", commandElement, this.commandsNamespaceMap, parameters, null, this.walkerConfig.verbose, this.walkerConfig.debug);
+                HashMap<String, String> commandHeaders = Utility.loadParameters(false, "cmd:Headers/cmd:Header", null, commandElement, this.commandsNamespaceMap, parameters, null, this.walkerConfig.verbose, this.walkerConfig.debug);
                 for (Map.Entry<String, String> entry : commandHeaders.entrySet()) {
                     urlConnection.setRequestProperty(entry.getKey(), entry.getValue());
                     if (!this.walkerConfig.debug && !this.walkerConfig.verbose) continue;
@@ -370,7 +370,7 @@ public class REST_Walker {
                             }
                             
                             // Get the parameters for the action and perform the action.
-                            HashMap<String, String> actionParameters = Utility.loadParameters(true, "cmd:Parameters/cmd:Parameter", actionElement, this.commandsNamespaceMap, contextParameters, matchElement, this.walkerConfig.verbose, this.walkerConfig.debug);
+                            HashMap<String, String> actionParameters = Utility.loadParameters(true, "cmd:Parameters/cmd:Parameter", "cmd:Parameters/cmd:ExtraParameters", actionElement, this.commandsNamespaceMap, contextParameters, matchElement, this.walkerConfig.verbose, this.walkerConfig.debug);
                             Document actionResult = this.doAction(actionElement, actionParameters, contextElement, currentDepth);
                             
                             // Add the results from this action to the results list.
@@ -383,7 +383,7 @@ public class REST_Walker {
                 } else {
                 	
                     // Get the parameters for the action and perform the action.
-                    HashMap<String, String> actionParameters = Utility.loadParameters(true, "cmd:Parameters/cmd:Parameter", actionElement, this.commandsNamespaceMap, contextParameters, contextElement, this.walkerConfig.verbose, this.walkerConfig.debug);
+                    HashMap<String, String> actionParameters = Utility.loadParameters(true, "cmd:Parameters/cmd:Parameter", "cmd:Parameters/cmd:ExtraParameters", actionElement, this.commandsNamespaceMap, contextParameters, contextElement, this.walkerConfig.verbose, this.walkerConfig.debug);
                     actionDocument = this.doAction(actionElement, actionParameters, contextElement, currentDepth);
                     
                     

@@ -124,6 +124,7 @@
   <xs:element name="Parameters">
     <xs:complexType>
       <xs:sequence>
+        <xs:element maxOccurs="1" ref="ExtraParameters"/>
         <xs:element maxOccurs="unbounded" ref="Parameter"/>
       </xs:sequence>
     </xs:complexType>
@@ -139,6 +140,12 @@
       <xs:attribute name="Format" type="ParameterFormatType"/>
       <xs:attribute name="XPath"/>
       <xs:attribute name="Function"/>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="ExtraParameters">
+    <xs:complexType>
+      <xs:attribute name="ParametersURI"/>
+      <xs:attribute name="ParametersXPath"/>
     </xs:complexType>
   </xs:element>
   <xs:element name="Body">

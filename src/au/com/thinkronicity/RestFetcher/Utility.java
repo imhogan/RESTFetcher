@@ -971,6 +971,7 @@ public class Utility {
      * 
      * @param includeContext		- if true the context parameters are added the collection.
      * @param parametersBaseXPath	- the XPath expression used to find the parameter elements.
+     * @param parametersExtraXPath	- the XPath expression used to find the extra parameters element.
      * @param parametersElement		- the parent element to search from.
      * @param prefMap				- the XML prefix map for namespace evaluation.
      * @param contextParameters		- the context parameters.
@@ -984,6 +985,7 @@ public class Utility {
     public static HashMap<String, String> loadParameters(
     		 Boolean includeContext
     		,String parametersBaseXPath
+    		,String parametersExtraXPath
     		,Element parametersElement
     		,Map<String, String> prefMap
     		,HashMap<String, String> contextParameters
@@ -1024,6 +1026,20 @@ public class Utility {
                 }
             }
         }
+        
+        if (parametersExtraXPath != null && !parametersExtraXPath.equals("")) {
+            NodeList parameterURINodes = Utility.getNodesByXPath(parametersElement, parametersExtraXPath, prefMap);
+            if (parameterURINodes != null && parameterURINodes.getLength() == 1) {
+                
+                Document paramsDocument = readXmlFromURI(((Element)parameterURINodes.item(0)).getAttribute("ParametersURI"));
+                
+                HashMap<String, String> extraParameters = Utility.loadParameters(false, ((Element)parameterURINodes.item(0)).getAttribute("ParametersXPath"), null, paramsDocument.getDocumentElement(), prefMap, contextParameters, contextElement, verbose, debug);
+                
+                 result.putAll(extraParameters);
+                
+            }
+        }
+
         return result;
     }
 

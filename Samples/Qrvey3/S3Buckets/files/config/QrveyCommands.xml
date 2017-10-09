@@ -79,7 +79,7 @@
             <Action Type="S3PUT">
                 <Parameters>
                     <Parameter Name="Bucket">$S3_Bucket</Parameter>
-                    <Parameter Name="Name">=Forms/${QrveyID}/NewVillageForm_Parameters_${JobID}.xml</Parameter>
+                    <Parameter Name="Name">=config/NewVillageForm_Parameters_${JobID}.xml</Parameter>
                 </Parameters>
                 <Body ContentType="application/xml"><![CDATA[=
                     <Parameters>
@@ -109,7 +109,8 @@
                 <Parameters>
                     <Parameter Name="UserID" XPath="//userid"/>
                     <Parameter Name="FormName">NewVillageForm</Parameter>
-                    <Parameter Name="Recipients_File">=config/NewVillageForm_Recipients_${JobID}.xml</Parameter>
+                    <Parameter Name="Parameters_File">=config/${FormName}_Parameters_${JobID}.xml</Parameter>
+                    <Parameter Name="Recipients_File">=config/${FormName}_Recipients_${JobID}.xml</Parameter>
                     <Parameter Name="QrveyType">onlineform</Parameter>
                 </Parameters>
             </Action>
@@ -128,14 +129,14 @@
                             <Parameter Name="Transform" Function="S3URL">=${S3_Bucket},xsl/QrveyXML2FO.xsl</Parameter>
                             <Parameter Name="Bucket">$S3_Bucket</Parameter>
                             <Parameter Name="Name">=PDFs/${FormName}_${JobID}.pdf</Parameter>
-                            <Parameter Name="ParametersListURI" Function="S3URL">=${S3_Bucket},config/${FormName}_Parameters_${JobID}.xml,3600</Parameter>
+                            <Parameter Name="ParametersListURI" Function="S3URL">=${S3_Bucket},${Parameters_File},3600</Parameter>
                         </Parameters>
                     </Action>
                     <Action Type="XSLT2" XSLTOutputIsText="true">
                         <Parameters>
                             <Parameter Name="Transform" Function="S3URL">=${S3_Bucket},xsl/QrveyXML2JSON.xsl,3600</Parameter>
                             <Parameter Name="StylesURI" Function="S3URL">=${S3_Bucket},config/QrveyStyles.xml,3600</Parameter>
-                            <Parameter Name="ParametersListURI" Function="S3URL">=${S3_Bucket},config/${FormName}_Parameters_${JobID}.xml,3600</Parameter>
+                            <Parameter Name="ParametersListURI" Function="S3URL">=${S3_Bucket},${Parameters_File},3600</Parameter>
                             <Parameter Name="QrveyUser">$UserID</Parameter>
                             <Parameter Name="StyleUser">$UserID</Parameter>
                             <Parameter Name="Bucket">$S3_Bucket</Parameter>
@@ -628,6 +629,7 @@ var ResultsConfig = {
                 <Parameters>
                     <Parameter Name="UserID" XPath="//userid"/>
                     <Parameter Name="QrveyType">onlineform</Parameter>
+                    <Parameter Name="Parameters_File">=Forms/${QrveyID}/${FormName}_Parameters_${JobID}.xml</Parameter>
                     <Parameter Name="Recipients_File">$RecipientsFile</Parameter>
                 </Parameters>
             </Action>
@@ -765,6 +767,7 @@ var ResultsConfig = {
             <Action Type="Command" Command="PublishQrvey">
                 <Parameters>
                     <Parameter Name="UserID" XPath="//userid"/>
+                    <Parameter Name="Parameters_File">=Forms/${QrveyID}/${FormName}_Parameters_${JobID}.xml</Parameter>
                     <Parameter Name="Recipients_File">=Forms/${QrveyID}/RecipientsFile.xml</Parameter>
                     <Parameter Name="QrveyType">$SurveyType</Parameter>
                 </Parameters>
@@ -966,104 +969,6 @@ var ResultsConfig = {
             <Action Type="AddResult">
                 <Parameters>
                     <Parameter Name="Result">=Deleted qrvey ${QrveyID} for user ${UserID}</Parameter>
-                </Parameters>
-            </Action>
-        </Actions>
-    </Command>
-    <Command Name="InitSystemXX" Verb="POST" IsJSON="true">
-        <Headers>
-            <Header Name="x-api-key">$API_KEY</Header>
-        </Headers>
-        <Parameters>
-            <Parameter Name="entity">user</Parameter>
-        </Parameters>
-        <Body>=
-            {
-            "email": "${UserEmail}",
-            "password": "${UserPassword}",
-            "first_name": "${UserFirstname}",
-            "last_name": "${UserLastname}",
-            "organization": "${UserOrganisation}"
-            }
-        </Body>
-        <Actions>
-            <Action Type="S3PUT" Mode="debug">
-                <Parameters>
-                    <Parameter Name="Bucket">$S3_Bucket</Parameter>
-                    <Parameter Name="Name">=${REST_Log_Path}/AddUser${JobID}.xml</Parameter>
-                </Parameters>
-            </Action>
-            <Action Type="S3PUT">
-                <Parameters>
-                    <Parameter Name="Bucket">$S3_Bucket</Parameter>
-                    <Parameter Name="Name">=config/UserDetails${JobID}.xml</Parameter>
-                    <Parameter Name="UserID" XPath="//userid"/>
-                </Parameters>
-                <Body ContentType="application/xml"><![CDATA[=
-                    <Parameters>
-                        <Parameter Name="UserID">${UserID}</Parameter>
-                        <Parameter Name="email">${UserEmail}</Parameter>
-                        <Parameter Name="password">${UserPassword}</Parameter>
-                        <Parameter Name="first_name">${UserFirstname}</Parameter>
-                        <Parameter Name="last_name">${UserLastname}</Parameter>
-                        <Parameter Name="organization">${UserOrganisation}</Parameter>
-                    </Parameters>
-                ]]></Body>
-            </Action>
-            <Action Type="S3PUT">
-                <Parameters>
-                    <Parameter Name="Bucket">$S3_Bucket</Parameter>
-                    <Parameter Name="Name">=www/${JobID}/config.xml</Parameter>
-                    <Parameter Name="ACL">PublicRead</Parameter>
-                    <Parameter Name="UserID" XPath="//userid"/>
-                </Parameters>
-                <Body ContentType="application/xml"><![CDATA[=
-                    <Parameters>
-                        <Parameter Name="UserID">${UserID}</Parameter>
-                    </Parameters>
-                ]]></Body>
-            </Action>
-            <Action Type="AddResult">
-                <Parameters>
-                    <Parameter Name="UserID" XPath="//userid"/>
-                    <Parameter Name="Result">=Added user ${UserID}</Parameter>
-                </Parameters>
-            </Action>
-            <Action Type="S3PUT">
-                <Parameters>
-                    <Parameter Name="Bucket">$S3_Bucket</Parameter>
-                    <Parameter Name="Name">=Forms/${QrveyID}/NewSurveyForm_Parameters_${JobID}.xml</Parameter>
-                </Parameters>
-                <Body ContentType="application/xml"><![CDATA[=
-                    <Parameters>
-                        <Parameter Name="NewSurveyLink">${PostProcessBase}?f=NewSurveyQrvey</Parameter>
-                    </Parameters>
-                ]]></Body>
-            </Action>
-            <Action Type="S3PUT">
-                <Parameters>
-                    <Parameter Name="Bucket">$S3_Bucket</Parameter>
-                    <Parameter Name="Name">=config/NewSurveyForm_Recipients_${JobID}.xml</Parameter>
-                </Parameters>
-                <Body ContentType="application/xml"><![CDATA[=
-                                    <Organisation Name='${UserOrganisation}'>
-                                        <Emails Type='Contacts'>
-                                            <Email Position='Owner'>
-                                                <To>${UserEmail}</To>
-                                                <Firstname>${UserFirstname}</Firstname>
-                                                <Lastname>${UserLastname}</Lastname>
-                                                <Salutation></Salutation>
-                                            </Email>
-                                        </Emails>
-                                    </Organisation>
-                                ]]></Body>
-            </Action>
-            <Action Type="Command" Command="PublishQrvey">
-                <Parameters>
-                    <Parameter Name="UserID" XPath="//userid"/>
-                    <Parameter Name="FormName">NewSurveyForm</Parameter>
-                    <Parameter Name="Recipients_File">=config/NewSurveyForm_Recipients_${JobID}.xml</Parameter>
-                    <Parameter Name="QrveyType">onlineform</Parameter>
                 </Parameters>
             </Action>
         </Actions>

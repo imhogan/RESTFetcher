@@ -567,6 +567,9 @@ public class REST_Walker {
             if (this.walkerConfig.debug) {
 	            Utility.LogMessage("S3PUT to '" + s3FileURL + "'.");
             }
+            
+            // Child actions will process the PUT document.
+            actionDocument = outputDocument;
         }
         else if (actionType.equals("S3DELETE")) {
         	

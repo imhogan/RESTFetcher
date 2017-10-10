@@ -83,7 +83,7 @@
                 </Parameters>
                 <Body ContentType="application/xml"><![CDATA[=
                     <Parameters>
-                        <Parameter Name="NewVillageLink">${PostProcessBase}?f=NewVillageQrvey</Parameter>
+                        <Parameter Name="NewResponseLink">${PostProcessBase}?f=NewVillageQrvey</Parameter>
                     </Parameters>
                 ]]></Body>
             </Action>
@@ -99,7 +99,7 @@
                                                 <To>${UserEmail}</To>
                                                 <Firstname>${UserFirstname}</Firstname>
                                                 <Lastname>${UserLastname}</Lastname>
-                                                <Salutation></Salutation>
+                                                <Salutation>Dear</Salutation>
                                             </Email>
                                         </Emails>
                                     </Organisation>
@@ -121,7 +121,7 @@
             <Action Type="XSLT2">
                 <Parameters>
                     <Parameter Name="Transform" Function="S3URL">=${S3_Bucket},xsl/CopyURL.xslt,3600</Parameter>
-                    <Parameter Name="SourceURI" Function="S3URL">=${S3_Bucket},config/${FormName}.xml,3600</Parameter>
+                    <Parameter Name="SourceURI" Function="S3URL">=${S3_Bucket},config/forms/${FormName}.xml,3600</Parameter>
                 </Parameters>
                 <Actions>
                     <Action Type="FOP">
@@ -278,6 +278,7 @@
             <Action Type="Command" Command="SendTakeSurveyLinks" Match="//url">
                 <Parameters>
                     <Parameter Name="SurveyURL" XPath="."/>
+                    <Parameter Name="EmailComments">=Use the Email Qrveys Form to send this Qrvey - ID = ${QrveyID}, Type = ${QrveyType}.</Parameter>
                 </Parameters>
             </Action>
             <Action Type="Command" Command="SendSurveyResultsPage" Match="//url">
@@ -295,7 +296,7 @@
                     <Action Type="S3PUT">
                         <Parameters>
                             <Parameter Name="Bucket">$S3_Bucket</Parameter>
-                            <Parameter Name="Name">=Forms/${QrveyID}/RecipientsFile.xml</Parameter>
+                            <Parameter Name="Name">=Forms/${QrveyID}/RecipientsFile_${JobID}.xml</Parameter>
                         </Parameters>
                     </Action>
                     <Action Type="eMail" Match="//Emails/Email[To!='']">
@@ -315,6 +316,7 @@
 						<p>Here is the <a href="${SurveyURL}?email=${To}">link</a> for the "${QrveyName}" Qrvey. The description of this Qrvey is:<br/>
 						<pre>${Description}</pre></p>
 						<p>If the link does not work, please paste ${SurveyURL}?email=${To} into your browser address.</p><br/>
+						<p>${EmailComments}</p>
 						<p>Blessings,</p><br/>
 						<p>${Name}</p><br/>
 						</body></html>]]>
@@ -537,6 +539,7 @@ var ResultsConfig = {
                     </Action>
                     <Action Type="Command" Command="RegisterVillage" Match="//Dataset/DataRow">
                         <Parameters>
+                            <Parameter Name="RecipientsFile">=Forms/${QrveyID}/${FormName}_Recipients_${JobID}.xml</Parameter>
                             <Parameter Name="SubmitterEmail" XPath="MetaData/Item[@Name='email']"/>
                             <Parameter Name="VillageName" XPath="Item[@Name='village_name']"/>
                             <Parameter Name="VillageUnits" XPath="Item[@Name='village_units']"/>
@@ -575,16 +578,11 @@ var ResultsConfig = {
         </Actions>
     </Command>
     <Command Name="RegisterVillage" IsNOP="true">
-        <Parameters>
-            <Parameter Name="FormName">NewSurveyForm</Parameter>
-            <Parameter Name="RecipientsFile">Forms/${QrveyID}/${FormName}_Recipients_${JobID}.xml</Parameter>
-        </Parameters>
         <Actions>
             <Action Type="S3PUT">
                 <Parameters>
                     <Parameter Name="Bucket">$S3_Bucket</Parameter>
                     <Parameter Name="Name">$RecipientsFile</Parameter>
-                    <Parameter Name="UserID" XPath="//userid"/>
                 </Parameters>
                 <Body ContentType="application/xml"><![CDATA[=
                     <Village Name='${VillageName}' Units='${VillageUnits}'>
@@ -614,24 +612,50 @@ var ResultsConfig = {
             <Action Type="S3PUT">
                 <Parameters>
                     <Parameter Name="Bucket">$S3_Bucket</Parameter>
+                    <Parameter Name="FormName">NewSurveyForm</Parameter>
                     <Parameter Name="Name">=Forms/${QrveyID}/${FormName}_Parameters_${JobID}.xml</Parameter>
                 </Parameters>
                 <Body ContentType="application/xml"><![CDATA[=
                     <Parameters>
                         <Parameter Name="VillageName">${VillageName}</Parameter>
                         <Parameter Name="VillageUnits">${VillageUnits}</Parameter>
-                        <Parameter Name="NewResidentsLink">${PostProcessBase}?f=NewResidentsForm</Parameter>
+                        <Parameter Name="NewResponseLink">${PostProcessBase}?f=NewResidentsForm</Parameter>
                         <Parameter Name="RecipientsFile">${RecipientsFile}</Parameter>
                     </Parameters>
                 ]]></Body>
+                <Actions>
+                    <Action Type="Command" Command="PublishQrvey">
+                        <Parameters>
+                            <Parameter Name="QrveyType">onlineform</Parameter>
+                            <Parameter Name="Parameters_File">=Forms/${QrveyID}/${FormName}_Parameters_${JobID}.xml</Parameter>
+                            <Parameter Name="Recipients_File">$RecipientsFile</Parameter>
+                        </Parameters>
+                    </Action>
+                </Actions>
             </Action>
-            <Action Type="Command" Command="PublishQrvey">
+            <Action Type="S3PUT">
                 <Parameters>
-                    <Parameter Name="UserID" XPath="//userid"/>
-                    <Parameter Name="QrveyType">onlineform</Parameter>
-                    <Parameter Name="Parameters_File">=Forms/${QrveyID}/${FormName}_Parameters_${JobID}.xml</Parameter>
-                    <Parameter Name="Recipients_File">$RecipientsFile</Parameter>
+                    <Parameter Name="Bucket">$S3_Bucket</Parameter>
+                    <Parameter Name="FormName">EmailQrveysForm</Parameter>
+                    <Parameter Name="Name">=Forms/${QrveyID}/${FormName}_Parameters_${JobID}.xml</Parameter>
                 </Parameters>
+                <Body ContentType="application/xml"><![CDATA[=
+                    <Parameters>
+                        <Parameter Name="VillageName">${VillageName}</Parameter>
+                        <Parameter Name="VillageUnits">${VillageUnits}</Parameter>
+                        <Parameter Name="NewResponseLink">${PostProcessBase}?f=NewResidentsForm</Parameter>
+                        <Parameter Name="RecipientsFile">${RecipientsFile}</Parameter>
+                    </Parameters>
+                ]]></Body>
+                <Actions>
+                    <Action Type="Command" Command="PublishQrvey">
+                        <Parameters>
+                            <Parameter Name="QrveyType">onlineform</Parameter>
+                            <Parameter Name="Parameters_File">=Forms/${QrveyID}/${FormName}_Parameters_${JobID}.xml</Parameter>
+                            <Parameter Name="Recipients_File">$RecipientsFile</Parameter>
+                        </Parameters>
+                    </Action>
+                </Actions>
             </Action>
         </Actions>
     </Command>
@@ -710,6 +734,7 @@ var ResultsConfig = {
                                 <RegExp><![CDATA[^(?<SurveyName>[^_]*)_(?<SurveyType>.+)$]]></RegExp>
                             </Parameter>
                             <Parameter Name="SurveyTitle" XPath="Item[@Name='survey_title']"/>
+                            <Parameter Name="FormName">=${SurveyName}Form</Parameter>
                         </Parameters>
                     </Action>
                     <Action Type="XSLT2">
@@ -733,9 +758,6 @@ var ResultsConfig = {
         </Actions>
     </Command>
     <Command Name="CreateSurveyFromQrvey" IsNOP="true">
-        <Parameters>
-            <Parameter Name="FormName">=${SurveyName}Form</Parameter>
-        </Parameters>
         <Actions>
             <Action Type="S3PUT">
                 <Parameters>
@@ -878,6 +900,149 @@ var ResultsConfig = {
                     </Action> -->
                 </Actions>
             </Action> 
+        </Actions>
+    </Command>
+    <Command Name="PostProcessEmailQrveysForm" IsNOP="true">
+        <Actions>
+            <Action Type="XSLT2">
+                <Parameters>
+                    <Parameter Name="Transform" Function="S3URL">=${S3_Bucket},xsl/GetLastProcessedTime.xslt,3600</Parameter>
+                    <Parameter Name="LastResponseTimeURI" Function="S3URL">=${S3_Bucket},Forms/${QrveyID}/LastResponseTime.xml,3600</Parameter>
+                    <!--<Parameter Name="FixedResult">$ResponsesModifiedSince</Parameter>-->
+                </Parameters>
+                <Actions>
+                    <Action Type="S3PUT">
+                        <Parameters>
+                            <Parameter Name="Bucket">$S3_Bucket</Parameter>
+                            <Parameter Name="Name">=Forms/${QrveyID}/LastResponseTime.xml</Parameter>
+                        </Parameters>
+                    </Action>
+                    <Action Type="Command" Command="ProcessLatestEmailQrveysFormResponses">
+                        <Parameters>
+                            <Parameter Name="responses_modified_since" XPath="//ResponsesModifiedTime"/>
+                        </Parameters>
+                    </Action>
+                </Actions>
+            </Action> 
+            <!--<Action Type="S3DELETE" Mode="!debug">
+                <Parameters>
+                    <Parameter Name="Bucket">$S3_Bucket</Parameter>
+                    <Parameter Name="Name">$DeleteFile</Parameter>
+                </Parameters>
+            </Action>-->
+        </Actions>
+    </Command>
+    <Command Name="ProcessLatestEmailQrveysFormResponses" Verb="POST" IsJSON="true">
+        <!-- For each form entry after the last processed date, generate the welcome letter. -->
+        <Headers>
+            <Header Name="x-api-key">$API_KEY</Header>
+        </Headers>
+        <Parameters>
+            <Parameter Name="entity">user</Parameter>
+            <Parameter Name="userid">$UserID</Parameter>
+            <Parameter Name="subentity">qrvey</Parameter>
+            <Parameter Name="surveyid">$QrveyID</Parameter>
+            <Parameter Name="operation">answers</Parameter>
+        </Parameters>
+        <Body></Body>
+        <Actions>
+            <Action Type="S3PUT" Mode="debug">
+                <Parameters>
+                    <Parameter Name="Bucket">$S3_Bucket</Parameter>
+                    <Parameter Name="Name">=${REST_Log_Path}/QrveyAnswers_${JobID}_${QrveyID}.xml</Parameter>
+                </Parameters>
+            </Action>
+            <Action Type="AddResult" Mode="debug">
+                <Parameters>
+                    <Parameter Name="Result">=Fetched results of qrvey ${QrveyID} to ${REST_Log_Path}/QrveyAnswers_${JobID}_${QrveyID}.xml</Parameter>
+                </Parameters>
+            </Action>
+            <Action Type="XSLT2">
+                <Parameters>
+                    <Parameter Name="Transform" Function="S3URL">=${S3_Bucket},xsl/Answers2Dataset.xslt,3600</Parameter>
+                    <!-- NOTE: Currently we use a time filter, and assume that all the responses have been returned - in production a filter or webhook would work more reliably. -->
+                    <Parameter Name="TimeFilter">$responses_modified_since</Parameter>
+                </Parameters>
+                <Actions>
+                    <Action Type="S3PUT" Mode="debug">
+                        <Parameters>
+                            <Parameter Name="Bucket">$S3_Bucket</Parameter>
+                            <Parameter Name="Name">=${REST_Log_Path}/QrveyData_${JobID}_${QrveyID}.xml</Parameter>
+                        </Parameters>
+                    </Action>
+                     <Action Type="Command" Command="SendQrveyInvitationEmails" Match="//Dataset/DataRow">
+                        <Parameters>
+                            <Parameter Name="SubmitterEmail" XPath="MetaData/Item[@Name='email']"/>
+                            <Parameter Name="QrveyID" XPath="Item[@Name='survey_id']"/>
+                            <Parameter Name="QrveyType" XPath="Item[@Name='survey_type']"/>
+                            <Parameter Name="EmailComments" XPath="Item[@Name='email_comments']"/>
+                            <Parameter Name="EmailList" XPath="Item[@Name='email_list']"/>
+                            <Parameter Name="Recipients_File">=config/lists/${EmailList}.xml</Parameter>
+                        </Parameters>
+                    </Action>
+                    <Action Type="XSLT2">
+                        <Parameters>
+                            <Parameter Name="Transform" Function="S3URL">=${S3_Bucket},xsl/GetLastProcessedTime.xslt,3600</Parameter>
+                            <Parameter Name="LastResponseTimeURI" Function="S3URL">=${S3_Bucket},Forms/${QrveyID}/LastResponseTime.xml,3600</Parameter>
+                            <Parameter Name="FixedResult"></Parameter>
+                        </Parameters>
+                        <Actions>
+                            <Action Type="S3PUT">
+                                <Parameters>
+                                    <Parameter Name="Bucket">$S3_Bucket</Parameter>
+                                    <Parameter Name="Name">=Forms/${QrveyID}/LastResponseTime.xml</Parameter>
+                                </Parameters>
+                            </Action>
+                        </Actions>
+                    </Action>
+                </Actions>
+            </Action> 
+        </Actions>
+    </Command>
+    <Command Name="SendQrveyInvitationEmails" Verb="POST" IsJSON="true">
+        <Headers>
+            <Header Name="x-api-key">$API_KEY</Header>
+        </Headers>
+        <Parameters>
+            <Parameter Name="entity">user</Parameter>
+            <Parameter Name="userid">$UserID</Parameter>
+            <Parameter Name="subentity">$QrveyType</Parameter>
+            <Parameter Name="surveyid">$QrveyID</Parameter>
+        </Parameters>
+        <Body></Body>
+        <Actions>
+            <Action Type="S3PUT" Mode="debug">
+                <Parameters>
+                    <Parameter Name="Bucket">$S3_Bucket</Parameter>
+                    <Parameter Name="Name">=${REST_Log_Path}/ActivateSurvey${JobID}.xml</Parameter>
+                </Parameters>
+            </Action>
+            <Action Type="AddResult">
+                <Parameters>
+                    <Parameter Name="SurveyURL" XPath="//url"/>
+                    <Parameter Name="Result">=Distributing links for qrvey ${QrveyID} for user ${UserID} - URL is ${SurveyURL}</Parameter>
+                </Parameters>
+            </Action>
+            <Action Type="S3PUT">
+                <!-- Note: QrveyID is not included in the SurveyURL, so we get the q request variable (qid) from the lookupID value.
+                     This is stored in an XML file named "qid.xml". This is used by the start process page to get the QrveyID-->
+                <Parameters>
+                    <Parameter Name="qid" XPath="//lookupID"/>
+                    <Parameter Name="Bucket">$S3_Bucket</Parameter>
+                    <Parameter Name="Name">=www/${propertyid}/${qid}.xml</Parameter>
+                    <Parameter Name="ACL">PublicRead</Parameter>
+                </Parameters>
+                <Body ContentType="application/xml"><![CDATA[=
+                    <Parameters>
+                        <Parameter Name="QrveyID">${QrveyID}</Parameter>
+                    </Parameters>
+                ]]></Body>
+            </Action>
+            <Action Type="Command" Command="SendTakeSurveyLinks" Match="//url">
+                <Parameters>
+                    <Parameter Name="SurveyURL" XPath="."/>
+                </Parameters>
+            </Action>
         </Actions>
     </Command>
     <Command Name="AddUser" Verb="POST" IsJSON="true">

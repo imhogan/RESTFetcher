@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<qrvey name='New Village Registration'>
+    <settings>
+        <properties introPage='true' emailNotifications='true' results_visibility="Private" respondent_email="Mandatory"></properties>
+        <description>Please fill out this form to register your village.</description>
+        <duration>
+            <neverExpires>true</neverExpires>
+            <from>2016-12-08T19:18:37.885Z</from>
+        </duration>
+        <thankYouPage>
+            <title>Thanks for registering your village.</title>
+            <content>Please click the link below and you will receive your registration confirmation email.</content>
+            <link>${NewResponseLink}</link>
+        </thankYouPage>
+    </settings>
+    <questions>
+        <question id='village_name' type='TEXTFIELD' time='10' _required='true' text='Please enter the name of your village.' maxChar='120'/>
+        <question id='contact1_salutation' type='SINGLE_CHOICE' time='10' _required='true' text='What is the preferred salutation for the primary contact?' otherField='true'>
+            <answer>Dr</answer>
+            <answer>Mr</answer>
+            <answer>Mrs</answer>
+            <answer>Ms</answer>
+        </question>
+        <question id='contact1_firstname' type='TEXTFIELD' time='10' _required='true' text="Please enter the primary contact's first name."/>
+        <question id='contact1_lastname' type='TEXTFIELD' time='10' _required='true' text="Please enter the primary contact's last name."/>
+        <question id='contact1_email' type='TEXTFIELD' time='10' _required='true' text="Please enter the primary contact's email address."/>
+        <question id='contact2' type="YES_NO" time='2' _required='true' text='Do you want to register a second contact?'>
+            <answer>Yes
+                <route>
+                    <question id='contact2_salutation' type='SINGLE_CHOICE' time='10' _required='true' text='What is the preferred salutation for the second contact?' otherField='true'>
+                        <answer>Dr</answer>
+                        <answer>Mr</answer>
+                        <answer>Mrs</answer>
+                        <answer>Ms</answer>
+                    </question>
+                    <question id='contact2_firstname' type='TEXTFIELD' time='10' _required='true' text="Please enter the second contact's first name."/>
+                    <question id='contact2_lastname' type='TEXTFIELD' time='10' _required='true' text="Please enter the second contact's last name."/>
+                    <question id='contact2_email' type='TEXTFIELD' time='10' _required='true' text="Please enter the second contact's email address."/>
+                    <question id='contact3' type="YES_NO" time='2' _required='true' text='Is there a third contact?'>
+                        <answer>Yes
+                            <route>
+                                <question id='contact3_salutation' type='SINGLE_CHOICE' time='10' _required='true' text='What is the preferred salutation for the third contact?' otherField='true'>
+                                    <answer>Dr</answer>
+                                    <answer>Mr</answer>
+                                    <answer>Mrs</answer>
+                                    <answer>Ms</answer>
+                                </question>
+                                <question id='contact3_firstname' type='TEXTFIELD' time='10' _required='true' text="Please enter the third contact's first name."/>
+                                <question id='contact3_lastname' type='TEXTFIELD' time='10' _required='true' text="Please enter the third contact's last name."/>
+                                <question id='contact3_email' type='TEXTFIELD' time='10' _required='true' text="Please enter the third contact's email address."/>
+                            </route>
+                        </answer>
+                        <answer>No</answer>
+                    </question>
+                </route>
+            </answer>
+            <answer>No</answer>
+        </question>
+        <question id='village_units' type='NUMERIC' time='3' _required='true' text='Please enter the number of units in your village.' allowDecimals='false' hasMinMax='true' min='1' max='500' numberType='Number'/>
+    </questions>
+</qrvey>

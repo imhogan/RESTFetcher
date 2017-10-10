@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<qrvey name='${VillageName} Qrvey Distribution'>
+    <settings>
+        <properties introPage='true' emailNotifications='true' results_visibility="Private" respondent_email="Mandatory"></properties>
+        <description>Please fill out this form to distribute a Qrvey via email.</description>
+        <duration>
+            <neverExpires>true</neverExpires>
+            <from>2016-12-08T19:18:37.885Z</from>
+        </duration>
+        <thankYouPage>
+            <title>Thanks for preparing the Qrvey for distribution.</title>
+            <content>Please click the link below to send the emails.</content>
+            <link>${NewResponseLink}</link>
+        </thankYouPage>
+    </settings>
+    <questions>
+        <question id='survey_id' type='TEXTFIELD' time='10' _required='true' text='What is the ID of the Qrvey you want to distribute?'/>
+        <question id='survey_type' type='SINGLE_CHOICE' time='10' _required='true' _sort_options='true' text='What is the type of the Qrvey you want to distribute?'>
+            <answer answerid='onlineform'>Online Form</answer>
+            <answer answerid='survey'>Survey</answer>
+            <answer answerid='nps'>NPS</answer>
+            <answer answerid='quiz'>Quiz</answer>
+            <answer answerid='audiencepoll'>Audience Poll</answer>
+            <answer answerid='onpagepoll'>On Page Poll</answer>
+            <answer answerid='checklist'>Checklist</answer>
+            <answer answerid='progressiveapp'>Progressive Survey</answer>
+        </question>
+        <question id='email_list' type='TEXTFIELD' time='10' _required='true' text='Please enter the name of the email list to use.' maxChar='120'/>
+        <question id='email_comment' type='TEXTFIELD' time='10' _required='true' text='Please enter any comments for the email.' maxChar='500'/>
+    </questions>
+</qrvey>

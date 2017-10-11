@@ -27,7 +27,7 @@
                         <xsl:choose>
                             <xsl:when test="data = type">
                                 <xsl:for-each select="*[lower-case(local-name())=lower-case(../type)]/*">
-                                    <Item Name="{../../id}.{local-name()}" AnswerId="{data_ansid}">><xsl:value-of select="normalize-space(.)"/></Item>
+                                    <Item Name="{../../id}.{local-name()}" AnswerId="{data_ansid}"><xsl:value-of select="normalize-space(.)"/></Item>
                                 </xsl:for-each>
                             </xsl:when>
                             <xsl:otherwise>

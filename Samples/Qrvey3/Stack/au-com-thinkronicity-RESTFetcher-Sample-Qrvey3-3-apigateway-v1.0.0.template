@@ -386,7 +386,7 @@
                                     "'",
                                     {"Fn::If": [
                                         "CorsOriginIsS3", 
-                                        {"Fn::Sub" : "s3-${AWS::Region}.amazonaws.com"}, 
+                                        {"Fn::Sub" : "https://s3-${AWS::Region}.amazonaws.com"}, 
                                         {"Ref": "CorsOrigin"}
                                       ]
                                     },
@@ -464,7 +464,7 @@
                                 "'",
                                 {"Fn::If": [
                                     "CorsOriginIsS3", 
-                                    {"Fn::Sub" : "s3-${AWS::Region}.amazonaws.com"}, 
+                                    {"Fn::Sub" : "https://s3-${AWS::Region}.amazonaws.com"}, 
                                     {"Ref": "CorsOrigin"}
                                   ]
                                 },

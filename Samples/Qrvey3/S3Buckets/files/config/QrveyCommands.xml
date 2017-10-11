@@ -399,7 +399,7 @@ var ResultsConfig = {
                             <Parameter Name="ResultsURL">=https://s3-${ResultsBucketRegion}.amazonaws.com/${ResultsBucket}/${ResultsPath}Results_${QrveyID}.html</Parameter>
                         </Parameters>
                         <Body ContentType="text/html"><![CDATA[=<html><body>
-						<p>${Salutation} ${Firstname} ${Firstname},</p><br/>
+						<p>Hi ${Firstname} ${Lastname},</p><br/>
 						<p>Your survey results are <a href="${ResultsURL}">here</a> - if this link does not work, please paste ${ResultsURL} into your browser address.</p><br/>
 						<p>Blessings,</p><br/>
 						<p>${Name}</p><br/>
@@ -473,6 +473,9 @@ var ResultsConfig = {
         <Actions>
             <Action Type="XSLT2">
                 <Parameters>
+                    <Parameter Name="ConfigDetails">$configurationURI
+                        <RegExp><![CDATA[^.*(?<propertyid>[^.]+)[.]properties$]]></RegExp>
+                    </Parameter>
                     <Parameter Name="Transform" Function="S3URL">=${S3_Bucket},xsl/GetLastProcessedTime.xslt,3600</Parameter>
                     <Parameter Name="LastResponseTimeURI" Function="S3URL">=${S3_Bucket},Forms/${QrveyID}/LastResponseTime.xml,3600</Parameter>
                     <!--<Parameter Name="FixedResult">$ResponsesModifiedSince</Parameter>-->
@@ -539,21 +542,21 @@ var ResultsConfig = {
                     </Action>
                     <Action Type="Command" Command="RegisterVillage" Match="//Dataset/DataRow">
                         <Parameters>
-                            <Parameter Name="RecipientsFile">=Forms/${QrveyID}/${FormName}_Recipients_${JobID}.xml</Parameter>
+                            <Parameter Name="RecipientsFile">=Forms/${QrveyID}/RegisterVillage_Recipients_${JobID}.xml</Parameter>
                             <Parameter Name="SubmitterEmail" XPath="MetaData/Item[@Name='email']"/>
                             <Parameter Name="VillageName" XPath="Item[@Name='village_name']"/>
                             <Parameter Name="VillageUnits" XPath="Item[@Name='village_units']"/>
                             <Parameter Name="Contact1.Salutation" XPath="Item[@Name='contact1_salutation']"/>
-                            <Parameter Name="Contact1.FirstName" XPath="Item[@Name='contact1_firstname']"/>
-                            <Parameter Name="Contact1.LastName" XPath="Item[@Name='contact1_lastname']"/>
+                            <Parameter Name="Contact1.FirstName" XPath="Item[@Name='contact1_name.first_name' or @Name='contact1_firstname']"/>
+                            <Parameter Name="Contact1.LastName" XPath="Item[@Name='contact1_name.last_name' or @Name='contact1_lastname']"/>
                             <Parameter Name="Contact1.Email" XPath="Item[@Name='contact1_email']"/>
                             <Parameter Name="Contact2.Salutation" XPath="Item[@Name='contact2_salutation']"/>
-                            <Parameter Name="Contact2.FirstName" XPath="Item[@Name='contact2_firstname']"/>
-                            <Parameter Name="Contact2.LastName" XPath="Item[@Name='contact2_lastname']"/>
+                            <Parameter Name="Contact2.FirstName" XPath="Item[@Name='contact2_name.first_name' or @Name='contact2_firstname']"/>
+                            <Parameter Name="Contact2.LastName" XPath="Item[@Name='contact2_name.last_name' or @Name='contact2_lastname']"/>
                             <Parameter Name="Contact2.Email" XPath="Item[@Name='contact2_email']"/>
                             <Parameter Name="Contact3.Salutation" XPath="Item[@Name='contact3_salutation']"/>
-                            <Parameter Name="Contact3.FirstName" XPath="Item[@Name='contact3_firstname']"/>
-                            <Parameter Name="Contact3.LastName" XPath="Item[@Name='contact3_lastname']"/>
+                            <Parameter Name="Contact3.FirstName" XPath="Item[@Name='contact3_name.first_name' or @Name='contact3_firstname']"/>
+                            <Parameter Name="Contact3.LastName" XPath="Item[@Name='contact3_name.last_name' or @Name='contact3_lastname']"/>
                             <Parameter Name="Contact3.Email" XPath="Item[@Name='contact3_email']"/>
                         </Parameters>
                     </Action>
@@ -619,7 +622,7 @@ var ResultsConfig = {
                     <Parameters>
                         <Parameter Name="VillageName">${VillageName}</Parameter>
                         <Parameter Name="VillageUnits">${VillageUnits}</Parameter>
-                        <Parameter Name="NewResponseLink">${PostProcessBase}?f=NewResidentsForm</Parameter>
+                        <Parameter Name="NewResponseLink">${PostProcessBase}?f=${FormName}</Parameter>
                         <Parameter Name="RecipientsFile">${RecipientsFile}</Parameter>
                     </Parameters>
                 ]]></Body>
@@ -643,7 +646,7 @@ var ResultsConfig = {
                     <Parameters>
                         <Parameter Name="VillageName">${VillageName}</Parameter>
                         <Parameter Name="VillageUnits">${VillageUnits}</Parameter>
-                        <Parameter Name="NewResponseLink">${PostProcessBase}?f=NewResidentsForm</Parameter>
+                        <Parameter Name="NewResponseLink">${PostProcessBase}?f=${FormName}</Parameter>
                         <Parameter Name="RecipientsFile">${RecipientsFile}</Parameter>
                     </Parameters>
                 ]]></Body>
@@ -659,10 +662,13 @@ var ResultsConfig = {
             </Action>
         </Actions>
     </Command>
-    <Command Name="PostProcessNewSurveyQrvey" IsNOP="true">
+    <Command Name="PostProcessNewSurveyForm" IsNOP="true">
         <Actions>
             <Action Type="XSLT2">
                 <Parameters>
+                    <Parameter Name="ConfigDetails">$configurationURI
+                        <RegExp><![CDATA[^.*(?<propertyid>[^.]+)[.]properties$]]></RegExp>
+                    </Parameter>
                     <Parameter Name="Transform" Function="S3URL">=${S3_Bucket},xsl/GetLastProcessedTime.xslt,3600</Parameter>
                     <Parameter Name="LastResponseTimeURI" Function="S3URL">=${S3_Bucket},Forms/${QrveyID}/LastResponseTime.xml,3600</Parameter>
                     <!--<Parameter Name="FixedResult">$ResponsesModifiedSince</Parameter>-->
@@ -674,7 +680,7 @@ var ResultsConfig = {
                             <Parameter Name="Name">=Forms/${QrveyID}/LastResponseTime.xml</Parameter>
                         </Parameters>
                     </Action>
-                    <Action Type="Command" Command="ProcessLatestNewSurveyQrveyResponses">
+                    <Action Type="Command" Command="ProcessLatestNewSurveyFormResponses">
                         <Parameters>
                             <Parameter Name="responses_modified_since" XPath="//ResponsesModifiedTime"/>
                         </Parameters>
@@ -689,7 +695,7 @@ var ResultsConfig = {
             </Action>-->
         </Actions>
     </Command>
-    <Command Name="ProcessLatestNewSurveyQrveyResponses" Verb="POST" IsJSON="true">
+    <Command Name="ProcessLatestNewSurveyFormResponses" Verb="POST" IsJSON="true">
         <!-- For each signup entry after the last processed date, generate the specified qrveys and forms, and send details to the given email address(es). -->
         <Headers>
             <Header Name="x-api-key">$API_KEY</Header>
@@ -800,6 +806,9 @@ var ResultsConfig = {
         <Actions>
             <Action Type="XSLT2">
                 <Parameters>
+                    <Parameter Name="ConfigDetails">$configurationURI
+                        <RegExp><![CDATA[^.*(?<propertyid>[^.]+)[.]properties$]]></RegExp>
+                    </Parameter>
                     <Parameter Name="Transform" Function="S3URL">=${S3_Bucket},xsl/GetLastProcessedTime.xslt,3600</Parameter>
                     <Parameter Name="LastResponseTimeURI" Function="S3URL">=${S3_Bucket},Forms/${QrveyID}/LastResponseTime.xml,3600</Parameter>
                     <!--<Parameter Name="FixedResult">$ResponsesModifiedSince</Parameter>-->
@@ -864,23 +873,22 @@ var ResultsConfig = {
                             <Parameter Name="Name">=${REST_Log_Path}/QrveyData_${JobID}_${QrveyID}.xml</Parameter>
                         </Parameters>
                     </Action>
-<!--                    <Action Type="Command" Command="GenerateWelcomePack" Match="//Dataset/DataRow">
+                    <Action Type="Command" Command="GenerateWelcomePack" Match="//Dataset/DataRow">
                         <Parameters>
                             <Parameter Name="SubmitterEmail" XPath="MetaData/Item[@Name='email']"/>
-                            <Parameter Name="VillageName" XPath="Item[@Name='village_name']"/>
-                            <Parameter Name="VillageUnits" XPath="Item[@Name='village_units']"/>
-                            <Parameter Name="Contact1.Salutation" XPath="Item[@Name='contact1_salutation']"/>
-                            <Parameter Name="Contact1.FirstName" XPath="Item[@Name='contact1_firstname']"/>
-                            <Parameter Name="Contact1.LastName" XPath="Item[@Name='contact1_lastname']"/>
-                            <Parameter Name="Contact1.Email" XPath="Item[@Name='contact1_email']"/>
-                            <Parameter Name="Contact2.Salutation" XPath="Item[@Name='contact2_salutation']"/>
-                            <Parameter Name="Contact2.FirstName" XPath="Item[@Name='contact2_firstname']"/>
-                            <Parameter Name="Contact2.LastName" XPath="Item[@Name='contact2_lastname']"/>
-                            <Parameter Name="Contact2.Email" XPath="Item[@Name='contact2_email']"/>
-                            <Parameter Name="Contact3.Salutation" XPath="Item[@Name='contact3_salutation']"/>
-                            <Parameter Name="Contact3.FirstName" XPath="Item[@Name='contact3_firstname']"/>
-                            <Parameter Name="Contact3.LastName" XPath="Item[@Name='contact3_lastname']"/>
-                            <Parameter Name="Contact3.Email" XPath="Item[@Name='contact3_email']"/>
+                            <Parameter Name="Resident1.Salutation" XPath="Item[@Name='resident1_salutation']"/>
+                            <Parameter Name="Resident1.FirstName" XPath="Item[@Name='resident1_name.first_name']"/>
+                            <Parameter Name="Resident1.LastName" XPath="Item[@Name='resident1_name.last_name']"/>
+                            <Parameter Name="Resident1.Email" XPath="Item[@Name='resident1_email']"/>
+                            <Parameter Name="Resident2.Salutation" XPath="Item[@Name='resident2_salutation']"/>
+                            <Parameter Name="Resident2.FirstName" XPath="Item[@Name='resident2_name.first_name']"/>
+                            <Parameter Name="Resident2.LastName" XPath="Item[@Name='resident2_name.last_name']"/>
+                            <Parameter Name="Resident2.Email" XPath="Item[@Name='resident2_email']"/>
+                            <Parameter Name="Resident3.Salutation" XPath="Item[@Name='resident3_salutation']"/>
+                            <Parameter Name="Resident3.FirstName" XPath="Item[@Name='resident3_name.first_name']"/>
+                            <Parameter Name="Resident3.LastName" XPath="Item[@Name='resident3_name.last_name']"/>
+                            <Parameter Name="Resident3.Email" XPath="Item[@Name='resident3_email']"/>
+                            <Parameter Name="ResidentNotes" XPath="Item[@Name='resident_notes']"/>
                         </Parameters>
                     </Action>
                     <Action Type="XSLT2">
@@ -897,15 +905,27 @@ var ResultsConfig = {
                                 </Parameters>
                             </Action>
                         </Actions>
-                    </Action> -->
+                    </Action>
                 </Actions>
             </Action> 
+        </Actions>
+    </Command>
+    <Command Name="GenerateWelcomePack" IsNOP="true">
+        <Actions>
+            <Action Type="AddResult">
+                <Parameters>
+                    <Parameter Name="Result">TODO: Create code to generate a welcome pack!</Parameter>
+                </Parameters>
+            </Action>
         </Actions>
     </Command>
     <Command Name="PostProcessEmailQrveysForm" IsNOP="true">
         <Actions>
             <Action Type="XSLT2">
                 <Parameters>
+                    <Parameter Name="ConfigDetails">$configurationURI
+                        <RegExp><![CDATA[^.*(?<propertyid>[^.]+)[.]properties$]]></RegExp>
+                    </Parameter>
                     <Parameter Name="Transform" Function="S3URL">=${S3_Bucket},xsl/GetLastProcessedTime.xslt,3600</Parameter>
                     <Parameter Name="LastResponseTimeURI" Function="S3URL">=${S3_Bucket},Forms/${QrveyID}/LastResponseTime.xml,3600</Parameter>
                     <!--<Parameter Name="FixedResult">$ResponsesModifiedSince</Parameter>-->

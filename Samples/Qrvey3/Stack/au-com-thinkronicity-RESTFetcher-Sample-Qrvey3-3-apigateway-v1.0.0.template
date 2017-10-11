@@ -814,7 +814,7 @@
                                     {"Ref": "AWS::Region"},
                                     ".amazonaws.com/",
                                     {"Fn::ImportValue" : {"Fn::Sub" : "${ProjectToolsStack}-AccessProjectS3FilesBucket"}},
-                                    {"Fn::Sub" : "www/${PropertyId}/StartPostProcess.html"}
+                                    {"Fn::Sub" : "/www/${PropertyId}/StartPostProcess.html"}
                                 ]
                             ]}
                         ]
@@ -844,7 +844,7 @@
                                 {"Ref": "AWS::Region"},
                                 ".amazonaws.com/",
                                 {"Fn::ImportValue" : {"Fn::Sub" : "${ProjectToolsStack}-AccessProjectS3FilesBucket"}},
-                                {"Fn::Sub" : "www/${PropertyId}/StartPostProcess.html"},
+                                {"Fn::Sub" : "/www/${PropertyId}/StartPostProcess.html"},
                                 "?f={FormName}"
                             ]
                     ]

@@ -1068,7 +1068,14 @@ public class Utility {
     public static String getParameterValue(String paramName, Element paramElement, Map<String, String> prefMap, HashMap<String, String> contextParameters, Element contextElement, Boolean verbose, Boolean debug) throws Exception {
 
     	// Start by getting the text value of the element.
-    	String paramValue = paramElement.getTextContent();
+    	String paramValue = "";
+
+        if (paramElement.hasAttribute("XPath")) {
+            paramValue = paramElement.getAttribute("Value");
+        } else {
+            paramValue = paramElement.getTextContent();
+        }
+
     	
     	// If there is an XPath attribute, evaluate this expression.
         if (paramElement.hasAttribute("XPath")) {

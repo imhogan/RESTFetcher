@@ -473,7 +473,7 @@ var ResultsConfig = {
         <Actions>
             <Action Type="XSLT2">
                 <Parameters>
-                    <Parameter Name="ConfigDetails">$configurationURI
+                    <Parameter Name="ConfigDetails" Value="$configurationURI">
                         <RegExp><![CDATA[^.*(?<propertyid>[^.]+)[.]properties$]]></RegExp>
                     </Parameter>
                     <Parameter Name="Transform" Function="S3URL">=${S3_Bucket},xsl/GetLastProcessedTime.xslt,3600</Parameter>
@@ -666,7 +666,7 @@ var ResultsConfig = {
         <Actions>
             <Action Type="XSLT2">
                 <Parameters>
-                    <Parameter Name="ConfigDetails">$configurationURI
+                    <Parameter Name="ConfigDetails" Value="$configurationURI">
                         <RegExp><![CDATA[^.*(?<propertyid>[^.]+)[.]properties$]]></RegExp>
                     </Parameter>
                     <Parameter Name="Transform" Function="S3URL">=${S3_Bucket},xsl/GetLastProcessedTime.xslt,3600</Parameter>
@@ -806,7 +806,7 @@ var ResultsConfig = {
         <Actions>
             <Action Type="XSLT2">
                 <Parameters>
-                    <Parameter Name="ConfigDetails">$configurationURI
+                    <Parameter Name="ConfigDetails" Value="$configurationURI">
                         <RegExp><![CDATA[^.*(?<propertyid>[^.]+)[.]properties$]]></RegExp>
                     </Parameter>
                     <Parameter Name="Transform" Function="S3URL">=${S3_Bucket},xsl/GetLastProcessedTime.xslt,3600</Parameter>
@@ -923,7 +923,7 @@ var ResultsConfig = {
         <Actions>
             <Action Type="XSLT2">
                 <Parameters>
-                    <Parameter Name="ConfigDetails">$configurationURI
+                    <Parameter Name="ConfigDetails" Value="$configurationURI">
                         <RegExp><![CDATA[^.*(?<propertyid>[^.]+)[.]properties$]]></RegExp>
                     </Parameter>
                     <Parameter Name="Transform" Function="S3URL">=${S3_Bucket},xsl/GetLastProcessedTime.xslt,3600</Parameter>

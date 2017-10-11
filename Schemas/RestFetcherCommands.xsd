@@ -140,6 +140,7 @@
       <xs:attribute name="Format" type="ParameterFormatType"/>
       <xs:attribute name="XPath"/>
       <xs:attribute name="Function"/>
+      <xs:attribute name="Value"/>
     </xs:complexType>
   </xs:element>
   <xs:element name="ExtraParameters">

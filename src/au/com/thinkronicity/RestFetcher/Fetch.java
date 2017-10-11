@@ -50,7 +50,7 @@ implements RequestHandler<Object, String> {
     /**
      * Version of this codebase.
      */
-    private static final String version = "2.4.9CE";
+    private static final String version = "2.CE";
     
     /**
      * Namespace for the Commands XML schema. 
@@ -171,7 +171,9 @@ implements RequestHandler<Object, String> {
                                 }
                                 HashMap<String, String> eventParameters = Utility.loadParameters(false, "../cmd:Parameters/cmd:Parameter", "cmd:Parameters/cmd:ExtraParameters", regExpElement, this.commandsNamespaceMap, this.input, null, false, debug);
                                 NodeList matchNodes = Utility.getNodesByXPath(regExpElement, "..", this.commandsNamespaceMap);
-                                this.input.put("command", ((Element)matchNodes.item(0)).getAttribute("Command"));
+                                if (!this.input.containsKey("command")) {
+                                    this.input.put("command", ((Element)matchNodes.item(0)).getAttribute("Command"));
+                                }
                                 this.input.putAll(eventParameters);
                                 return;
                             }

@@ -452,7 +452,14 @@
                             "#set($inputRoot = $input.path('$'))",
                            "{",
                             "\"S3_Bucket\": \"$input.params('project')-${stageVariables.mode}-files-${stageVariables.domain}\"",
-                            ",\"configurationURI\": \"s3://$input.params('project')-${stageVariables.mode}-files-${stageVariables.domain}/config/Qrvey",{"Ref": "PropertyId"},".properties\"",
+                            {"Fn::Join": [
+                                "",
+                                [
+                                ",\"configurationURI\": \"s3://$input.params('project')-${stageVariables.mode}-files-${stageVariables.domain}/config/Qrvey",
+                                {"Ref": "PropertyId"},
+                                ".properties\""
+                                ]
+                            ]},
                             ",\"UserID\": \"$input.params('userid')\"",
                             ",\"JobID\": \"${context.requestId}\"",
                             ",\"QrveyID\": \"$input.params('qrveyid')\"",

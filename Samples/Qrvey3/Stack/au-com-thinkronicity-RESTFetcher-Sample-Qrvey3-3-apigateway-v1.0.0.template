@@ -9,7 +9,8 @@
                     "EmailSender",
                     "EmailSenderName",
                     "ProjectToolsStack",
-                    "EnableDebug"
+                    "EnableDebug",
+                    "PropertyId"
                 ]
             },
             {
@@ -40,10 +41,7 @@
             }
         ],
         "ParameterLabels": {"EmailSender": {"default": "Email address to send emails from?"}}
-        },
-        "TODO": [
-            "Add html page - which calls generated javascript file containing url of trigger API."
-        ]
+        }
     },
     "Description": "Define API Gateway for post processing trigger for the Our Village Sample Application.",
     "Parameters": {
@@ -164,6 +162,11 @@
           "Description": "System name.",
           "Type": "String",
           "Default": "Our Village Services"
+        },
+        "PropertyId": {
+          "Description": "Id for Properties file.",
+          "Type": "Number",
+          "Default": "3"
         }
     },
   "Mappings": {
@@ -449,7 +452,7 @@
                             "#set($inputRoot = $input.path('$'))",
                            "{",
                             "\"S3_Bucket\": \"$input.params('project')-${stageVariables.mode}-files-${stageVariables.domain}\"",
-                            ",\"configurationURI\": \"s3://$input.params('project')-${stageVariables.mode}-files-${stageVariables.domain}/config/Qrvey3.properties\"",
+                            ",\"configurationURI\": \"s3://$input.params('project')-${stageVariables.mode}-files-${stageVariables.domain}/config/Qrvey",{"Ref": "PropertyId"},".properties\"",
                             ",\"UserID\": \"$input.params('userid')\"",
                             ",\"JobID\": \"${context.requestId}\"",
                             ",\"QrveyID\": \"$input.params('qrveyid')\"",
@@ -567,7 +570,7 @@
                 },
                 "Target": {
                     "Bucket": {"Fn::ImportValue" : {"Fn::Sub" : "${ProjectToolsStack}-AccessProjectS3FilesBucket"}},
-                    "Key": "www/3/StartPostProcess.html",
+                    "Key": {"Fn::Sub" : "www/${PropertyId}/StartPostProcess.html"},
                     "ACL": "public-read",
                     "contentType": "text/html"
                 },
@@ -592,7 +595,7 @@
                 },
                 "Target": {
                     "Bucket": {"Fn::ImportValue" : {"Fn::Sub" : "${ProjectToolsStack}-AccessProjectS3FilesBucket"}},
-                    "Key": "www/3/TriggerFired.html",
+                    "Key": {"Fn::Sub" : "www/${PropertyId}/TriggerFired.html"},
                     "ACL": "public-read",
                     "contentType": "text/html"
                 },
@@ -636,7 +639,7 @@
                 },
                 "Target": {
                     "Bucket": {"Fn::ImportValue" : {"Fn::Sub" : "${ProjectToolsStack}-AccessProjectS3FilesBucket"}},
-                    "Key": "www/3/config.js",
+                    "Key": {"Fn::Sub" : "www/${PropertyId}/config.js"},
                     "ACL": "public-read"
                 },
                 "Debug": "true"
@@ -811,7 +814,7 @@
                                     {"Ref": "AWS::Region"},
                                     ".amazonaws.com/",
                                     {"Fn::ImportValue" : {"Fn::Sub" : "${ProjectToolsStack}-AccessProjectS3FilesBucket"}},
-                                    "/www/3/StartPostProcess.html"
+                                    {"Fn::Sub" : "www/${PropertyId}/StartPostProcess.html"}
                                 ]
                             ]}
                         ]
@@ -820,7 +823,7 @@
                 },
                 "Target": {
                     "Bucket": {"Fn::ImportValue" : {"Fn::Sub" : "${ProjectToolsStack}-AccessProjectS3FilesBucket"}},
-                    "Key": "config/Qrvey3.properties"
+                    "Key": {"Fn::Sub" : "config/Qrvey${PropertyId}.properties"}
                 },
                 "Debug": "true"
             }
@@ -841,7 +844,8 @@
                                 {"Ref": "AWS::Region"},
                                 ".amazonaws.com/",
                                 {"Fn::ImportValue" : {"Fn::Sub" : "${ProjectToolsStack}-AccessProjectS3FilesBucket"}},
-                                "/www/3/StartPostProcess.html?f={FormName}"
+                                {"Fn::Sub" : "www/${PropertyId}/StartPostProcess.html"},
+                                "?f={FormName}"
                             ]
                     ]
             },

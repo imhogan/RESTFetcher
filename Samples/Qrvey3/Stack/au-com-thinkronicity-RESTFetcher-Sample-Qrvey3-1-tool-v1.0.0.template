@@ -34,7 +34,10 @@
     "ProjectPrefix": {
       "Description": "Project prefix - for reuse with different projects the bucket name will be prefix-target-domain - observe bucket name restrictions - see http://docs.aws.amazon.com/AmazonS3/latest/dev/BucketRestrictions.html",
       "Type": "String",
-      "Default": "qrvey"
+      "Default": "qrvey",
+      "MinLength": 1,
+      "MaxLength": 6,
+      "AllowedPattern": "^[a-z][-a-z0-9]*$"
     },
     "TargetEnvironment": {
       "Description": "Target environment - dev, uat or prod, default is prod",

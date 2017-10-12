@@ -1,0 +1,866 @@
+{
+    "AWSTemplateFormatVersion": "2010-09-09",
+    "Metadata":{"AWS::CloudFormation::Interface": {
+        "ParameterGroups": [
+            {
+                "Label": {"default": "Project Configuration"},
+                "Parameters": [
+                    "SystemName",
+                    "EmailSender",
+                    "EmailSenderName",
+                    "ProjectToolsStack",
+                    "EnableDebug",
+                    "PropertyId"
+                ]
+            },
+            {
+                "Label": {"default": "Qrvey Details"},
+                "Parameters": [
+                    "QrveyAPIKey",
+                    "QrveyUserEmail",
+                    "QrveyUserFirstname",
+                    "QrveyUserLastname",
+                    "QrveyUserPassword",
+                    "QrveyUserOrganisation",
+                    "QrveyDomain"
+                ]
+            },
+            {
+                "Label": {"default": "API Details"},
+                "Parameters": [
+                    "APIName",
+                    "DeployApi",
+                    "CorsOrigin"
+                ]
+            },
+            {
+                "Label": {"default": "Custom Resource Lambda Functions"},
+                "Parameters": [
+                    "S3PutFileKey"
+                ]
+            }
+        ],
+        "ParameterLabels": {"EmailSender": {"default": "Email address to send emails from?"}}
+        }
+    },
+    "Description": "Define API Gateway for post processing trigger for the Our Village Sample Application.",
+    "Parameters": {
+        "EmailSender": {
+            "Description": "Email address registered with AWS SES in the selected SES region (EmailRegion). This email address needs to conform to sender validation protocol for email recipients to not block emails.",
+            "Type": "String",
+            "Default": "ses.sender@my.com"
+        },
+        "EmailSenderName": {
+            "Description": "Display name for sent emails.",
+            "Type": "String",
+            "Default": "Qrvey Administrator"
+        },
+        "EmailRegion": {
+            "Description": "The SES Region for sending emails.",
+            "Type": "String",
+            "AllowedValues": [
+              "us-east-1",
+              "us-west-2",
+              "eu-west-1"
+            ],
+            "Default": "us-east-1"
+        },
+        "BitlyAPIBase": {
+            "Description": "Base for Bitly API calls.",
+            "Type": "String",
+            "Default": "https://api-ssl.bitly.com"
+        },
+        "BitlyAPIKey": {
+            "Description": "Your Bitly API Key.",
+            "Type": "String",
+            "Default": ""
+        },
+        "QrveyAPIKey": {
+            "Description": "Your Qrvey API Key.",
+            "Type": "String",
+            "Default": ""
+        },
+        "QrveyUserEmail": {
+            "Description": "Email for Qrvey user. The Templates list and Qrvey result pages will be emailed to this address.",
+            "Type": "String",
+            "Default": "Somebody@hear.me"
+        },
+        "QrveyUserFirstname": {
+            "Description": "Qrvey user's first name.",
+            "Type": "String",
+            "Default": "Kwer"
+        },
+        "QrveyUserLastname": {
+            "Description": "Qrvey user's last name.",
+            "Type": "String",
+            "Default": "Vay"
+        },
+        "QrveyUserPassword": {
+            "Description": "Qrvey user's password.",
+            "Type": "String",
+            "Default": "ReallySecret",
+            "NoEcho": "true"
+        },
+        "QrveyUserOrganisation": {
+            "Description": "Qrvey user's organisation.",
+            "Type": "String",
+            "Default": "Response Collector"
+        },
+        "QrveyDomain": {
+            "Description": "Qrvey domain for results page.",
+            "Type": "String",
+            "Default": "https://api.qrvey.com"
+        },
+        "EnableDebug": {
+            "Description": "Enable debugging?",
+            "Type": "String",
+            "AllowedValues": [
+                "true",
+                "false"
+            ],
+            "Default": "true"
+        },
+        "APIName": {
+            "Description": "The name of the API",
+            "Type": "String",
+            "MinLength": 1,
+            "MaxLength": 255,
+            "AllowedPattern": "^[a-zA-Z][-a-zA-Z0-9]*$",
+            "Default": "OurVillageMonitorTrigger"
+        },
+        "DeployApi": {
+          "Description": "Deploy the API",
+          "Type": "String",
+          "AllowedValues": [
+            "Yes",
+            "No"
+          ],
+          "Default": "Yes"
+        },
+        "CorsOrigin": {
+            "Description": "The domain from which the endpoint will be called. Leave empty if the endpoint will be called from the S3 Bucket web page.",
+            "Type": "String",
+            "MinLength": 0,
+            "MaxLength": 255,
+            "AllowedPattern": "^(http[s]?:\\/\\/[^:\\/\\s]+|)$",
+            "Default": ""
+        },
+        "ProjectToolsStack": {
+            "Description": "The stack containing the base framework for the system.",
+            "Type": "String",
+            "MinLength": 1,
+            "MaxLength": 255,
+            "AllowedPattern": "^[a-zA-Z][-a-zA-Z0-9]*$",
+            "Default": "qrvey-sample-3-tools"
+        },
+        "S3PutFileKey": {
+            "Description": "Zip file for S3 Put File function",
+            "Type": "String",
+            "Default": "au-com-thinkronicity-PutS3File-V1.2.zip"
+        },
+        "SystemName": {
+          "Description": "System name.",
+          "Type": "String",
+          "Default": "Our Village Services"
+        },
+        "PropertyId": {
+          "Description": "Id for Properties file.",
+          "Type": "Number",
+          "Default": "3"
+        }
+    },
+  "Mappings": {
+    "AWSRegion2Bucket": {
+      "us-east-1": {
+        "OpenCode": "au-com-thinkronicity-opencode-usea1",
+        "ClientCode": "au-com-thinkronicity-clientcode-apse2"
+      },
+      "us-east-2": {
+        "OpenCode": "au-com-thinkronicity-opencode-usea2",
+        "ClientCode": "au-com-thinkronicity-clientcode-apse2"
+      },
+      "us-west-1": {
+        "OpenCode": "au-com-thinkronicity-opencode-uswe1",
+        "ClientCode": "au-com-thinkronicity-clientcode-apse2"
+      },
+      "us-west-2": {
+        "OpenCode": "au-com-thinkronicity-opencode-uswe2",
+        "ClientCode": "au-com-thinkronicity-clientcode-apse2"
+      },
+      "sa-east-1": {
+        "OpenCode": "au-com-thinkronicity-opencode-saea1",
+        "ClientCode": "au-com-thinkronicity-clientcode-apse2"
+      },
+      "ap-northeast-1": {
+        "OpenCode": "au-com-thinkronicity-opencode-apne1",
+        "ClientCode": "au-com-thinkronicity-clientcode-apse2"
+      },
+      "ap-northeast-2": {
+        "OpenCode": "au-com-thinkronicity-opencode-apne2",
+        "ClientCode": "au-com-thinkronicity-clientcode-apse2"
+      },
+      "ap-south-1": {
+        "OpenCode": "au-com-thinkronicity-opencode-aps1",
+        "ClientCode": "au-com-thinkronicity-clientcode-apse2"
+      },
+      "ap-southeast-1": {
+        "OpenCode": "au-com-thinkronicity-opencode-apse1",
+        "ClientCode": "au-com-thinkronicity-clientcode-apse2"
+      },
+      "ap-southeast-2": {
+        "OpenCode": "au-com-thinkronicity-opencode-apse2",
+        "ClientCode": "au-com-thinkronicity-clientcode-apse2"
+      },
+      "eu-central-1": {
+        "OpenCode": "au-com-thinkronicity-opencode-euce1",
+        "ClientCode": "au-com-thinkronicity-clientcode-apse2"
+      },
+      "eu-west-1": {
+        "OpenCode": "au-com-thinkronicity-opencode-euwe1",
+        "ClientCode": "au-com-thinkronicity-clientcode-apse2"
+      }
+    }
+  },
+    "Conditions" : {
+        "DeployApiYes" : {"Fn::Equals" : [{"Ref" : "DeployApi"}, "Yes"]},
+        "CorsOriginIsS3" : {"Fn::Equals" : [{"Ref" : "CorsOrigin"}, ""]}
+    },
+    "Resources": {
+        "APIToLambdaCredential": {
+            "Type": "AWS::IAM::Role",
+            "Properties": {
+                "AssumeRolePolicyDocument": {
+                    "Version": "2012-10-17",
+                    "Statement": [{
+                        "Effect": "Allow",
+                        "Principal": {
+                            "Service": [
+                            "apigateway.amazonaws.com"
+                            ]
+                        },
+                        "Action": [
+                            "sts:AssumeRole"
+                        ]
+                    }]
+                },
+                "Path": "/",
+                "Policies": [{
+                    "PolicyName": "root",
+                    "PolicyDocument": {
+                        "Version": "2012-10-17",
+                        "Statement": [
+                            {
+                            "Effect": "Allow",
+                            "Action": [
+                            "lambda:InvokeFunction",
+                                "iam:PassRole"
+                            ],
+                            "Resource": [
+                            "*"
+                            ]
+                        }]
+                    }
+                }]
+            }
+        },
+        "LambdaExecutionRole": {
+            "Type": "AWS::IAM::Role",
+            "Properties": {
+                "AssumeRolePolicyDocument": {
+                    "Version": "2012-10-17",
+                    "Statement": [
+                        {
+                            "Effect": "Allow",
+                            "Principal": {"Service": "lambda.amazonaws.com"},
+                            "Action": "sts:AssumeRole"
+                        },
+                        {
+                            "Effect": "Allow",
+                            "Principal": {"Service": "apigateway.amazonaws.com"},
+                            "Action": "sts:AssumeRole"
+                        },
+                        {
+                            "Effect": "Allow",
+                            "Principal": {"Service": "s3.amazonaws.com"},
+                            "Action": "sts:AssumeRole"
+                        }
+                    ]
+                },
+                "Path": {"Fn::Join": [
+                    "",
+                    [
+                        "/",
+                        {"Fn::ImportValue" : {"Fn::Sub" : "${ProjectToolsStack}-SelectedProjectPrefix"}},
+                        "/"
+                    ]
+                ]},
+                "Policies": [{
+                    "PolicyName": "AccessProjectS3FilesAndSES",
+                    "PolicyDocument": {
+                        "Version": "2012-10-17",
+                        "Statement": [
+                            {
+                                "Effect": "Allow",
+                                "Action": ["s3:*"],
+                                "Resource": [{"Fn::Join": [
+                                    "",
+                                    [
+                                        "arn:aws:s3:::",
+                                        {"Fn::ImportValue" : {"Fn::Sub" : "${ProjectToolsStack}-AccessProjectS3FilesBucket"}},
+                                        "/*"
+                                    ]
+                                ]}]
+                            },
+                            {
+                                "Effect": "Allow",
+                                "Action": [
+                                    "s3:Get*",
+                                    "s3:List*"
+                                ],
+                                "Resource": [{"Fn::Join": [
+                                    "",
+                                    [
+                                        "arn:aws:s3:::",
+                                        {"Fn::FindInMap": [
+                                            "AWSRegion2Bucket",
+                                            {"Ref": "AWS::Region"},
+                                            "OpenCode"
+                                        ]},
+                                        "/*"
+                                    ]
+                                ]}]
+                            },
+                            {
+                                "Effect": "Allow",
+                                "Action": [
+                                    "logs:CreateLogGroup",
+                                    "logs:CreateLogStream",
+                                    "logs:PutLogEvents"
+                                ],
+                                "Resource": "arn:aws:logs:*:*:*"
+                            }
+                        ]
+                    }
+                }]
+            }
+        },
+        "OVWSRMApi": {
+            "Type": "AWS::ApiGateway::RestApi",
+            "Properties": {
+                "Name": {"Ref": "APIName"},
+                "Description": "An API to allow the Survey end page link to trigger production of post-processing."
+            }
+        },
+        "OVWSRMSurveyResource": {
+            "Type": "AWS::ApiGateway::Resource",
+            "Properties": {
+                "RestApiId": {"Ref": "OVWSRMApi"},
+                "ParentId": {"Fn::GetAtt": [
+                    "OVWSRMApi",
+                    "RootResourceId"
+                ]},
+                "PathPart": "survey"
+            }
+        },
+        "OVWSRMSurveyIdResource": {
+            "Type": "AWS::ApiGateway::Resource",
+            "Properties": {
+                "RestApiId": {"Ref": "OVWSRMApi"},
+                "ParentId": {"Ref": "OVWSRMSurveyResource"},
+                "PathPart": "{userid}"
+            }
+        },
+        "OVWSRMSurveyIdRespondentReportsOptions": {
+            "Type": "AWS::ApiGateway::Method",
+            "Properties": {
+                "RestApiId": {"Ref": "OVWSRMApi"},
+                "ResourceId": {"Ref": "OVWSRMSurveyIdResource"},
+                "HttpMethod": "OPTIONS",
+                "AuthorizationType": "NONE",
+                "Integration": {
+                    "Type": "MOCK",
+                    "RequestTemplates": {"application/json": "{\"statusCode\":200}"},
+                    "IntegrationResponses": [{
+                        "ResponseParameters": {
+                            "method.response.header.Access-Control-Allow-Headers": "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,x-amz-security-token'",
+                            "method.response.header.Access-Control-Allow-Origin": {"Fn::Join": [
+                                "",
+                                [
+                                    "'",
+                                    {"Fn::If": [
+                                        "CorsOriginIsS3", 
+                                        {"Fn::Sub" : "https://s3-${AWS::Region}.amazonaws.com"}, 
+                                        {"Ref": "CorsOrigin"}
+                                      ]
+                                    },
+                                    "'"
+                                ]
+                            ]},
+                            "method.response.header.Access-Control-Allow-Expose-Headers": "'Access-Control-Allow-Origin'",
+                            "method.response.header.Access-Control-Allow-Methods": "'GET,OPTIONS'"
+                        },
+                        "SelectionPattern": "",
+                        "StatusCode": "200"
+                    }]
+                },
+                "MethodResponses": [{
+                    "ResponseParameters": {
+                        "method.response.header.Access-Control-Allow-Headers": true,
+                        "method.response.header.Access-Control-Allow-Origin": true,
+                        "method.response.header.Access-Control-Allow-Expose-Headers": true,
+                        "method.response.header.Access-Control-Allow-Methods": true
+                    },
+                    "StatusCode": "200"
+                }]
+            }
+        },
+        "OVWSRMSurveyIdRespondentReportsGet": {
+            "Type": "AWS::ApiGateway::Method",
+            "Properties": {
+                "RestApiId": {"Ref": "OVWSRMApi"},
+                "ResourceId": {"Ref": "OVWSRMSurveyIdResource"},
+                "HttpMethod": "GET",
+                "AuthorizationType": "NONE",
+                "RequestParameters": {
+                    "method.request.querystring.project": true,
+                    "method.request.querystring.propertyid": true,
+                    "method.request.querystring.qrveyid": true,
+                    "method.request.querystring.form": true,
+                    "method.request.path.userid": true
+                },
+                "Integration": {
+                    "Type": "AWS",
+                    "IntegrationHttpMethod": "POST",
+                    "Credentials": {
+                      "Fn::GetAtt": [
+                          "APIToLambdaCredential",
+                         "Arn"
+                      ]
+                    },
+                    "Uri": {"Fn::Join": [
+                        "",
+                        [
+                            "arn:aws:apigateway:",
+                            {"Ref": "AWS::Region"},
+                            ":lambda:path/2015-03-31/functions/",
+                            {"Fn::ImportValue" : {"Fn::Sub" : "${ProjectToolsStack}-S3TriggerLambdaArn"}},
+                            "/invocations"
+                        ]
+                    ]},
+                    "RequestTemplates": {"application/json": {"Fn::Join": [
+                        "\n",
+                        [
+                            "#set($inputRoot = $input.path('$'))",
+                            "{",
+                            "\"bucketname\": \"$input.params('project')-${stageVariables.mode}-files-${stageVariables.domain}\"",
+                            ",\"keyname\": \"Qrveys/$input.params('propertyid')/Job_ProcessForm_$input.params('form')_$input.params('userid')_${context.requestId}\"",
+                            ",\"extension\": \"xml\"",
+                            ",\"contentType\": \"application/xml\"",
+                            ",\"filetext\": \"<AsyncJob><QrveyID><![CDATA[$input.params('qrveyid')]]><\/QrveyID><event_id><![CDATA[${context.requestId}]]><\/event_id><ReportVariant><![CDATA[$input.params('report')]]><\/ReportVariant><respondent><![CDATA[$input.params('respondent')]]><\/respondent><\/AsyncJob>\"",
+                            ",\"successMessage\": \"Processing started for form $input.params('form'), qrvey $input.params('qrveyid')\"",
+                            ",\"failMessage\": \"Could not start processing for form $input.params('form'), qrvey $input.params('qrveyid')\"",
+                            "}"
+                        ]
+                    ]}},
+                    "IntegrationResponses": [{
+                        "ResponseParameters": {"method.response.header.Access-Control-Allow-Origin": {"Fn::Join": [
+                            "",
+                            [
+                                "'",
+                                {"Fn::If": [
+                                    "CorsOriginIsS3", 
+                                    {"Fn::Sub" : "https://s3-${AWS::Region}.amazonaws.com"}, 
+                                    {"Ref": "CorsOrigin"}
+                                  ]
+                                },
+                                "'"
+                            ]
+                        ]}},
+                        "SelectionPattern": "",
+                        "StatusCode": "200"
+                    }]
+                },
+                "MethodResponses": [{
+                    "ResponseParameters": {"method.response.header.Access-Control-Allow-Origin": true},
+                    "StatusCode": "200"
+                }]
+            }
+        },
+        "OVWSRMApiDeployment": {
+            "Type": "AWS::ApiGateway::Deployment",
+            "DependsOn" : ["OVWSRMSurveyIdRespondentReportsOptions", "OVWSRMSurveyIdRespondentReportsGet"],
+            "Condition" : "DeployApiYes",
+            "Properties": {
+                "Description": "Initial Deployment",
+                "RestApiId": {"Ref": "OVWSRMApi"},
+                "StageDescription": {
+                    "Variables": {
+                        "mode": {"Fn::ImportValue" : {"Fn::Sub" : "${ProjectToolsStack}-SelectedTargetEnvironment"}},
+                        "domain": {"Fn::ImportValue" : {"Fn::Sub" : "${ProjectToolsStack}-SelectedTargetDomain"}}
+                    },
+                    "MethodSettings": [
+                        {
+                          "ResourcePath": "/survey/{userid}",
+                          "HttpMethod": "GET"
+                        }, 
+                        {
+                          "ResourcePath": "/survey/{userid}",
+                          "HttpMethod": "OPTIONS"
+                        }
+                    ]
+                },
+                "StageName": {"Fn::ImportValue" : {"Fn::Sub" : "${ProjectToolsStack}-SelectedTargetEnvironment"}}
+            }
+        },
+        "LambdaInvokePermission": {
+          "Type": "AWS::Lambda::Permission",
+          "Properties": {
+            "FunctionName" : {"Fn::ImportValue" : {"Fn::Sub" : "${ProjectToolsStack}-RESTFetcherLambdaArn"}},
+            "Action": "lambda:InvokeFunction",
+            "Principal": "apigateway.amazonaws.com",
+            "SourceArn": {"Fn::Join": [
+                        "",
+                        [
+                            "arn:aws:execute-api:",
+                            {"Ref": "AWS::Region"},
+                            ":",
+                            {"Ref": "AWS::AccountId"},
+                            ":",
+                            {"Ref": "OVWSRMApi"},
+                            "/*/GET/survey/*"
+                        ]
+                    ]}
+          }
+        },
+        "S3PutFileLambda": {
+            "Type": "AWS::Lambda::Function",
+            "Properties": {
+                "Code": {
+                    "S3Bucket": {"Fn::FindInMap": [
+                        "AWSRegion2Bucket",
+                        {"Ref": "AWS::Region"},
+                        "OpenCode"
+                    ]},
+                    "S3Key": {"Ref": "S3PutFileKey"}
+                },
+                "Runtime": "nodejs4.3",
+                "Handler": "index.handler",
+                "Timeout": "30",
+                "Description": "CloudFormation S3 Put File Helper from https://github.com/imhogan/PutS3File",
+                "MemorySize": 128,
+                "Role": {"Fn::GetAtt": [
+                    "LambdaExecutionRole",
+                    "Arn"
+                ]}
+            }
+        },
+        "CreatePostProcessTrigger": {
+            "Type": "Custom::S3FilePut",
+            "Properties": {
+                "ServiceToken": {"Fn::GetAtt": [
+                    "S3PutFileLambda",
+                    "Arn"
+                ]},
+                "Source": {
+                    "S3Url":{"Fn::Join": [
+                                "",
+                                [
+                                    {"Fn::ImportValue" : {"Fn::Sub" : "${ProjectToolsStack}-AccessProjectS3FilesBucket"}},
+                                    "/www/PostProcessingTrigger.html"
+                                ]
+                            ]}
+                },
+                "Target": {
+                    "Bucket": {"Fn::ImportValue" : {"Fn::Sub" : "${ProjectToolsStack}-AccessProjectS3FilesBucket"}},
+                    "Key": {"Fn::Sub" : "www/${PropertyId}/StartPostProcess.html"},
+                    "ACL": "public-read",
+                    "contentType": "text/html"
+                },
+                "Debug": "true"
+            }
+        },
+        "CreatePostProcessTriggerFired": {
+            "Type": "Custom::S3FilePut",
+            "Properties": {
+                "ServiceToken": {"Fn::GetAtt": [
+                    "S3PutFileLambda",
+                    "Arn"
+                ]},
+                "Source": {
+                    "S3Url":{"Fn::Join": [
+                                "",
+                                [
+                                    {"Fn::ImportValue" : {"Fn::Sub" : "${ProjectToolsStack}-AccessProjectS3FilesBucket"}},
+                                    "/www/TriggerFired.html"
+                                ]
+                            ]}
+                },
+                "Target": {
+                    "Bucket": {"Fn::ImportValue" : {"Fn::Sub" : "${ProjectToolsStack}-AccessProjectS3FilesBucket"}},
+                    "Key": {"Fn::Sub" : "www/${PropertyId}/TriggerFired.html"},
+                    "ACL": "public-read",
+                    "contentType": "text/html"
+                },
+                "Debug": "true"
+            }
+        },
+        "SaveConfigForPostProcessTrigger": {
+            "Type": "Custom::S3FilePut",
+            "Properties": {
+                "ServiceToken": {"Fn::GetAtt": [
+                    "S3PutFileLambda",
+                    "Arn"
+                ]},
+                "Source": {
+                    "filetext": {"Fn::Join": [
+                        "\n",
+                        [
+                            {"Fn::Join": [
+                                "",
+                                [
+                                    "var url = 'https://",
+                                    {"Ref": "OVWSRMApi"},
+                                    ".execute-api.",
+                                    {"Ref": "AWS::Region"},
+                                    ".amazonaws.com/",
+                                    {"Fn::ImportValue" : {"Fn::Sub" : "${ProjectToolsStack}-SelectedTargetEnvironment"}},
+                                    "/survey/';"
+                                ]
+                            ]},
+                            {"Fn::Join": [
+                                "",
+                                [
+                                    "var project='",
+                                    {"Fn::ImportValue" : {"Fn::Sub" : "${ProjectToolsStack}-SelectedProjectPrefix"}},
+                                    "';"
+                                ]
+                            ]},
+                            {"Fn::Join": [
+                                "",
+                                [
+                                    "var propertyid='",
+                                    {"Ref": "PropertyId"},
+                                    "';"
+                                ]
+                            ]}
+                        ]
+                    ]},
+                    "contentType": "application/text"
+                },
+                "Target": {
+                    "Bucket": {"Fn::ImportValue" : {"Fn::Sub" : "${ProjectToolsStack}-AccessProjectS3FilesBucket"}},
+                    "Key": {"Fn::Sub" : "www/${PropertyId}/config.js"},
+                    "ACL": "public-read"
+                },
+                "Debug": "true"
+            }
+        },
+        "SavePropertiesForEnvironment": {
+            "Type": "Custom::S3FilePut",
+            "Properties": {
+                "ServiceToken": {"Fn::GetAtt": [
+                    "S3PutFileLambda",
+                    "Arn"
+                ]},
+                "Source": {
+                    "filetext": {"Fn::Join": [
+                        "\n",
+                        [
+                            "# Qrvey configuration file for RESTFetcher.",
+                            "#",
+                            "# Note ${S3_Bucket} will be replaced by the value of the parameter S3_Bucket, ",
+                            "# passed in by the caller or from LambdaEventsMap.xml. This allows the bucket ",
+                            "# name holding the configuration file to be used.",
+                            "#",
+                            "# Author Ian Hogan, Ian_MacDonald_Hogan@yahoo.com",
+                            "# Endpoint for web service ",
+                            "service.endPoint:https://api.qrvey.com",
+                            "# Default timeout for REST interface",
+                            "service.timeout:10000",
+                            "# Debug tracing option",
+                            {"Fn::Join": [
+                                "",
+                                [
+                                    "trace.debug:",
+                                    {"Ref": "EnableDebug"}
+                                ]
+                            ]},
+                            "# Depth limit to prevent infinite recursion",
+                            "service.depthLimit:20",
+                            "# Commands file for RESTFetcher",
+                            "service.commandsFile:s3://${S3_Bucket}/config/QrveyCommands.xml",
+                            "# Default ContentType for request body",
+                            "service.contentType:application/json; charset=UTF-8",
+                            "# Region for SES ",
+                            {"Fn::Join": [
+                                "",
+                                [
+                                    "parameter.AWS.SES_Region:",
+                                    {"Ref": "EmailRegion"}
+                                ]
+                            ]},
+                            "# Email sender details",
+                            "# Warning: Sender address needs to conform to sender validation protocol for email recipients to not block emails.",
+                            {"Fn::Join": [
+                                "",
+                                [
+                                    "parameter.EmailSender:",
+                                    {"Ref": "EmailSender"}
+                                ]
+                            ]},
+                            {"Fn::Join": [
+                                "",
+                                [
+                                    "parameter.EmailSenderName:",
+                                    {"Ref": "EmailSenderName"}
+                                ]
+                            ]},
+                            "# System Name",
+                            {"Fn::Join": [
+                                "",
+                                [
+                                    "parameter.System:",
+                                    {"Ref": "SystemName"},
+                                    " ",
+                                    {"Fn::ImportValue" : {"Fn::Sub" : "${ProjectToolsStack}-SelectedTargetEnvironment"}}
+                                ]
+                            ]},
+                            "# Parameters for Apache FOP make sure the region is correct for the S3 Bucket",
+                            {"Fn::Join": [
+                                "",
+                                [
+                                    "parameter.FOP_BASE_URI:https://s3-",
+                                    {"Ref": "AWS::Region"},
+                                    ".amazonaws.com/${S3_Bucket}/fop"
+                                ]
+                            ]},
+                            "parameter.FOP_CONFIG:fop-aws.xconf",
+                            "# Log folder for debugging.",
+                            "parameter.REST_Log_Path:REST_Logs",
+                            "# API Details for bitly calls",
+                            {"Fn::Join": [
+                                "",
+                                [
+                                    "parameter.BITLY_API_Base:",
+                                    {"Ref": "BitlyAPIBase"}
+                                ]
+                            ]},
+                            {"Fn::Join": [
+                                "",
+                                [
+                                    "parameter.BITLY_API_KEY:",
+                                    {"Ref": "BitlyAPIKey"}
+                                ]
+                            ]},
+                            "# API Key for qrvey calls",
+                            {"Fn::Join": [
+                                "",
+                                [
+                                    "parameter.API_KEY:",
+                                    {"Ref": "QrveyAPIKey"}
+                                ]
+                            ]},
+                            "# Survey user details",
+                            {"Fn::Join": [
+                                "",
+                                [
+                                    "parameter.UserEmail:",
+                                    {"Ref": "QrveyUserEmail"}
+                                ]
+                            ]},
+                            {"Fn::Join": [
+                                "",
+                                [
+                                    "parameter.UserFirstname:",
+                                    {"Ref": "QrveyUserFirstname"}
+                                ]
+                            ]},
+                            {"Fn::Join": [
+                                "",
+                                [
+                                    "parameter.UserLastname:",
+                                    {"Ref": "QrveyUserLastname"}
+                                ]
+                            ]},
+                            {"Fn::Join": [
+                                "",
+                                [
+                                    "parameter.UserPassword:",
+                                    {"Ref": "QrveyUserPassword"}
+                                ]
+                            ]},
+                            {"Fn::Join": [
+                                "",
+                                [
+                                    "parameter.UserOrganisation:",
+                                    {"Ref": "QrveyUserOrganisation"}
+                                ]
+                            ]},
+                            "# Results S3 Bucket Region",
+                            {"Fn::Join": [
+                                "",
+                                [
+                                    "parameter.ResultsBucketRegion:",
+                                    {"Ref": "AWS::Region"}
+                                ]
+                            ]},
+                            "# Results S3 Bucket",
+                            "parameter.ResultsBucket:${S3_Bucket}",
+                            "# Results HTML Pages path",
+                            "parameter.ResultsPath:results/",
+                            "# Results domain",
+                            {"Fn::Join": [
+                                "",
+                                [
+                                    "parameter.ResultsDomain:",
+                                    {"Ref": "QrveyDomain"}
+                                ]
+                            ]},
+                            "# Post Process base URL",
+                            {"Fn::Join": [
+                                "",
+                                [
+                                    "parameter.PostProcessBase:https://s3-",
+                                    {"Ref": "AWS::Region"},
+                                    ".amazonaws.com/",
+                                    {"Fn::ImportValue" : {"Fn::Sub" : "${ProjectToolsStack}-AccessProjectS3FilesBucket"}},
+                                    {"Fn::Sub" : "/www/${PropertyId}/StartPostProcess.html"}
+                                ]
+                            ]}
+                        ]
+                    ]},
+                    "contentType": "text/x-java-properties"
+                },
+                "Target": {
+                    "Bucket": {"Fn::ImportValue" : {"Fn::Sub" : "${ProjectToolsStack}-AccessProjectS3FilesBucket"}},
+                    "Key": {"Fn::Sub" : "config/Qrvey${PropertyId}.properties"}
+                },
+                "Debug": "true"
+            }
+        }        
+    },
+    "Outputs": {
+        "OVWSRMApiName": {
+            "Value": {"Ref": "APIName"},
+             "Description": "The name given to the API when the stack was created."
+         },
+        "PostSurveyURL": {
+            "Value": {"Fn::Join": 
+                    [
+                            "",
+                            [
+                                "https://",
+                                "s3-",
+                                {"Ref": "AWS::Region"},
+                                ".amazonaws.com/",
+                                {"Fn::ImportValue" : {"Fn::Sub" : "${ProjectToolsStack}-AccessProjectS3FilesBucket"}},
+                                {"Fn::Sub" : "/www/${PropertyId}/StartPostProcess.html"},
+                                "?f={FormName}"
+                            ]
+                    ]
+            },
+            "Description": "The URL to use for the survey processing trigger - replace {FormName} with the appropriate form name, ie the corresponding command will be PostProcessFormName.",
+            "Export" : { "Name" : {"Fn::Sub": "${AWS::StackName}-PostSurveyURL" }}
+        }
+    }
+}

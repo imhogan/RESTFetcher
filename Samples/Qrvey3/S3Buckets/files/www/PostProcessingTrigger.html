@@ -133,6 +133,7 @@ function TriggerPostProcess() {
      // initial url and project come from config.js, and userid comes from config.xml
      url += myConfig.UserID+'/';
      url += '?project='+project;
+     url += '&propertyid='+propertyid;
      // qrveyid and form are fetched from the referrer querystrings and current page querystrings respectively.
      url += '&qrveyid='+myConfig.QrveyID;
      url += '&form='+getQueryString('f');

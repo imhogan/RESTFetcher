@@ -456,7 +456,7 @@
                             ",\"keyname\": \"Qrveys/$input.params('propertyid')/Job_ProcessForm_$input.params('form')_$input.params('userid')_${context.requestId}_Config\"",
                             ",\"extension\": \"xml\"",
                             ",\"contentType\": \"application/xml\"",
-                            ",\"filetext\": \"<AsyncJob><QrveyID><![CDATA[$input.params('qrveyid')]]><\/QrveyID><event_id><![CDATA[${context.requestId}]]><\/event_id><ReportVariant><![CDATA[$input.params('report')]]><\/ReportVariant><respondent><![CDATA[$input.params('respondent')]]><\/respondent><\/AsyncJob>\"",
+                            ",\"filetext\": \"<AsyncJob><QrveyID><![CDATA[$input.params('qrveyid')]]><\/QrveyID><event_id><![CDATA[${context.requestId}]]><\/event_id><\/AsyncJob>\"",
                             ",\"successMessage\": \"Processing started for form $input.params('form'), qrvey $input.params('qrveyid')\"",
                             ",\"failMessage\": \"Could not start processing for form $input.params('form'), qrvey $input.params('qrveyid')\"",
                             "}"

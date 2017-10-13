@@ -1,8 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<xsl:stylesheet xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
+<xsl:stylesheet 
+    xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
     xmlns:xs="http://www.w3.org/2001/XMLSchema"
+    xmlns:fn="http://www.w3.org/2005/xpath-functions"
     xmlns:xd="http://www.oxygenxml.com/ns/doc/xsl"
-    exclude-result-prefixes="xs xd"
+    exclude-result-prefixes="xsl xs fn xd"
     version="2.0">
     <xd:doc scope="stylesheet">
         <xd:desc>
@@ -13,11 +15,29 @@
     </xd:doc>
     <xsl:output indent="yes"></xsl:output>
     <xsl:param name="TimeFilter"></xsl:param>
-    <xsl:param name="Debug">N</xsl:param>
+    <xsl:param name="Debug">Y</xsl:param>
+    <xd:doc>
+        <xd:desc>The URI of the styles file.</xd:desc>
+    </xd:doc>
+    <xsl:param name="QrveyURI">Qrvey.xml</xsl:param>
+    
+    <xsl:variable name="QrveyAbsURI">
+        <xsl:call-template name="GetAbsoluteURI">
+            <xsl:with-param name="SourceURI" select="$QrveyURI"/>
+        </xsl:call-template>
+    </xsl:variable>
+    <xd:doc>
+        <xd:desc>Load the styles or use an empty sequence if there is none.</xd:desc>
+    </xd:doc>
+    <xsl:variable name="Qrvey" select="if (fn:doc-available($QrveyAbsURI)) then fn:doc($QrveyAbsURI) else ()"></xsl:variable>
+    
     <xsl:template match="/">
         <Dataset>
             <xsl:for-each select="//Items[$TimeFilter = '' or modifyDate >= $TimeFilter]">
                 <DataRow>
+                    <xsl:if test="$Debug='Y'">
+                        <xsl:comment>Qrvey is <xsl:value-of select="$Qrvey//qrvey/settings/description"/></xsl:comment>
+                    </xsl:if>
                     <MetaData>
                         <xsl:for-each select="*[local-name()!='answers']">
                             <Item Name="{local-name()}"><xsl:value-of select="normalize-space(.)"/></Item>
@@ -27,11 +47,31 @@
                         <xsl:choose>
                             <xsl:when test="data = type">
                                 <xsl:for-each select="*[lower-case(local-name())=lower-case(../type)]/*">
-                                    <Item Name="{../../id}.{local-name()}" AnswerId="{data_ansid}"><xsl:value-of select="normalize-space(.)"/></Item>
+                                    <xsl:if test="$Debug='Y'">
+                                        <xsl:comment>Answer is <xsl:value-of select="normalize-space(current())"/></xsl:comment>
+                                        <xsl:comment>Answer ID is <xsl:value-of select="$Qrvey//answer[.=normalize-space(current())]/@answerid"/></xsl:comment>
+                                    </xsl:if>
+                                    <xsl:variable name="AnswerId">
+                                        <xsl:choose>
+                                            <xsl:when test="data_ansid != ''"><xsl:value-of select="data_ansid"/></xsl:when>
+                                            <xsl:otherwise><xsl:value-of select="$Qrvey//answer[.=normalize-space(current())]/@answerid"/></xsl:otherwise>
+                                        </xsl:choose>
+                                    </xsl:variable>
+                                    <Item Name="{../../id}.{local-name()}" AnswerId="{$AnswerId}"><xsl:value-of select="normalize-space(.)"/></Item>
                                 </xsl:for-each>
                             </xsl:when>
                             <xsl:otherwise>
-                                <Item Name="{id}" AnswerId="{data_ansid}"><xsl:value-of select="normalize-space(data)"/></Item>
+                                <xsl:if test="$Debug='Y'">
+                                    <xsl:comment>Answer is <xsl:value-of select="normalize-space(current()/data)"/></xsl:comment>
+                                    <xsl:comment>Answer ID is <xsl:value-of select="$Qrvey//answer[.=normalize-space(current()/data)]/@answerid"/></xsl:comment>
+                                </xsl:if>
+                                <xsl:variable name="AnswerId">
+                                    <xsl:choose>
+                                        <xsl:when test="data_ansid != ''"><xsl:value-of select="data_ansid"/></xsl:when>
+                                        <xsl:otherwise><xsl:value-of select="$Qrvey//answer[.=normalize-space(current()/data)]/@answerid"/></xsl:otherwise>
+                                    </xsl:choose>
+                                </xsl:variable>
+                                <Item Name="{id}" AnswerId="{$AnswerId}"><xsl:value-of select="normalize-space(data)"/></Item>
                             </xsl:otherwise>
                         </xsl:choose>
                     </xsl:for-each>
@@ -39,4 +79,15 @@
             </xsl:for-each>
         </Dataset>
     </xsl:template>
+
+    <xsl:template name="GetAbsoluteURI">
+        <xsl:param name="SourceURI"></xsl:param>
+        <xsl:choose>
+            <xsl:when test="fn:base-uri(/) != ''"><xsl:value-of select="fn:resolve-uri($SourceURI,fn:base-uri(/))"/></xsl:when>
+            <xsl:when test="fn:base-uri() != ''"><xsl:value-of select="fn:resolve-uri($SourceURI,fn:base-uri())"/></xsl:when>
+            <xsl:otherwise><xsl:value-of select="$SourceURI"/></xsl:otherwise>
+        </xsl:choose>
+    </xsl:template>
+    
+    
 </xsl:stylesheet>

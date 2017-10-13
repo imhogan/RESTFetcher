@@ -532,6 +532,7 @@ var ResultsConfig = {
                     <Parameter Name="Transform" Function="S3URL">=${S3_Bucket},xsl/Answers2Dataset.xslt,3600</Parameter>
                     <!-- NOTE: Currently we use a time filter, and assume that all the responses have been returned - in production a filter or webhook would work more reliably. -->
                     <Parameter Name="TimeFilter">$responses_modified_since</Parameter>
+                    <Parameter Name="QrveyURI" Function="S3URL">=${S3_Bucket},config/forms/NewVillageForm.xml,3600</Parameter>
                 </Parameters>
                 <Actions>
                     <Action Type="S3PUT" Mode="debug">
@@ -666,9 +667,6 @@ var ResultsConfig = {
         <Actions>
             <Action Type="XSLT2">
                 <Parameters>
-                    <Parameter Name="ConfigDetails" Value="$configurationURI">
-                        <RegExp><![CDATA[^.*(?<propertyid>[^.]+)[.]properties$]]></RegExp>
-                    </Parameter>
                     <Parameter Name="Transform" Function="S3URL">=${S3_Bucket},xsl/GetLastProcessedTime.xslt,3600</Parameter>
                     <Parameter Name="LastResponseTimeURI" Function="S3URL">=${S3_Bucket},Forms/${QrveyID}/LastResponseTime.xml,3600</Parameter>
                     <!--<Parameter Name="FixedResult">$ResponsesModifiedSince</Parameter>-->
@@ -725,6 +723,7 @@ var ResultsConfig = {
                     <Parameter Name="Transform" Function="S3URL">=${S3_Bucket},xsl/Answers2Dataset.xslt,3600</Parameter>
                     <!-- NOTE: Currently we use a time filter, and assume that all the responses have been returned - in production a filter or webhook would work more reliably. -->
                     <Parameter Name="TimeFilter">$responses_modified_since</Parameter>
+                    <Parameter Name="QrveyURI" Function="S3URL">=${S3_Bucket},config/forms/NewSurveyForm.xml,3600</Parameter>
                 </Parameters>
                 <Actions>
                     <Action Type="S3PUT" Mode="debug">
@@ -740,7 +739,9 @@ var ResultsConfig = {
                                 <RegExp><![CDATA[^(?<SurveyName>[^_]*)_(?<SurveyType>.+)$]]></RegExp>
                             </Parameter>
                             <Parameter Name="SurveyTitle" XPath="Item[@Name='survey_title']"/>
-                            <Parameter Name="FormName">=${SurveyName}Form</Parameter>
+                            <Parameter Name="FormName">=${SurveyDetails.SurveyName}Form</Parameter>
+                            <Parameter Name="SurveyName">=${SurveyDetails.SurveyName}</Parameter>
+                            <Parameter Name="SurveyType">=${SurveyDetails.SurveyType}Form</Parameter>
                         </Parameters>
                     </Action>
                     <Action Type="XSLT2">
@@ -806,9 +807,6 @@ var ResultsConfig = {
         <Actions>
             <Action Type="XSLT2">
                 <Parameters>
-                    <Parameter Name="ConfigDetails" Value="$configurationURI">
-                        <RegExp><![CDATA[^.*(?<propertyid>[^.]+)[.]properties$]]></RegExp>
-                    </Parameter>
                     <Parameter Name="Transform" Function="S3URL">=${S3_Bucket},xsl/GetLastProcessedTime.xslt,3600</Parameter>
                     <Parameter Name="LastResponseTimeURI" Function="S3URL">=${S3_Bucket},Forms/${QrveyID}/LastResponseTime.xml,3600</Parameter>
                     <!--<Parameter Name="FixedResult">$ResponsesModifiedSince</Parameter>-->
@@ -865,6 +863,7 @@ var ResultsConfig = {
                     <Parameter Name="Transform" Function="S3URL">=${S3_Bucket},xsl/Answers2Dataset.xslt,3600</Parameter>
                     <!-- NOTE: Currently we use a time filter, and assume that all the responses have been returned - in production a filter or webhook would work more reliably. -->
                     <Parameter Name="TimeFilter">$responses_modified_since</Parameter>
+                    <Parameter Name="QrveyURI" Function="S3URL">=${S3_Bucket},config/forms/NewResidentsForm.xml,3600</Parameter>
                 </Parameters>
                 <Actions>
                     <Action Type="S3PUT" Mode="debug">
@@ -982,6 +981,7 @@ var ResultsConfig = {
                     <Parameter Name="Transform" Function="S3URL">=${S3_Bucket},xsl/Answers2Dataset.xslt,3600</Parameter>
                     <!-- NOTE: Currently we use a time filter, and assume that all the responses have been returned - in production a filter or webhook would work more reliably. -->
                     <Parameter Name="TimeFilter">$responses_modified_since</Parameter>
+                    <Parameter Name="QrveyURI" Function="S3URL">=${S3_Bucket},config/forms/EmailQrveysForm.xml,3600</Parameter>
                 </Parameters>
                 <Actions>
                     <Action Type="S3PUT" Mode="debug">

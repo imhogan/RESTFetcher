@@ -18,10 +18,9 @@
             <Parameters>
                 <Parameter Name="configurationURI">=s3://${S3_Bucket}/config/Qrvey${propertyid}.properties</Parameter>
                 <Parameter Name="UserID">$userid</Parameter>
-                <Parameter Name="TemplateID">$templateid</Parameter>
                 <Parameter Name="JobID">=${propertyid}_${uid}</Parameter>
                 <Parameter Name="JobFile">=Qrveys/${propertyid}/Job_ProcessForm_${formname}_${userid}_${uid}.xml</Parameter>
-                <Parameter Name="command">=PostProcess${formname}Form</Parameter>
+                <Parameter Name="command">=PostProcess${formname}</Parameter>
             </Parameters>
         </MatchKey>
         <MatchKey Command="AddUserFormFromXML">
@@ -88,14 +87,13 @@
             </Parameters>
         </MatchKey>
         <MatchKey Command="PostProcessForm">
-            <RegExp><![CDATA[^Qrveys/(?<propertyid>[^/]*)/Job_ProcessForm_(?<formname>[^_]+)_(?<userid>[^_]+)_(?<uid>[^_]+)_config.xml$]]></RegExp>
+            <RegExp><![CDATA[^Qrveys/(?<propertyid>[^/]*)/Job_ProcessForm_(?<formname>[^_]+)_(?<userid>[^_]+)_(?<uid>[^_]+)_Config.xml$]]></RegExp>
             <Parameters>
                 <Parameter Name="configurationURI">=s3://${S3_Bucket}/config/Qrvey${propertyid}.properties</Parameter>
                 <Parameter Name="UserID">$userid</Parameter>
-                <Parameter Name="TemplateID">$templateid</Parameter>
                 <Parameter Name="JobID">=${propertyid}_${uid}</Parameter>
                 <Parameter Name="JobFile">=Qrveys/${propertyid}/Job_ProcessForm_${formname}_${userid}_${uid}.xml</Parameter>
-                <Parameter Name="command">=PostProcess${formname}Form</Parameter>
+                <Parameter Name="command">=PostProcess${formname}</Parameter>
             </Parameters>
         </MatchKey>
         <MatchKey Command="AddUserFormFromXML">

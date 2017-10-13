@@ -1020,6 +1020,9 @@ public class Utility {
                             while (m.find()) {
                                 String groupName = m.group(1);
                                 result.put(String.valueOf(paramName) + "." + groupName, resolver.group(groupName));
+                                if (debug || verbose) {
+                        	        Utility.LogMessage(String.valueOf(paramName)+ "." + groupName + "='" + resolver.group(groupName) + "'");
+                                }
                             }
                         }
                     }

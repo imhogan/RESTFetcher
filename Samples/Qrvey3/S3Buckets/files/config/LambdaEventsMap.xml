@@ -4,6 +4,7 @@
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
     xsi:schemaLocation="http://THINKronicity.com.au/Schemas/Smirnov/RestFetcherCommands.xsd https://github.com/imhogan/RESTFetcher/raw/master/Schemas/RestFetcherCommands.xsd"
     >
+    <!-- NOTE: All Regexps must be registered in the bucket LambdaConfigurations in the tools stack! -->
     <LambdaEvent Event="aws:s3:ObjectCreated:Copy">
         <MatchKey Command="InitSystem">
             <RegExp><![CDATA[^config/Qrvey(?<propertyid>[^.]*).properties$]]></RegExp>
@@ -13,7 +14,7 @@
             </Parameters>
         </MatchKey>
         <MatchKey Command="PostProcessForm">
-            <RegExp><![CDATA[^Qrveys/(?<propertyid>[^/]*)/Job_ProcessForm_(?<formname>[^_]+)_(?<userid>[^_]+)_(?<uid>[^_]+).xml$]]></RegExp>
+            <RegExp><![CDATA[^Qrveys/(?<propertyid>[^/]*)/Job_ProcessForm_(?<formname>[^_]+)_(?<userid>[^_]+)_(?<uid>[^_]+)_Config.xml$]]></RegExp>
             <Parameters>
                 <Parameter Name="configurationURI">=s3://${S3_Bucket}/config/Qrvey${propertyid}.properties</Parameter>
                 <Parameter Name="UserID">$userid</Parameter>
@@ -87,7 +88,7 @@
             </Parameters>
         </MatchKey>
         <MatchKey Command="PostProcessForm">
-            <RegExp><![CDATA[^Qrveys/(?<propertyid>[^/]*)/Job_ProcessForm_(?<formname>[^_]+)_(?<userid>[^_]+)_(?<uid>[^_]+).xml$]]></RegExp>
+            <RegExp><![CDATA[^Qrveys/(?<propertyid>[^/]*)/Job_ProcessForm_(?<formname>[^_]+)_(?<userid>[^_]+)_(?<uid>[^_]+)_config.xml$]]></RegExp>
             <Parameters>
                 <Parameter Name="configurationURI">=s3://${S3_Bucket}/config/Qrvey${propertyid}.properties</Parameter>
                 <Parameter Name="UserID">$userid</Parameter>

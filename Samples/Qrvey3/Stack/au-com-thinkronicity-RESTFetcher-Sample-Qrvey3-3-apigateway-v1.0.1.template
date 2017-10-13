@@ -453,7 +453,7 @@
                             "#set($inputRoot = $input.path('$'))",
                             "{",
                             "\"bucketname\": \"$input.params('project')-${stageVariables.mode}-files-${stageVariables.domain}\"",
-                            ",\"keyname\": \"Qrveys/$input.params('propertyid')/Job_ProcessForm_$input.params('form')_$input.params('userid')_${context.requestId}\"",
+                            ",\"keyname\": \"Qrveys/$input.params('propertyid')/Job_ProcessForm_$input.params('form')_$input.params('userid')_${context.requestId}_Config\"",
                             ",\"extension\": \"xml\"",
                             ",\"contentType\": \"application/xml\"",
                             ",\"filetext\": \"<AsyncJob><QrveyID><![CDATA[$input.params('qrveyid')]]><\/QrveyID><event_id><![CDATA[${context.requestId}]]><\/event_id><ReportVariant><![CDATA[$input.params('report')]]><\/ReportVariant><respondent><![CDATA[$input.params('respondent')]]><\/respondent><\/AsyncJob>\"",

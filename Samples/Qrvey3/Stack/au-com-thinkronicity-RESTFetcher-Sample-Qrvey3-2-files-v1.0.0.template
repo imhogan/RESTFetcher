@@ -27,7 +27,7 @@
         "ProjectZipFilesList": {
             "Description": "Project List Files",
             "Type": "CommaDelimitedList",
-            "Default": "au-com-thinkronicity-RestFetcher-QrveySample3-V1.0.0.zip"
+            "Default": "au-com-thinkronicity-RestFetcher-QrveySample3-V1.0.1.zip"
         },
         "ProjectToolsStack": {
             "Description": "The stack containing the base framework for the system.",

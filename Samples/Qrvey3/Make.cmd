@@ -39,7 +39,7 @@ IF NOT EXIST %_7ZIP% (
 
 SET _MAKE_BUCKET=
 SET _DOMAIN=au-com-thinkronicity
-SET _VERSION=1.0.0
+SET _VERSION=1.0.1
 SET _SampleID=3
 SET _S3_SOURCE=open* client*
 SET _S3_Payer=BucketOwner

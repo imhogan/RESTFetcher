@@ -1019,6 +1019,7 @@ public class Utility {
                             Matcher m = Pattern.compile("\\(\\?<([a-zA-Z][a-zA-Z0-9]*)>").matcher(expValue);
                             while (m.find()) {
                                 String groupName = m.group(1);
+                                currentContext.put(String.valueOf(paramName) + "." + groupName, resolver.group(groupName));
                                 result.put(String.valueOf(paramName) + "." + groupName, resolver.group(groupName));
                                 if (debug || verbose) {
                         	        Utility.LogMessage(String.valueOf(paramName)+ "." + groupName + "='" + resolver.group(groupName) + "'");
@@ -1110,7 +1111,7 @@ public class Utility {
             }
         } else if (paramValue.startsWith("=")) {
             // If the parameter value starts with an = sign, substitute all patterns of the form ${SomeName} with the value of the context parameter whose name is SomeName.
-            paramValue = Utility.replaceParameters(paramValue.substring(1), contextParameters);
+            paramValue = Utility.replaceParameters(paramValue.substring(1), contextParameters, debug);
         }
         if (paramElement.hasAttribute("Function")) {
             // If the parameter element has a function attribute, apply that function to the current value to get the new value.
@@ -1136,9 +1137,9 @@ public class Utility {
             } else if (paramType.equals("AuthToken")) {
                 paramValue = "bearer " + paramValue;
             } else if (paramType.equals("URL")) {
-                paramValue = Utility.replaceParameters(Utility.readStringFromURL(paramValue), contextParameters);
+                paramValue = Utility.replaceParameters(Utility.readStringFromURL(paramValue), contextParameters, debug);
             } else if (paramType.equals("LocalFile")) {
-                paramValue = Utility.replaceParameters(Utility.readStringFromFile(paramValue), contextParameters);
+                paramValue = Utility.replaceParameters(Utility.readStringFromFile(paramValue), contextParameters, debug);
             } else if (!paramType.equals("Text")) {
                Utility.LogMessage("Warning: Unknown type '" + paramType + "' for parameter " + paramName);
             }
@@ -1158,7 +1159,7 @@ public class Utility {
      * @param contextParameters	- the context parameters.
      * @return					- the evaluated string.
      */
-    public static String replaceParameters(String value, HashMap<String, String> contextParameters) {
+    public static String replaceParameters(String value, HashMap<String, String> contextParameters, Boolean debug) {
         String result = value;
         for (Map.Entry<String, String> e : contextParameters.entrySet()) {
         

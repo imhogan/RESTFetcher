@@ -741,7 +741,7 @@ var ResultsConfig = {
                             <Parameter Name="SurveyTitle" XPath="Item[@Name='survey_title']"/>
                             <Parameter Name="FormName">=${SurveyDetails.SurveyName}Form</Parameter>
                             <Parameter Name="SurveyName">=${SurveyDetails.SurveyName}</Parameter>
-                            <Parameter Name="SurveyType">=${SurveyDetails.SurveyType}Form</Parameter>
+                            <Parameter Name="SurveyType">=${SurveyDetails.SurveyType}</Parameter>
                         </Parameters>
                     </Action>
                     <Action Type="XSLT2">

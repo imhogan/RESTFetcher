@@ -1161,7 +1161,17 @@ public class Utility {
     public static String replaceParameters(String value, HashMap<String, String> contextParameters) {
         String result = value;
         for (Map.Entry<String, String> e : contextParameters.entrySet()) {
+        
+            if (debug && contextParameters.containsKey("DebugReplaceParameters")) {
+            
+	           Utility.LogMessage("Replacing ${" + e.getKey() + "} with '"+e.getValue()+"' in '"+ result + "'");
+            }
             result = result.replaceAll("\\$\\{" + e.getKey() + "\\}", e.getValue());
+            
+            if (debug && contextParameters.containsKey("DebugReplaceParameters")) {
+            
+	           Utility.LogMessage("Result is '"+ result + "'");
+            }
         }
         return result;
     }

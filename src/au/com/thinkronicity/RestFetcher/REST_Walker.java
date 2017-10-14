@@ -777,7 +777,7 @@ public class REST_Walker {
             );
             
             // The result document provides the sent email details.
-            actionDocument =  Utility.readXmlFromString(Utility.replaceParameters("<Result><EmailLog><From><![CDATA[${From}]]></From><To><![CDATA[${To}]]></To><ReplyTo><![CDATA[${ReplyTo}]]></ReplyTo><Subject><![CDATA[${Subject}]]></Subject><Body><![CDATA[" + bodyContent + "]]></Body>" + "</EmailLog></Result>", actionParameters));
+            actionDocument =  Utility.readXmlFromString(Utility.replaceParameters("<Result><EmailLog><From><![CDATA[${From}]]></From><To><![CDATA[${To}]]></To><ReplyTo><![CDATA[${ReplyTo}]]></ReplyTo><Subject><![CDATA[${Subject}]]></Subject><Body><![CDATA[" + bodyContent + "]]></Body>" + "</EmailLog></Result>", actionParameters, this.walkerConfig.debug));
         }
         else if (actionType.equals("ZIP")) {
         	
@@ -861,7 +861,7 @@ public class REST_Walker {
             }
             
             // The result document provides the sent email details.
-            actionDocument =  Utility.readXmlFromString(Utility.replaceParameters("<Result><ZipLog><SourceFiles><![CDATA[${SourceFiles}]]></SourceFiles><ZipFile><![CDATA[${ZipFile}]]></ZipFile></ZipLog></Result>", actionParameters));
+            actionDocument =  Utility.readXmlFromString(Utility.replaceParameters("<Result><ZipLog><SourceFiles><![CDATA[${SourceFiles}]]></SourceFiles><ZipFile><![CDATA[${ZipFile}]]></ZipFile></ZipLog></Result>", actionParameters, this.walkerConfig.debug));
         }
         else {
         	Utility.LogMessage("Warning - Unknown action type: " + actionType);

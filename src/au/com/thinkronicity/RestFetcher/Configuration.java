@@ -135,7 +135,7 @@ public class Configuration {
 	    	for(Enumeration<Object> e = configurationProperties.keys(); e.hasMoreElements();) {
 	    		String key = (String) e.nextElement();
 	    		if (key.startsWith(prefix) && !parameters.containsKey(key.substring(prefix.length()))) {
-    	    		parameters.put(key.substring(prefix.length()), Utility.replaceParameters(configurationProperties.getProperty(key), parameters));
+    	    		parameters.put(key.substring(prefix.length()), Utility.replaceParameters(configurationProperties.getProperty(key), parameters, debug));
 	    		}
 	    	}
     	}
@@ -168,7 +168,7 @@ public class Configuration {
      * @return				- the value of the named parameter or default value.
      */
     public String getParameter(String name, String defaultValue) {
-        return Utility.replaceParameters((String)parameters.getOrDefault(name, defaultValue), parameters);
+        return Utility.replaceParameters((String)parameters.getOrDefault(name, defaultValue), parameters, debug);
     }
 
     /**

@@ -296,19 +296,23 @@
                     <Action Type="S3PUT">
                         <Parameters>
                             <Parameter Name="Bucket">$S3_Bucket</Parameter>
-                            <Parameter Name="Name">=Forms/${QrveyID}/RecipientsFile_${JobID}.xml</Parameter>
+                            <Parameter Name="Name">=Forms/${QrveyID}/RecipientsFile.xml</Parameter>
                         </Parameters>
                     </Action>
-                    <Action Type="eMail" Match="//Emails/Email[To!='']">
+                    <Action Type="eMail" Match="//Emails/Email[To!=''] | /Addresses/Address[Email != '' and not(Email/@bounce = 'true')]">
                         <Parameters>
                             <Parameter Name="From">$EmailSender</Parameter>
                             <Parameter Name="Name">$EmailSenderName</Parameter>
-                            <Parameter Name="To" XPath="To"/>
+                            <Parameter Name="To" XPath="To | Email"/>
                             <Parameter Name="BCC">$EmailSender</Parameter>
                             <Parameter Name="Subject">=${QrveyName} link details.</Parameter>
-                            <Parameter Name="Salutation" XPath="Salutation"/>
-                            <Parameter Name="Firstname" XPath="Firstname"/>
-                            <Parameter Name="Lastname" XPath="Lastname"/>
+                            <Parameter Name="FileSalutation" XPath="Salutation"/>
+                            <Parameter Name="SalutationDetails" Value="=${FileSalutation} Dear">
+                                <RegExp><![CDATA[^[ ]*(?<salutation>[^ ]+).*$]]></RegExp>
+                            </Parameter>
+                            <Parameter Name="Salutation">$SalutationDetails.salutation</Parameter>
+                            <Parameter Name="Firstname" XPath="Firstname | Addressee"/>
+                            <Parameter Name="Lastname" XPath="Lastname | Surname"/>
                             <Parameter Name="Attachments" Function="S3URL">=${S3_Bucket},PDFs/${FormName}_${JobID}.pdf</Parameter>
                         </Parameters>
                         <Body ContentType="text/html"><![CDATA[=<html><body>
@@ -775,13 +779,20 @@ var ResultsConfig = {
                 <Body ContentType="application/xml"><![CDATA[=
                     <Parameters>
                         <Parameter Name="NewResponseLink">${PostProcessBase}?f=${SurveyName}Form</Parameter>
+                        <Parameter Name="SurveyTitle">${SurveyTitle}</Parameter>
                     </Parameters>
                 ]]></Body>
                 <Actions>
+                    <Action Type="AddResult" Mode="debug">
+                        <Parameters>
+                            <Parameter Name="CheckResult" XPath="//Parameter[@Name='SurveyTitle']"/>
+                            <Parameter Name="Result">=Check Result is ${CheckResult}.</Parameter>
+                        </Parameters>
+                    </Action>
                     <Action Type="XSLT2">
                         <Parameters>
                             <Parameter Name="Transform" Function="S3URL">=${S3_Bucket},xsl/MergeParameters.xslt,3600</Parameter>
-                            <Parameter Name="SourceURI" Function="S3URL">=${S3_Bucket},Forms/${QrveyID}/FormParameters.xml,3600</Parameter>
+                            <Parameter Name="OldParamsURI" Function="S3URL">=${S3_Bucket},Forms/${QrveyID}/FormParameters.xml,3600</Parameter>
                         </Parameters>
                         <Actions>
                             <Action Type="S3PUT">
@@ -792,9 +803,8 @@ var ResultsConfig = {
                             </Action>
                             <Action Type="Command" Command="PublishQrvey">
                                 <Parameters>
-                                    <Parameter Name="UserID" XPath="//userid"/>
                                     <Parameter Name="Parameters_File">=Forms/${QrveyID}/${FormName}_Parameters_${JobID}.xml</Parameter>
-                                    <Parameter Name="Recipients_File">=Forms/${QrveyID}/RecipientsFile.xml</Parameter>
+                                    <Parameter Name="Recipients_File" XPath="//Parameters/Parameter[@Name='RecipientsFile']"/>
                                     <Parameter Name="QrveyType">$SurveyType</Parameter>
                                 </Parameters>
                             </Action>
@@ -995,7 +1005,7 @@ var ResultsConfig = {
                         <Parameters>
                             <Parameter Name="SubmitterEmail" XPath="MetaData/Item[@Name='email']"/>
                             <Parameter Name="QrveyID" XPath="Item[@Name='survey_id']"/>
-                            <Parameter Name="QrveyType" XPath="Item[@Name='survey_type']"/>
+                            <Parameter Name="QrveyType" XPath="Item[@Name='survey_type']/@AnswerId"/>
                             <Parameter Name="EmailComments" XPath="Item[@Name='email_comments']"/>
                             <Parameter Name="EmailList" XPath="Item[@Name='email_list']"/>
                             <Parameter Name="Recipients_File">=config/lists/${EmailList}.xml</Parameter>

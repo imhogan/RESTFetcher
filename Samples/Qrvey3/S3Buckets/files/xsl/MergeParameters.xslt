@@ -6,20 +6,26 @@
     exclude-result-prefixes="xsl fn xd"
     version="2.0">
     <xsl:output method="xml" indent="yes"/>
-    <xsl:param name="SourceURI"/>
-    <xsl:variable name="SourceAbsURI">
+    <xsl:param name="OldParamsURI"/>
+    <xsl:variable name="OldParamsAbsURI">
         <xsl:call-template name="GetAbsoluteURI">
-            <xsl:with-param name="SourceURI" select="$SourceURI"/>
+            <xsl:with-param name="SourceURI" select="$OldParamsURI"/>
         </xsl:call-template>
     </xsl:variable>
     <xd:doc>
         <xd:desc>Load the source file or use an empty sequence if there is none.</xd:desc>
     </xd:doc>
-    <xsl:variable name="SourceFile" select="if (fn:doc-available($SourceAbsURI)) then fn:doc($SourceAbsURI) else ()"></xsl:variable>
+    <xsl:variable name="OldParamsFile" select="if (fn:doc-available($OldParamsAbsURI)) then fn:doc($OldParamsAbsURI) else ()"></xsl:variable>
     <xsl:template match="/">
         <xsl:variable name="MyNames" select="//Parameters/Parameter/@Name"/>
-        <Parameters>
-            <xsl:copy-of select="//Parameter | $SourceFile//Parameter[not(@Name = $MyNames)]"></xsl:copy-of>
+        <Parameters OldParamsURI="{$OldParamsURI}">
+            <xsl:attribute name="MyNames">
+                <xsl:for-each select="$MyNames">
+                    <xsl:value-of select="."/>
+                    <xsl:if test="position() != last()">,</xsl:if>
+                </xsl:for-each>
+            </xsl:attribute>
+            <xsl:copy-of select="//Parameter | $OldParamsFile//Parameter[not(@Name = $MyNames)]"></xsl:copy-of>
         </Parameters>
     </xsl:template>
     <xsl:template name="GetAbsoluteURI">

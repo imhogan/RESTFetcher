@@ -37,7 +37,7 @@
     <xsl:attribute-set name="HeaderStyle">
         <xsl:attribute name="font-weight">bold</xsl:attribute>
         <xsl:attribute name="font-family">Lucida Sans</xsl:attribute>
-        <xsl:attribute name="font-size">9pt</xsl:attribute>
+        <xsl:attribute name="font-size">12pt</xsl:attribute>
     </xsl:attribute-set>
     <xsl:attribute-set name="stdPadding">
         <xsl:attribute name="padding-top">4pt</xsl:attribute>
@@ -306,6 +306,13 @@
                             </fo:table>
                         </fo:block-container>
                     </xsl:if>
+                    <fo:block-container xsl:use-attribute-sets="HeaderStyle stdBorders">
+                        <fo:block>
+                            <xsl:call-template name="ReplaceParameters">
+                                <xsl:with-param name="value" select="/qrvey/settings/description"/>
+                            </xsl:call-template>
+                        </fo:block>
+                    </fo:block-container>
                     <xsl:for-each select="//question">
                         <fo:block-container width="100%" keep-together.within-page="5">
                             <fo:table>
@@ -478,12 +485,24 @@
                                 </fo:table-body>
                             </fo:table>
                             
+                            <xsl:if test="position()=last()">
+                                <fo:block id="terminator"/>
+                            </xsl:if>
                         </fo:block-container>
                         
                     </xsl:for-each>
-                    <xsl:if test="position()=last()">
-                        <fo:block id="terminator"/>
-                    </xsl:if>
+                    <fo:block-container xsl:use-attribute-sets="blockNotes">
+                        <fo:block xsl:use-attribute-sets="HeaderStyle">
+                            <xsl:call-template name="ReplaceParameters">
+                                <xsl:with-param name="value" select="/qrvey/settings/thankYouPage/title"/>
+                            </xsl:call-template>
+                        </fo:block>
+                        <fo:block>
+                            <xsl:call-template name="ReplaceParameters">
+                                <xsl:with-param name="value" select="/qrvey/settings/thankYouPage/content"/>
+                            </xsl:call-template>
+                        </fo:block>
+                    </fo:block-container>
                 </fo:flow>
             </fo:page-sequence>
             

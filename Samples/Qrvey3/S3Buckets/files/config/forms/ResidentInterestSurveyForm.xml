@@ -2,14 +2,14 @@
 <qrvey name='${VillageName} Resident Interest Survey'>
     <settings>
         <properties introPage='true' emailNotifications='true' results_visibility="Private" respondent_email="Mandatory"></properties>
-        <description>Please fill out this survey to help the Social Committee plan events to suit your interests. Please note, your responses are anonymous.</description>
+        <description>${SurveyTitle} Please note, your responses are anonymous.</description>
         <duration>
             <neverExpires>true</neverExpires>
             <from>2017-10-03T00:00:00.000Z</from>
         </duration>
         <thankYouPage>
             <title>Thanks for registering your interests.</title>
-            <content>The Social Committee appreciates the time you have taken to complete this survey..</content>
+            <content>The Social Committee appreciates the time you have taken to complete this survey.</content>
             <!--<link>${NewResponseLink}</link>-->
         </thankYouPage>
     </settings>

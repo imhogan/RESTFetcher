@@ -477,9 +477,6 @@ var ResultsConfig = {
         <Actions>
             <Action Type="XSLT2">
                 <Parameters>
-                    <Parameter Name="ConfigDetails" Value="$configurationURI">
-                        <RegExp><![CDATA[^.*(?<propertyid>[^.]+)[.]properties$]]></RegExp>
-                    </Parameter>
                     <Parameter Name="Transform" Function="S3URL">=${S3_Bucket},xsl/GetLastProcessedTime.xslt,3600</Parameter>
                     <Parameter Name="LastResponseTimeURI" Function="S3URL">=${S3_Bucket},Forms/${QrveyID}/LastResponseTime.xml,3600</Parameter>
                     <!--<Parameter Name="FixedResult">$ResponsesModifiedSince</Parameter>-->
@@ -933,9 +930,6 @@ var ResultsConfig = {
         <Actions>
             <Action Type="XSLT2">
                 <Parameters>
-                    <Parameter Name="ConfigDetails" Value="$configurationURI">
-                        <RegExp><![CDATA[^.*(?<propertyid>[^.]+)[.]properties$]]></RegExp>
-                    </Parameter>
                     <Parameter Name="Transform" Function="S3URL">=${S3_Bucket},xsl/GetLastProcessedTime.xslt,3600</Parameter>
                     <Parameter Name="LastResponseTimeURI" Function="S3URL">=${S3_Bucket},Forms/${QrveyID}/LastResponseTime.xml,3600</Parameter>
                     <!--<Parameter Name="FixedResult">$ResponsesModifiedSince</Parameter>-->
@@ -1052,14 +1046,15 @@ var ResultsConfig = {
                     <Parameter Name="SurveyURL" XPath=".">
                         <RegExp><![CDATA[^.*/(?<qid>[^/]+)$]]></RegExp>
                     </Parameter>
-                    <Parameter Name="Result">=Distributing links for qrvey ${QrveyID} for user ${UserID} - URL is ${SurveyURL}</Parameter>
+                    <Parameter Name="qid">=${SurveyURL.qid}</Parameter>
+                    <Parameter Name="Result">=Distributing links for qrvey ${QrveyID} for user ${UserID} - URL is ${SurveyURL} - qid is ${qid}</Parameter>
                 </Parameters>
                 <Actions>
                     <Action Type="S3PUT">
                         <!-- Note: QrveyID is not included in the SurveyURL, so we get the q request variable (qid) from the lookupID value.
                              This is stored in an XML file named "qid.xml". This is used by the start process page to get the QrveyID-->
                         <Parameters>
-                            <Parameter Name="qid">$SurveyURL.qid</Parameter>
+                            <Parameter Name="DebugReplaceParameters">Yes</Parameter>
                             <Parameter Name="Bucket">$S3_Bucket</Parameter>
                             <Parameter Name="Name">=www/${propertyid}/${qid}.xml</Parameter>
                             <Parameter Name="ACL">PublicRead</Parameter>

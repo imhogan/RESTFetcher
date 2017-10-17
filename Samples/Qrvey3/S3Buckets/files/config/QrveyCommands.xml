@@ -1030,7 +1030,7 @@ var ResultsConfig = {
             </Action> 
         </Actions>
     </Command>
-    <Command Name="SendQrveyInvitationEmails" Verb="POST" IsJSON="true">
+    <Command Name="SendQrveyInvitationEmails" Verb="GET" IsJSON="true">
         <Headers>
             <Header Name="x-api-key">$API_KEY</Header>
         </Headers>
@@ -1040,7 +1040,6 @@ var ResultsConfig = {
             <Parameter Name="subentity">$QrveyType</Parameter>
             <Parameter Name="surveyid">$QrveyID</Parameter>
         </Parameters>
-        <Body></Body>
         <Actions>
             <Action Type="S3PUT" Mode="debug">
                 <Parameters>
@@ -1048,31 +1047,31 @@ var ResultsConfig = {
                     <Parameter Name="Name">=${REST_Log_Path}/ActivateSurvey${JobID}.xml</Parameter>
                 </Parameters>
             </Action>
-            <Action Type="AddResult">
+            <Action Type="AddResult" Match="//qrveyURL">
                 <Parameters>
-                    <Parameter Name="SurveyURL" XPath="//url"/>
+                    <Parameter Name="SurveyURL" XPath=".">
+                        <RegExp><![CDATA[^.*/(?<qid>[^/]+)$]]></RegExp>
+                    </Parameter>
                     <Parameter Name="Result">=Distributing links for qrvey ${QrveyID} for user ${UserID} - URL is ${SurveyURL}</Parameter>
                 </Parameters>
-            </Action>
-            <Action Type="S3PUT">
-                <!-- Note: QrveyID is not included in the SurveyURL, so we get the q request variable (qid) from the lookupID value.
-                     This is stored in an XML file named "qid.xml". This is used by the start process page to get the QrveyID-->
-                <Parameters>
-                    <Parameter Name="qid" XPath="//lookupID"/>
-                    <Parameter Name="Bucket">$S3_Bucket</Parameter>
-                    <Parameter Name="Name">=www/${propertyid}/${qid}.xml</Parameter>
-                    <Parameter Name="ACL">PublicRead</Parameter>
-                </Parameters>
-                <Body ContentType="application/xml"><![CDATA[=
-                    <Parameters>
-                        <Parameter Name="QrveyID">${QrveyID}</Parameter>
-                    </Parameters>
-                ]]></Body>
-            </Action>
-            <Action Type="Command" Command="SendTakeSurveyLinks" Match="//url">
-                <Parameters>
-                    <Parameter Name="SurveyURL" XPath="."/>
-                </Parameters>
+                <Actions>
+                    <Action Type="S3PUT">
+                        <!-- Note: QrveyID is not included in the SurveyURL, so we get the q request variable (qid) from the lookupID value.
+                             This is stored in an XML file named "qid.xml". This is used by the start process page to get the QrveyID-->
+                        <Parameters>
+                            <Parameter Name="qid">$SurveyURL.qid</Parameter>
+                            <Parameter Name="Bucket">$S3_Bucket</Parameter>
+                            <Parameter Name="Name">=www/${propertyid}/${qid}.xml</Parameter>
+                            <Parameter Name="ACL">PublicRead</Parameter>
+                        </Parameters>
+                        <Body ContentType="application/xml"><![CDATA[=
+                            <Parameters>
+                                <Parameter Name="QrveyID">${QrveyID}</Parameter>
+                            </Parameters>
+                        ]]></Body>
+                    </Action>
+                    <Action Type="Command" Command="SendTakeSurveyLinks"/>
+                </Actions>
             </Action>
         </Actions>
     </Command>

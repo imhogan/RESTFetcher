@@ -279,6 +279,7 @@
                 <Parameters>
                     <Parameter Name="SurveyURL" XPath="."/>
                     <Parameter Name="EmailComments">=Use the Email Qrveys Form to send this Qrvey - ID = ${QrveyID}, Type = ${QrveyType}.</Parameter>
+                    <Parameter Name="Attachments" Function="S3URL">=${S3_Bucket},PDFs/${FormName}_${JobID}.pdf</Parameter>
                 </Parameters>
             </Action>
             <Action Type="Command" Command="SendSurveyResultsPage" Match="//url">
@@ -307,14 +308,13 @@
                             <Parameter Name="BCC">$EmailSender</Parameter>
                             <Parameter Name="Subject">=${QrveyName} link details.</Parameter>
                             <Parameter Name="FileSalutation" XPath="Salutation"/>
-                            <Parameter Name="DebugReplaceParameters">Yes</Parameter>
+                            <Parameter Name="NoDebugReplaceParameters">Yes</Parameter>
                             <Parameter Name="SalutationDetails" Value="=${FileSalutation} Dear">
                                 <RegExp><![CDATA[^[ ]*(?<salutation>[^ ]+).*$]]></RegExp>
                             </Parameter>
                             <Parameter Name="Salutation">$SalutationDetails.salutation</Parameter>
                             <Parameter Name="Firstname" XPath="Firstname | Addressee"/>
                             <Parameter Name="Lastname" XPath="Lastname | Surname"/>
-                            <Parameter Name="Attachments" Function="S3URL">=${S3_Bucket},PDFs/${FormName}_${JobID}.pdf</Parameter>
                         </Parameters>
                         <Body ContentType="text/html"><![CDATA[=<html><body>
 						<p>${Salutation} ${Firstname} ${Lastname},</p><br/>
@@ -1074,6 +1074,7 @@ var ResultsConfig = {
                     <Parameter Name="QrveyID" XPath="../qrveyid"/>
                     <Parameter Name="QrveyName" XPath="../name"/>
                     <Parameter Name="Description" XPath="../description"/>
+                    <Parameter Name="Attachments"/>
                 </Parameters>
             </Action>
         </Actions>

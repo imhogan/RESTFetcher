@@ -24,7 +24,7 @@
     "RESTFetcherKey": {
       "Description": "Zip file for REST Fetcher function",
       "Type": "String",
-      "Default": "au-com-thinkronicity-RestFetcher-V2.5.3CE.zip"
+      "Default": "au-com-thinkronicity-RestFetcher-V2.5.4CE.zip"
     },
     "S3TriggerKey": {
       "Description": "Zip file for S3Trigger function",

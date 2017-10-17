@@ -1074,7 +1074,7 @@ public class Utility {
     	// Start by getting the text value of the element.
     	String paramValue = "";
 
-        if (paramElement.hasAttribute("XPath")) {
+        if (paramElement.hasAttribute("Value")) {
             paramValue = paramElement.getAttribute("Value");
         } else {
             paramValue = paramElement.getTextContent();

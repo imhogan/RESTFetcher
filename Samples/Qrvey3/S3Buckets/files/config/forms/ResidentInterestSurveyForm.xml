@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <qrvey name='${VillageName} Resident Interest Survey'>
     <settings>
-        <properties introPage='true' emailNotifications='true' results_visibility="Private" respondent_email="Mandatory"></properties>
+        <properties introPage='true' emailNotifications='true' results_visibility="Private"></properties>
         <description>${SurveyTitle} Please note, your responses are anonymous.</description>
         <duration>
             <neverExpires>true</neverExpires>
@@ -14,14 +14,15 @@
         </thankYouPage>
     </settings>
     <questions>
-        <question id='daytrip' type='YES_NO' time='10' _required='true' text='Are you interested in day trips?' otherField='true'>
+        <question id='daytrip' type='YES_NO' time='10' _required='true' text='Are you interested in day trips?'>
             <answer>Yes
                 <route>
                     <question id='daytrip_theme' type='MULTIPLE_CHOICE' time='10' _required='true' _sort_options='true' text='What type of day trips interest you?' otherField='true'>
-                        <answer>Garden visits</answer>
-                        <answer>Winery tours</answer>
-                        <answer>Cultural sites</answer>
-                        <answer>Bushland parks</answer>
+                        <answer>Garden visit</answer>
+                        <answer>Winery tour</answer>
+                        <answer>Guided walking tour</answer>
+                        <answer>Cultural site visit</answer>
+                        <answer>Bushland park</answer>
                         <answer>Seaside</answer>
                         <answer>Shopping spree</answer>
                         <answer>Markets</answer>
@@ -29,7 +30,7 @@
                         <answer>Train ride</answer>
                         <answer>Boat/ferry ride</answer>
                     </question>
-                    <question id='daytrip_season' type='MULTIPLE_CHOICE' time='10' _required='true' text='What time of the year would suit you?' otherField='true'>
+                    <question id='daytrip_season' type='MULTIPLE_CHOICE' time='10' _required='true' text='What time of the year would suit you?'>
                         <answer>Summer</answer>
                         <answer>Autumn</answer>
                         <answer>Winter</answer>
@@ -40,6 +41,7 @@
                         <answer>Mornington Peninsular</answer>
                         <answer>Bellarine Peninsular</answer>
                         <answer>The Dandenongs</answer>
+                        <answer>Phillip Island</answer>
                         <answer>Melbourne City</answer>
                         <answer>Melbourne Suburbs</answer>
                     </question>
@@ -52,10 +54,10 @@
                 </route>
             </answer>-->
         </question>
-        <question id='theatre' type='YES_NO' time='10' _required='true' text='Are you interested in theatre events?' otherField='true'>
+        <question id='theatre' type='YES_NO' time='10' _required='true' text='Are you interested in theatre events?'>
             <answer>Yes
                 <route>
-                    <question id='theatre_level' type='MULTIPLE_CHOICE' time='10' _required='true' _sort_options='true' text='Which level of theatre are you interested in?' otherField='true'>
+                    <question id='theatre_level' type='MULTIPLE_CHOICE' time='10' _required='true' _sort_options='true' text='Which level of theatre are you interested in?'>
                         <answer>Amateur</answer>
                         <answer>Professional</answer>
                     </question>
@@ -68,7 +70,7 @@
                         <answer>Opera</answer>
                         <answer>Ballet</answer>
                     </question>
-                    <question id='theatre_time' type='MULTIPLE_CHOICE' time='10' _required='true' text='What time of day would suit you?' otherField='true'>
+                    <question id='theatre_time' type='MULTIPLE_CHOICE' time='10' _required='true' text='What time of day would suit you?'>
                         <answer>Morning</answer>
                         <answer>Afternoon</answer>
                         <answer>Evening</answer>
@@ -77,10 +79,10 @@
             </answer>
             <answer>No</answer>
         </question>
-        <question id='concert' type='YES_NO' time='10' _required='true' text='Are you interested in concert events?' otherField='true'>
+        <question id='concert' type='YES_NO' time='10' _required='true' text='Are you interested in concert events?'>
             <answer>Yes
                 <route>
-                    <question id='concert_level' type='MULTIPLE_CHOICE' time='10' _required='true' _sort_options='true' text='Which level of concert are you interested in?' otherField='true'>
+                    <question id='concert_level' type='MULTIPLE_CHOICE' time='10' _required='true' _sort_options='true' text='Which level of concert are you interested in?'>
                         <answer>Amateur</answer>
                         <answer>Semi-Professional</answer>
                         <answer>Professional</answer>
@@ -91,7 +93,7 @@
                         <answer>Tribute Shows - 70's and later</answer>
                         <answer>Classical Music</answer>
                     </question>
-                    <question id='concert_time' type='MULTIPLE_CHOICE' time='10' _required='true' text='What time of day would suit you?' otherField='true'>
+                    <question id='concert_time' type='MULTIPLE_CHOICE' time='10' _required='true' text='What time of day would suit you?'>
                         <answer>Morning</answer>
                         <answer>Afternoon</answer>
                         <answer>Evening</answer>
@@ -100,7 +102,7 @@
             </answer>
             <answer>No</answer>
         </question>
-        <question id='dancing' type='YES_NO' time='10' _required='true' text='Are you interested in dancing events?' otherField='true'>
+        <question id='dancing' type='YES_NO' time='10' _required='true' text='Are you interested in dancing events?'>
             <answer>Yes
                 <route>
                     <question id='dancing_styles' type='MULTIPLE_CHOICE' time='10' _required='true' _sort_options='true' text='Which style of dancing are you interested in?' otherField='true'>
@@ -110,17 +112,17 @@
                         <answer>Square dancing</answer>
                         <answer>Rock and roll</answer>
                     </question>
-                    <question id='dancing_time' type='MULTIPLE_CHOICE' time='10' _required='true' text='What time of day would suit you?' otherField='true'>
+                    <question id='dancing_time' type='MULTIPLE_CHOICE' time='10' _required='true' text='What time of day would suit you?'>
                         <answer>Morning</answer>
                         <answer>Afternoon</answer>
                         <answer>Evening</answer>
                     </question>
-                    <question id='dancing_location' type='MULTIPLE_CHOICE' time='10' _required='true' _sort_options='true' text='What venue would suit you?' otherField='true'>
+                    <question id='dancing_location' type='MULTIPLE_CHOICE' time='10' _required='true' _sort_options='true' text='What venue would suit you?'>
                         <answer>In the clubhouse</answer>
                         <answer>In a dance studio</answer>
                         <answer>At a social dance venue - eg dinner dance</answer>
                     </question>
-                    <question id='dancing_partner' type='YES_NO' time='10' _required='true' text='Do you have a dance partner?' otherField='true'>
+                    <question id='dancing_partner' type='YES_NO' time='10' _required='true' text='Do you have a dance partner?'>
                         <answer>Yes</answer>
                         <answer>No</answer>
                     </question>
@@ -133,7 +135,129 @@
                 </route>
             </answer>-->
         </question>
-        <question id="car_pool" type='YES_NO' time='10' _required='true' text='If an event involved car transport would you be able to take other residents?' otherField='true'>
+        <question id='shortstay' type='YES_NO' time='10' _required='true' text='Are you interested in short stay trips?'>
+            <answer>Yes
+                <route>
+                    <question id='shortstay_theme' type='MULTIPLE_CHOICE' time='10' _required='true' _sort_options='true' text='What type of short stay trips interest you?' otherField='true'>
+                        <answer>Sightseeing</answer>
+                        <answer>Festival Event</answer>
+                        <answer>Bus trip</answer>
+                        <answer>Train trip</answer>
+                        <answer>Boat/ferry ride</answer>
+                    </question>
+                    <question id='shortstay_duration' type='MULTIPLE_CHOICE' time='10' _required='true' text='What length trips would be of interest?'>
+                        <answer>1 night</answer>
+                        <answer>2 nights</answer>
+                        <answer>3 nights</answer>
+                    </question>
+                    <question id='shortstay_season' type='MULTIPLE_CHOICE' time='10' _required='true' text='What time of the year would suit you?'>
+                        <answer>Summer</answer>
+                        <answer>Autumn</answer>
+                        <answer>Winter</answer>
+                        <answer>Spring</answer>
+                    </question>
+                    <question id='shortstay_location' type='MULTIPLE_CHOICE' time='10' _required='true' _sort_options='true' text='What destinations would interest you?' otherField='true'>
+                        <answer>Yarra Valley</answer>
+                        <answer>Mornington Peninsular</answer>
+                        <answer>Phillip Island</answer>
+                        <answer>Bellarine Peninsular</answer>
+                        <answer>Gippsland</answer>
+                        <answer>Daylesford &amp; the Macedon Ranges</answer>
+                        <answer>Goldfields</answer>
+                        <answer>The Murray</answer>
+                        <answer>Grampians</answer>
+                    </question>
+                </route>
+            </answer>
+            <answer>No</answer>
+            <!--<answer>Test
+                <route>
+                    <question id='dance_test' type="TEXTFIELD" text="enter test"/>
+                </route>
+            </answer>-->
+        </question>
+        <question id='clubhouse_movies' type='YES_NO' time='10' _required='true' text='Are you interested in watching movies in the clubhouse?'>
+            <answer>Yes
+                <route>
+                    <question id='clubhouse_movie_theme' type='MULTIPLE_CHOICE' time='10' _required='true' _sort_options='true' text='What type of movies interest you?' otherField='true'>
+                        <answer>Comedy</answer>
+                        <answer>Drama</answer>
+                        <answer>Romantic Comedy</answer>
+                        <answer>Thriller</answer>
+                        <answer>Musical</answer>
+                        <answer>Historical</answer>
+                        <answer>Concert</answer>
+                    </question>
+                    <question id='clubhouse_movie_time' type='MULTIPLE_CHOICE' time='10' _required='true' text='What time would suit you?'>
+                        <answer>Morning</answer>
+                        <answer>Lunchtime</answer>
+                        <answer>Afternoon</answer>
+                        <answer>Evening</answer>
+                    </question>
+                    <question id='clubhouse_movie_discussion' type='YES_NO' time='10' _required='true' text='Would you be interested in a movie and discussion event?'/>
+                </route>
+            </answer>
+            <answer>No</answer>
+            <!--<answer>Test
+                <route>
+                    <question id='dance_test' type="TEXTFIELD" text="enter test"/>
+                </route>
+            </answer>-->
+        </question>
+        <question id='clubhouse_boardgames' type='YES_NO' time='10' _required='true' text='Are you interested in playing boardgames in the clubhouse?'>
+            <answer>Yes
+                <route>
+                    <question id='clubhouse_boardgames_theme' type='MULTIPLE_CHOICE' time='10' _required='true' _sort_options='true' text='What type of boardgames interest you?' otherField='true'>
+                        <answer>Chess</answer>
+                        <answer>Draughts</answer>
+                        <answer>Trivial Persuit</answer>
+                        <answer>Monopoly</answer>
+                        <answer>Strategy Games</answer>
+                    </question>
+                    <question id='clubhouse_boardgames_time' type='MULTIPLE_CHOICE' time='10' _required='true' text='What time would suit you?'>
+                        <answer>Morning</answer>
+                        <answer>Lunchtime</answer>
+                        <answer>Afternoon</answer>
+                        <answer>Evening</answer>
+                    </question>
+                    <question id='clubhouse_boardgames_learning' type='YES_NO' time='10' _required='true' text='Would you be interested in learning new boardgames?'/>
+                </route>
+            </answer>
+            <answer>No</answer>
+            <!--<answer>Test
+                <route>
+                    <question id='dance_test' type="TEXTFIELD" text="enter test"/>
+                </route>
+            </answer>-->
+        </question>
+        <question id='clubhouse_bookclub' type='YES_NO' time='10' _required='true' text='Are you interested in attending a bookclub in the clubhouse?'>
+            <answer>Yes
+                <route>
+                    <question id='clubhouse_bookclub_theme' type='MULTIPLE_CHOICE' time='10' _required='true' _sort_options='true' text='What type of books interest you?' otherField='true'>
+                        <answer>Comedy</answer>
+                        <answer>Drama</answer>
+                        <answer>Romantic Comedy</answer>
+                        <answer>Thriller</answer>
+                        <answer>Philosophy</answer>
+                        <answer>Historical</answer>
+                        <answer>Scientific development</answer>
+                    </question>
+                    <question id='clubhouse_bookclub_time' type='MULTIPLE_CHOICE' time='10' _required='true' text='What time would suit you?'>
+                        <answer>Morning</answer>
+                        <answer>Lunchtime</answer>
+                        <answer>Afternoon</answer>
+                        <answer>Evening</answer>
+                    </question>
+                </route>
+            </answer>
+            <answer>No</answer>
+            <!--<answer>Test
+                <route>
+                    <question id='dance_test' type="TEXTFIELD" text="enter test"/>
+                </route>
+            </answer>-->
+        </question>
+        <question id="car_pool" type='YES_NO' time='10' _required='true' text='If an event involved car transport would you be able to take other residents?'>
             <answer>Yes
                 <route>
                     <question id='car_pool_pax' type='NUMERIC' time='3' _required='true' text='Please enter the number of passengers you can take.' allowDecimals='false' hasMinMax='true' min='1' max='10' numberType='Number'/>
@@ -141,9 +265,23 @@
             </answer>
             <answer>No
                 <route>
-                    <question id="car_pool_needed" type='YES_NO' time='10' _required='true' text='Would you need a lift?' otherField='true'/>
+                    <question id="car_pool_needed" type='YES_NO' time='10' _required='true' text='Would you need a lift?'/>
                 </route>
             </answer>
+        </question>
+        <question id='gender' time='5' type='SINGLE_CHOICE' _required='true' text='What is your gender?'>
+            <answer>Male</answer>
+            <answer>Female</answer>
+            <answer>Prefer not to say</answer>
+        </question>
+        <question id='mobility' time='10' type='MULTIPLE_CHOICE' _required='false' text='What, if any, mobility challenges do you have?'>
+            <answer>I require a walking stick.</answer>
+            <answer>I require a walking frame.</answer>
+            <answer>I require a mobility scooter.</answer>
+            <answer>I require a wheel chair.</answer>
+            <answer>I am vision impaired.</answer>
+            <answer>I can not walk very far.</answer>
+            <answer>I can not walk fast.</answer>
         </question>
     </questions>
 </qrvey>

@@ -44,6 +44,10 @@
             <answer answer="left"/>
             <answer answer="right"/>
         </Question>
+        <Question Type="YES_NO">
+            <answer answer="Yes"/>
+            <answer answer="No"/>
+        </Question>
     </xsl:variable>
     
     <xsl:variable name="ParametersListAbsURI">

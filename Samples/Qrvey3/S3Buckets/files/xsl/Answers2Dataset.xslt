@@ -15,7 +15,7 @@
     </xd:doc>
     <xsl:output indent="yes"></xsl:output>
     <xsl:param name="TimeFilter"></xsl:param>
-    <xsl:param name="Debug">Y</xsl:param>
+    <xsl:param name="Debug">N</xsl:param>
     <xd:doc>
         <xd:desc>The URI of the styles file.</xd:desc>
     </xd:doc>
@@ -44,6 +44,7 @@
                         </xsl:for-each>
                     </MetaData>
                     <xsl:for-each select="answers">
+                        <xsl:variable name="QuestionId" select="id"/>
                         <xsl:choose>
                             <xsl:when test="data = type">
                                 <xsl:for-each select="*[lower-case(local-name())=lower-case(../type)]/*">
@@ -57,23 +58,29 @@
                                             <xsl:otherwise><xsl:value-of select="$Qrvey//answer[.=normalize-space(current())]/@answerid"/></xsl:otherwise>
                                         </xsl:choose>
                                     </xsl:variable>
-                                    <Item Name="{../../id}.{local-name()}" AnswerId="{$AnswerId}"><xsl:value-of select="normalize-space(.)"/></Item>
+                                    <Item Name="{../../id}.{local-name()}" QuestionId="{$QuestionId}" AnswerId="{$AnswerId}"><xsl:value-of select="normalize-space(.)"/></Item>
                                 </xsl:for-each>
                             </xsl:when>
                             <xsl:otherwise>
-                                <xsl:if test="$Debug='Y'">
-                                    <xsl:comment>Answer is <xsl:value-of select="normalize-space(current()/data)"/></xsl:comment>
-                                    <xsl:comment>Answer ID is <xsl:value-of select="$Qrvey//answer[.=normalize-space(current()/data)]/@answerid"/></xsl:comment>
-                                </xsl:if>
-                                <xsl:variable name="AnswerId">
-                                    <xsl:choose>
-                                        <xsl:when test="data_ansid != ''"><xsl:value-of select="data_ansid"/></xsl:when>
-                                        <xsl:otherwise><xsl:value-of select="$Qrvey//answer[.=normalize-space(current()/data)]/@answerid"/></xsl:otherwise>
-                                    </xsl:choose>
-                                </xsl:variable>
-                                <Item Name="{id}" AnswerId="{$AnswerId}"><xsl:value-of select="normalize-space(data)"/></Item>
+                                <xsl:for-each select="data">
+                                    <xsl:variable name="DataPosition" select="position()"/>
+                                    <xsl:if test="$Debug='Y'">
+                                        <xsl:comment>Answer is <xsl:value-of select="normalize-space(.)"/></xsl:comment>
+                                        <xsl:comment>Answer ID is <xsl:value-of select="$Qrvey//answer[.=normalize-space(.)]/@answerid"/></xsl:comment>
+                                    </xsl:if>
+                                    <xsl:variable name="AnswerId">
+                                        <xsl:choose>
+                                            <xsl:when test="../data_ansid[position()=$DataPosition] != ''"><xsl:value-of select="../data_ansid[position()=$DataPosition]"/></xsl:when>
+                                            <xsl:otherwise><xsl:value-of select="$Qrvey//answer[.=normalize-space(current())]/@answerid"/></xsl:otherwise>
+                                        </xsl:choose>
+                                    </xsl:variable>
+                                    <Item Name="{$QuestionId}" QuestionId="{$QuestionId}.{position()}" AnswerId="{$AnswerId}"><xsl:value-of select="normalize-space(.)"/></Item>
+                                </xsl:for-each>
                             </xsl:otherwise>
                         </xsl:choose>
+                        <xsl:if test="otherField">
+                            <Item Name="{$QuestionId}" QuestionId="{$QuestionId}.Other" AnswerId="Other"><xsl:value-of select="normalize-space(otherField)"/></Item>
+                        </xsl:if>
                     </xsl:for-each>
                 </DataRow>
             </xsl:for-each>

@@ -300,6 +300,7 @@
                             <Parameter Name="Name">=Forms/${QrveyID}/RecipientsFile.xml</Parameter>
                         </Parameters>
                     </Action>
+                    <!-- TODO: Add withConfigurationSetName support for sending emails with open tracking, etc. -->
                     <Action Type="eMail" Match="//Emails/Email[To!=''] | /Addresses/Address[Email != '' and not(Email/@bounce = 'true')]">
                         <Parameters>
                             <Parameter Name="From">$EmailSender</Parameter>
@@ -472,6 +473,87 @@ var ResultsConfig = {
                     <Parameter Name="Result">=Fetched results of qrvey ${QrveyID} to ${REST_Log_Path}/QrveyAnswers_${JobID}_${QrveyID}.xml</Parameter>
                 </Parameters>
             </Action>
+            <Action Type="XSLT2">
+                <Parameters>
+                    <Parameter Name="Transform" Function="S3URL">=${S3_Bucket},xsl/Answers2Dataset.xslt,3600</Parameter>
+                    <Parameter Name="QrveyURI" Function="S3URL">=${S3_Bucket},config/forms/${FormName}.xml,3600</Parameter>
+                </Parameters>
+                <Actions>
+                    <Action Type="S3PUT" Mode="debug">
+                        <Parameters>
+                            <Parameter Name="Bucket">$S3_Bucket</Parameter>
+                            <Parameter Name="Name">=${REST_Log_Path}/QrveyData_${JobID}_${QrveyID}.xml</Parameter>
+                        </Parameters>
+                    </Action>
+                </Actions>
+            </Action> 
+        </Actions>
+    </Command>
+    <Command Name="PublishQrveyResults" Verb="POST" IsJSON="true">
+        <Headers>
+            <Header Name="x-api-key">$API_KEY</Header>
+        </Headers>
+        <Parameters>
+            <Parameter Name="entity">user</Parameter>
+            <Parameter Name="userid">$UserID</Parameter>
+            <Parameter Name="subentity">qrvey</Parameter>
+            <Parameter Name="surveyid">$QrveyID</Parameter>
+            <Parameter Name="operation">answers</Parameter>
+            <Parameter Name="limit" Separator="?" Format="Query">$Limit</Parameter>
+        </Parameters>
+        <Body></Body>
+        <Actions>
+            <Action Type="S3PUT">
+                <Parameters>
+                    <Parameter Name="Bucket">$S3_Bucket</Parameter>
+                    <Parameter Name="Name">=Forms/${QrveyID}/QrveyAnswers_${JobID}.xml</Parameter>
+                </Parameters>
+            </Action>
+            <Action Type="AddResult">
+                <Parameters>
+                    <Parameter Name="Result">=Fetched results of qrvey ${QrveyID} to Forms/${QrveyID}/QrveyAnswers_${JobID}.xml</Parameter>
+                </Parameters>
+            </Action>
+            <Action Type="XSLT2">
+                <Parameters>
+                    <Parameter Name="Transform" Function="S3URL">=${S3_Bucket},xsl/Answers2Dataset.xslt,3600</Parameter>
+                    <Parameter Name="QrveyURI" Function="S3URL">=${S3_Bucket},config/forms/${FormName}.xml,3600</Parameter>
+                </Parameters>
+                <Actions>
+                    <Action Type="S3PUT">
+                        <Parameters>
+                            <Parameter Name="Bucket">$S3_Bucket</Parameter>
+                            <Parameter Name="Name">=Forms/${QrveyID}/QrveyData_${JobID}.xml</Parameter>
+                        </Parameters>
+                    </Action>
+                    <Action Type="XSLT2">
+                        <Parameters>
+                            <Parameter Name="Transform" Function="S3URL">=${S3_Bucket},xsl/CopyURL.xslt,3600</Parameter>
+                            <Parameter Name="SourceURI" Function="S3URL">=${S3_Bucket},config/forms/${FormName}.xml,3600</Parameter>
+                        </Parameters>
+                        <Actions>
+                            <Action Type="FOP">
+                                <Parameters>
+                                    <Parameter Name="Transform" Function="S3URL">=${S3_Bucket},xsl/QrveyXML2ResultsFO.xsl</Parameter>
+                                    <Parameter Name="Bucket">$S3_Bucket</Parameter>
+                                    <Parameter Name="Name">=PDFs/${FormName}_${JobID}.pdf</Parameter>
+                                    <Parameter Name="ParametersListURI" Function="S3URL">=${S3_Bucket},Forms/${QrveyID}/FormParameters.xml,3600</Parameter>
+                                    <Parameter Name="ResultsDataURI" Function="S3URL">=${S3_Bucket},Forms/${QrveyID}/QrveyData_${JobID}.xml,3600</Parameter>
+                                    <Parameter Name="SuppressZeroResults">$SuppressZeroResults</Parameter>
+                                </Parameters>
+                                <Actions>
+                                    <Action Type="XSLT2">
+                                        <Parameters>
+                                            <Parameter Name="Transform" Function="S3URL">=${S3_Bucket},xsl/CopyURL.xslt,3600</Parameter>
+                                            <Parameter Name="SourceURI" Function="S3URL">=${S3_Bucket},Forms/${QrveyID}/FormParameters.xml,3600</Parameter>
+                                        </Parameters>
+                                    </Action>
+                                </Actions>
+                            </Action>
+                        </Actions>
+                    </Action>
+                </Actions>
+            </Action> 
         </Actions>
     </Command>
     <Command Name="PostProcessNewVillageQrvey" IsNOP="true">
@@ -1001,7 +1083,7 @@ var ResultsConfig = {
                             <Parameter Name="SubmitterEmail" XPath="MetaData/Item[@Name='email']"/>
                             <Parameter Name="QrveyID" XPath="Item[@Name='survey_id']"/>
                             <Parameter Name="QrveyType" XPath="Item[@Name='survey_type']/@AnswerId"/>
-                            <Parameter Name="EmailComments" XPath="Item[@Name='email_comments']"/>
+                            <Parameter Name="EmailComments" XPath="Item[@Name='email_comment']"/>
                             <Parameter Name="EmailList" XPath="Item[@Name='email_list']"/>
                             <Parameter Name="Recipients_File">=config/lists/${EmailList}.xml</Parameter>
                         </Parameters>

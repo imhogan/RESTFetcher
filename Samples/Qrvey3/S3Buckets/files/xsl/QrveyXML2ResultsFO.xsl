@@ -20,7 +20,7 @@
     <xsl:preserve-space elements="Note"/>
     
     <!-- Processing parameters. -->
-    <xsl:param name="ApplicationTitle">Qrvey Printable Format</xsl:param>
+    <xsl:param name="ApplicationTitle">Qrvey Results Summary</xsl:param>
     <xsl:param name="ApplicationSubTitle">
         <xsl:call-template name="ReplaceParameters"><xsl:with-param name="value" select="//qrvey/@name"/></xsl:call-template>
     </xsl:param>
@@ -31,6 +31,8 @@
     <xsl:param name="EntityIconScale">16px</xsl:param>
     <xsl:param name="IconImageURIPattern">../images/-iconPath-</xsl:param>
     <xsl:param name="ParametersListURI"/>
+    <xsl:param name="ResultsDataURI"/>
+    <xsl:param name="SuppressZeroResults">Y</xsl:param>
     <xsl:param name="Debug">No</xsl:param>
     
     <!-- Define format attribute sets. -->
@@ -134,7 +136,7 @@
         <xsl:attribute name="font-weight">bold</xsl:attribute>
         <xsl:attribute name="font-family">Lucida Sans</xsl:attribute>
         <xsl:attribute name="font-size">10pt</xsl:attribute>
-        <xsl:attribute name="background-color">red</xsl:attribute>
+        <xsl:attribute name="background-color">#E6773D</xsl:attribute>
         <xsl:attribute name="color">white</xsl:attribute>
         <xsl:attribute name="text-align">center</xsl:attribute>
         <xsl:attribute name="padding-top">1pt</xsl:attribute>
@@ -162,6 +164,16 @@
     </xd:doc>
     <xsl:variable name="Parameters" select="if (fn:doc-available($ParametersListAbsURI)) then fn:doc($ParametersListAbsURI) else ()"></xsl:variable>
     
+    <xsl:variable name="ResultsDataAbsURI">
+        <xsl:call-template name="GetAbsoluteURI">
+            <xsl:with-param name="SourceURI" select="$ResultsDataURI"/>
+        </xsl:call-template>
+    </xsl:variable>
+    <xd:doc>
+        <xd:desc>Load the styles or use an empty sequence if there is none.</xd:desc>
+    </xd:doc>
+    <xsl:variable name="ResultsData" select="if (fn:doc-available($ResultsDataAbsURI)) then fn:doc($ResultsDataAbsURI) else ()"></xsl:variable>
+    
     <xsl:variable name="QuestionIndex">
         <xsl:for-each select="//question">
             <question id="{@id}">
@@ -169,6 +181,8 @@
             </question>
         </xsl:for-each>
     </xsl:variable>
+    
+    <xsl:key name="QuestionResultsByQuestionId" match="//questions/data" use="questionid"></xsl:key>
     
     <!-- Start with the root node. -->
     <xsl:template match="/">
@@ -249,7 +263,7 @@
                                     <fo:block>
                                         <!-- TODO: Link to particular Qrvey? -->
                                         <fo:basic-link external-destination="https://www.qrvey.com/" show-destination="new">
-                                            <xsl:value-of select="$ApplicationTitle"/>
+                                            <xsl:value-of select="$ApplicationTitle"/> - <xsl:value-of select="count($ResultsData//DataRow)"/> Responses.
                                         </fo:basic-link>
                                     </fo:block>
                                 </fo:table-cell>
@@ -314,6 +328,7 @@
                         </fo:block>
                     </fo:block-container>
                     <xsl:for-each select="//question">
+                        <xsl:variable name="QuestionID" select="@id"/>
                         <fo:block-container width="100%" keep-together.within-page="5">
                             <fo:table>
                                 <fo:table-column column-width="10%"/>
@@ -331,10 +346,10 @@
                                                     <xsl:call-template name="ReplaceParameters"><xsl:with-param name="value" select="@text"/></xsl:call-template>
                                                     <fo:inline xsl:use-attribute-sets="optionNotes" margin-left="2mm">
                                                         (<xsl:choose>
-                                                            <xsl:when test="@type='MULTIPLE_CHOICE' and @_required='true'">Please select one or more options.</xsl:when>
-                                                            <xsl:when test="@type='MULTIPLE_CHOICE'">Please select any applicable options.</xsl:when>
-                                                            <xsl:when test="@type='SINGLE_CHOICE' or @type='YES_NO'">Please select one option.</xsl:when>
-                                                            <xsl:otherwise>Please enter your answer in the box below.</xsl:otherwise>
+                                                            <xsl:when test="@type='MULTIPLE_CHOICE' and @_required='true'">One or more options allowed.</xsl:when>
+                                                            <xsl:when test="@type='MULTIPLE_CHOICE'">Any number of options allowed.</xsl:when>
+                                                            <xsl:when test="@type='SINGLE_CHOICE' or @type='YES_NO'">One option allowed.</xsl:when>
+                                                            <xsl:otherwise>Answer [Count].</xsl:otherwise>
                                                         </xsl:choose>)
                                                     </fo:inline>
                                                     <!--<fo:inline xsl:use-attribute-sets="blockNotes">
@@ -369,42 +384,49 @@
                                                                                 <fo:table-body>
                                                                                     <xsl:for-each select="answer">
                                                                                         <xsl:sort select="if(../@_sort_options='true') then text()[normalize-space()][1] else position()"></xsl:sort>
-                                                                                        <fo:table-row>
-                                                                                            <fo:table-cell text-align="right" padding-right="2mm">
-                                                                                                <fo:block>
-                                                                                                    <xsl:value-of select="position()"/>.
-                                                                                                </fo:block>
-                                                                                            </fo:table-cell>
-                                                                                            <fo:table-cell xsl:use-attribute-sets="stdBorders">
-                                                                                                <fo:block>
-                                                                                               </fo:block>
-                                                                                            </fo:table-cell>
-                                                                                            <fo:table-cell padding-left="2mm">
-                                                                                                <fo:block>
-                                                                                                    <xsl:call-template name="ReplaceParameters">
-                                                                                                        <xsl:with-param name="value">
-                                                                                                            <xsl:for-each select="text()[normalize-space(.)]">
-                                                                                                                <xsl:if test="position() &gt; 1"><xsl:text> </xsl:text></xsl:if>
-                                                                                                                <xsl:value-of select="normalize-space(.)"/>
-                                                                                                            </xsl:for-each>
-                                                                                                        </xsl:with-param>
-                                                                                                    </xsl:call-template>
-                                                                                                    <xsl:if test="$Debug='Y'">
-                                                                                                        (<xsl:value-of select="if(../@_sort_options='true') then text()[normalize-space()][1] else position()"/>)
-                                                                                                    </xsl:if>
-                                                                                                </fo:block>
-                                                                                            </fo:table-cell>
-                                                                                            <fo:table-cell>
-                                                                                                <fo:block>
-                                                                                                    <xsl:choose>
-                                                                                                        <xsl:when test="route">Go to <xsl:value-of select="$QuestionIndex//question[@id=current()/route/question[1]/@id]"/>.</xsl:when>
-                                                                                                        <xsl:when test="../answer[route] and $QuestionIndex//question[@id=current()/../following-sibling::question[1]/@id] != ''">Go to <xsl:value-of select="$QuestionIndex//question[@id=current()/../following-sibling::question[1]/@id]"/>.</xsl:when>
-                                                                                                        <xsl:when test="../answer[route]">All finished.</xsl:when>
-                                                                                                        <xsl:otherwise></xsl:otherwise>
-                                                                                                    </xsl:choose>
-                                                                                                </fo:block>
-                                                                                            </fo:table-cell>
-                                                                                        </fo:table-row>
+                                                                                        <xsl:variable name="QuestionText">
+                                                                                            <xsl:call-template name="ReplaceParameters">
+                                                                                                <xsl:with-param name="value">
+                                                                                                    <xsl:for-each select="text()[normalize-space(.)]">
+                                                                                                        <xsl:if test="position() &gt; 1"><xsl:text> </xsl:text></xsl:if>
+                                                                                                        <xsl:value-of select="normalize-space(.)"/>
+                                                                                                    </xsl:for-each>
+                                                                                                </xsl:with-param>
+                                                                                            </xsl:call-template>
+                                                                                        </xsl:variable>
+                                                                                        <xsl:variable name="Frequency" select="count($ResultsData//Item[@Name=$QuestionID and normalize-space(.)=$QuestionText])"/>
+                                                                                        <xsl:if test="$SuppressZeroResults != 'Y' or $Frequency != 0">
+                                                                                            <fo:table-row>
+                                                                                                <fo:table-cell text-align="right" padding-right="2mm">
+                                                                                                    <fo:block>
+                                                                                                        <xsl:value-of select="position()"/>.
+                                                                                                    </fo:block>
+                                                                                                </fo:table-cell>
+                                                                                                <fo:table-cell xsl:use-attribute-sets="stdBorders">
+                                                                                                    <fo:block text-align="right" padding-right="1mm">
+                                                                                                        <xsl:value-of select="$Frequency"/>
+                                                                                                    </fo:block>
+                                                                                                </fo:table-cell>
+                                                                                                <fo:table-cell padding-left="2mm">
+                                                                                                    <fo:block>
+                                                                                                        <xsl:value-of select="$QuestionText"/>
+                                                                                                        <xsl:if test="$Debug='Y'">
+                                                                                                            (<xsl:value-of select="if(../@_sort_options='true') then text()[normalize-space()][1] else position()"/>)
+                                                                                                        </xsl:if>
+                                                                                                    </fo:block>
+                                                                                                </fo:table-cell>
+                                                                                                <fo:table-cell>
+                                                                                                    <fo:block>
+                                                                                                        <xsl:choose>
+                                                                                                            <xsl:when test="route">Go to <xsl:value-of select="$QuestionIndex//question[@id=current()/route/question[1]/@id]"/>.</xsl:when>
+                                                                                                            <xsl:when test="../answer[route] and $QuestionIndex//question[@id=current()/../following-sibling::question[1]/@id] != ''">Go to <xsl:value-of select="$QuestionIndex//question[@id=current()/../following-sibling::question[1]/@id]"/>.</xsl:when>
+                                                                                                            <xsl:when test="../answer[route]">All finished.</xsl:when>
+                                                                                                            <xsl:otherwise></xsl:otherwise>
+                                                                                                        </xsl:choose>
+                                                                                                    </fo:block>
+                                                                                                </fo:table-cell>
+                                                                                            </fo:table-row>
+                                                                                        </xsl:if>
                                                                                     </xsl:for-each>
                                                                                     <xsl:if test="@otherField = 'true'">
                                                                                         <fo:table-row>
@@ -415,6 +437,11 @@
                                                                                             </fo:table-cell>
                                                                                             <fo:table-cell number-columns-spanned="2" xsl:use-attribute-sets="stdBorders" padding-left="2mm">
                                                                                                 <fo:block>
+                                                                                                    <xsl:for-each-group select="$ResultsData//Item[@Name=$QuestionID and @AnswerId='Other']" group-by="normalize-space(.)">
+                                                                                                        <xsl:sort select="normalize-space(current-grouping-key())"></xsl:sort>
+                                                                                                        <xsl:value-of select="normalize-space(current-grouping-key())"/><xsl:text> [</xsl:text><xsl:value-of select="count(current-group())"/><xsl:text>]</xsl:text>
+                                                                                                        <xsl:if test="not(position() = last())"><xsl:text>, </xsl:text></xsl:if>
+                                                                                                    </xsl:for-each-group>
                                                                                                 </fo:block>
                                                                                             </fo:table-cell>
                                                                                         </fo:table-row>
@@ -440,6 +467,7 @@
                                                                                 <fo:table-column column-width="30%"/>
                                                                                 <fo:table-body>
                                                                                     <xsl:for-each select="tokenize('Yes,No',',')">
+                                                                                        <xsl:variable name="QuestionText" select="."/>
                                                                                         <fo:table-row>
                                                                                             <fo:table-cell text-align="right" padding-right="2mm">
                                                                                                 <fo:block>
@@ -447,7 +475,8 @@
                                                                                                 </fo:block>
                                                                                             </fo:table-cell>
                                                                                             <fo:table-cell xsl:use-attribute-sets="stdBorders">
-                                                                                                <fo:block>
+                                                                                                <fo:block text-align="right" padding-right="1mm">
+                                                                                                    <xsl:value-of select="count($ResultsData//Item[@Name=$QuestionID and normalize-space(.)=$QuestionText])"/>
                                                                                                 </fo:block>
                                                                                             </fo:table-cell>
                                                                                             <fo:table-cell padding-left="2mm">
@@ -476,9 +505,13 @@
                                                             <fo:table-body>
                                                                 <fo:table-row>
                                                                     <fo:table-cell>
-                                                                        <xsl:call-template name="EmitDataEntryField">
-                                                                            <xsl:with-param name="FieldType" select="@type"/>
-                                                                        </xsl:call-template>
+                                                                        <fo:block xsl:use-attribute-sets="stdBorders">
+                                                                            <xsl:for-each-group select="$ResultsData//Item[@Name=$QuestionID]" group-by="normalize-space(.)">
+                                                                                <xsl:sort select="normalize-space(current-grouping-key())"></xsl:sort>
+                                                                                <xsl:value-of select="normalize-space(current-grouping-key())"/><xsl:text> [</xsl:text><xsl:value-of select="count(current-group())"/><xsl:text>]</xsl:text>
+                                                                                <xsl:if test="not(position() = last())"><xsl:text>, </xsl:text></xsl:if>
+                                                                            </xsl:for-each-group>
+                                                                        </fo:block>
                                                                     </fo:table-cell>
                                                                     <fo:table-cell>
                                                                         <fo:block>
@@ -505,97 +538,13 @@
                         </fo:block-container>
                         
                     </xsl:for-each>
-                    <fo:block-container xsl:use-attribute-sets="blockNotes">
-                        <fo:block xsl:use-attribute-sets="HeaderStyle">
-                            <xsl:call-template name="ReplaceParameters">
-                                <xsl:with-param name="value" select="/qrvey/settings/thankYouPage/title"/>
-                            </xsl:call-template>
-                        </fo:block>
-                        <fo:block>
-                            <xsl:call-template name="ReplaceParameters">
-                                <xsl:with-param name="value" select="/qrvey/settings/thankYouPage/content"/>
-                            </xsl:call-template>
-                        </fo:block>
-                    </fo:block-container>
                 </fo:flow>
             </fo:page-sequence>
             
         </fo:root>
     </xsl:template>
     
-    <xsl:template name="EmitDataEntryField">
-        <xsl:param name="FieldType"/>
-        <xsl:param name="FieldWidth">80</xsl:param>
-        <xsl:param name="FieldHeight">5</xsl:param>
-        <xsl:param name="FieldCharacter"> </xsl:param>
-        <fo:block xsl:use-attribute-sets="stdBorders" padding-top="{concat($FieldHeight,'mm')}" margin-right="2mm">
-            <xsl:sequence select="string-join((for $i in 1 to $FieldWidth return $FieldCharacter),'')"/>
-        </fo:block>
-    </xsl:template>
-    
-    <xsl:template name="EmitTemplateTitle">
-        <xsl:param name="Template"/>
-        <xsl:for-each select="$Template">
-            <fo:external-graphic src="{fn:resolve-uri(replace($EntityImageURIPattern,'-EntityType-','Survey'))}" width="{$EntityIconScale}" content-width="scale-to-fit" content-height="{$EntityIconScale}"/>
-            <xsl:value-of select="concat('  Template: ',templateID,' - ',name)"/>
-        </xsl:for-each>
-    </xsl:template>
-    
-    <xsl:template name="EmitProperiesTable">
-        <xsl:param name="Properties"/>
-        <xsl:param name="TableType"/>
-        <fo:block xsl:use-attribute-sets="subSectionHeader" padding-top="{$HalfLineHeight}" padding-bottom="{$HalfLineHeight}">
-            <xsl:value-of select="$TableType"/>
-        </fo:block>
-        
-        <fo:table table-layout="fixed" width="100%">
-            <fo:table-column column-width="20%"/>
-            <fo:table-column column-width="80%"/>
-            <fo:table-header>
-                <fo:table-row>
-                    <fo:table-cell xsl:use-attribute-sets="cellSubTableHeader">
-                        <fo:block xsl:use-attribute-sets="subTableHeader">
-                            Property
-                        </fo:block>
-                    </fo:table-cell>
-                    <fo:table-cell xsl:use-attribute-sets="cellSubTableHeader">
-                        <fo:block xsl:use-attribute-sets="subTableHeader">
-                            Value
-                        </fo:block>
-                    </fo:table-cell>
-                </fo:table-row>
-            </fo:table-header>
-            <fo:table-body>
-                <xsl:for-each select="$Properties">
-                    <fo:table-row keep-together="5">
-                        <xsl:if test="@Advanced='Y' or @Type='hidden'">
-                            <xsl:attribute name="background-color">#FFE6CD</xsl:attribute>
-                        </xsl:if>
-                        <fo:table-cell xsl:use-attribute-sets="subTable">
-                            <fo:block xsl:use-attribute-sets="subTableHeader">
-                                <xsl:value-of select="local-name()"/>
-                            </fo:block>
-                        </fo:table-cell>
-                        <fo:table-cell xsl:use-attribute-sets="subTable">
-                            <fo:block xsl:use-attribute-sets="subTableHeader">
-                                <xsl:call-template name="ReplaceParameters"><xsl:with-param name="value" select="."/></xsl:call-template>
-                            </fo:block>
-                        </fo:table-cell>
-                    </fo:table-row>
-                </xsl:for-each>
-                <xsl:if test="not($Properties)">
-                    <fo:table-row>
-                        <fo:table-cell number-columns-spanned="3">
-                            <fo:block xsl:use-attribute-sets="subTableHeader">
-                                No fields.
-                            </fo:block>
-                        </fo:table-cell>
-                    </fo:table-row>
-                </xsl:if>
-            </fo:table-body>
-        </fo:table>
-    </xsl:template>
-    
+   
     <xsl:template match="menuItem">
         <fo:inline font-style="italic" color="red"><xsl:apply-templates select="* | text()"/></fo:inline>
     </xsl:template>

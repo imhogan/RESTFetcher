@@ -772,6 +772,7 @@ public class REST_Walker {
                 , actionParameters.get("To")
                 , actionParameters.get("CC")
                 , actionParameters.get("BCC")
+                , actionParameters.get("SESConfigurationSet")
                 , Regions.fromName((String)regionName)
                 , this.walkerConfig.debug || this.walkerConfig.verbose
             );

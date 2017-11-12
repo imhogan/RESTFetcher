@@ -64,6 +64,7 @@ public class EmailHelper {
     		,String recipients
     		,String recipientsCC
     		,String recipientsBCC
+    		,String SESConfigurationSet
     		,Regions awsRegion
     		,Boolean traceLog
     	) 
@@ -154,6 +155,11 @@ public class EmailHelper {
             message.writeTo((OutputStream)outputStream);
             RawMessage rawMessage = new RawMessage(ByteBuffer.wrap(outputStream.toByteArray()));
             SendRawEmailRequest rawEmailRequest = new SendRawEmailRequest(rawMessage);
+            
+            if (SESConfigurationSet != null && !SESConfigurationSet.isEmpty()) {
+                rawEmailRequest = rawEmailRequest.withConfigurationSetName(SESConfigurationSet);
+            }
+            
             SendRawEmailResult result = client.sendRawEmail(rawEmailRequest);
             
             if (traceLog) {

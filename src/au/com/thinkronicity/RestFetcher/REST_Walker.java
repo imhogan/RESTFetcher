@@ -760,6 +760,12 @@ public class REST_Walker {
                 Utility.LogMessage("SES Region is '" + regionName + "'.");
             }
             
+            // Get the AWS region to send email through
+            String SESConfigurationSet = this.walkerConfig.getParameter("AWS.SESConfigurationSet","");
+            if (actionParameters.containsKey("SESConfigurationSet")) {
+                regionName = actionParameters.get("SESConfigurationSet");
+            }
+            
             // Send the email.
             EmailHelper.sendEmailViaSES(
                 this.getMyCredentials()
@@ -772,7 +778,7 @@ public class REST_Walker {
                 , actionParameters.get("To")
                 , actionParameters.get("CC")
                 , actionParameters.get("BCC")
-                , actionParameters.get("SESConfigurationSet")
+                , SESConfigurationSet
                 , Regions.fromName((String)regionName)
                 , this.walkerConfig.debug || this.walkerConfig.verbose
             );

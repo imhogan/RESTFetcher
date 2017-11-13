@@ -424,11 +424,26 @@ public class REST_Walker {
     	
     	
         // Initialize the result to the context element's document.
-        Document actionDocument = contextElement.getOwnerDocument();
+        Document actionDocument = null;
+        
+        if (contextElement != null) {
+            actionDocument = contextElement.getOwnerDocument();
+        }
+        else {
+            actionDocument = Utility.readXmlFromString("<Dummy/>");
+            
+            if (this.walkerConfig.debug || this.walkerConfig.verbose) {
+                Utility.LogMessage("Warning: contextElement is null in doAction!");
+            }
+        }
         
         // Get the type and mode of the action.
         String actionType = actionElement.getAttribute("Type");
         String actionMode = actionElement.getAttribute("Mode");
+        
+        if (this.walkerConfig.debug || this.walkerConfig.verbose) {
+            Utility.LogMessage("Doing action " + actionType + " with mode '" + actionMode + "', with action document root element '" + actionDocument.getDocumentElement().getTagName() + "'");
+        }
         
         // Skip if mode is not matched. This allows for actions to be only performed in debug mode for example.
         if (actionMode.equals("verbose") && !this.walkerConfig.verbose || actionMode.equals("debug") && !this.walkerConfig.debug) {

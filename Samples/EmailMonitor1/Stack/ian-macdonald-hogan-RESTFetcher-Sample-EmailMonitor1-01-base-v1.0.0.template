@@ -23,7 +23,21 @@
     "Purpose":
         ["This template is part of a system which implements SES event logging and reporting."],
     "TODO":
-        ["Define DB tables"]
+        ["Define DB tables", "Add Lambda Resouce to create SNSDestination"],
+    "TOFIX-trackingConfigSetDestination": {
+      "Type" : "AWS::SES::ConfigurationSetEventDestination",
+      "Properties" : {
+        "ConfigurationSetName" : {"Ref": "trackingConfigSet"},
+        "EventDestination" : {
+          "Name": {"Fn::Sub" : "${ProjectPrefix}-${TargetEnvironment}-sesTrackingDest-${TargetDomain}"}, 
+          "Enabled": true,
+          "MatchingEventTypes": ["send", "reject", "bounce", "complaint", "delivery", "open", "click", "renderingFailure"],
+          "SNSDestination": {
+            "TopicArn": {"Ref": "topicEventsFromSES"}
+            }
+          }
+       }
+    }
     },
   "Parameters": {
     "RESTFetcherKey": {
@@ -715,20 +729,6 @@
             "Properties": {
                 "Name": {"Fn::Sub" : "${ProjectPrefix}-${TargetEnvironment}-sesTracking-${TargetDomain}"}
             }
-    },
-    "trackingConfigSetDestination": {
-      "Type" : "AWS::SES::ConfigurationSetEventDestination",
-      "Properties" : {
-        "ConfigurationSetName" : {"Ref": "trackingConfigSet"},
-        "EventDestination" : {
-          "Name": {"Fn::Sub" : "${ProjectPrefix}-${TargetEnvironment}-sesTrackingDest-${TargetDomain}"}, 
-          "Enabled": true,
-          "MatchingEventTypes": ["send", "reject", "bounce", "complaint", "delivery", "open", "click", "renderingFailure"],
-          "SNSDestination": {
-            "TopicArn": {"Ref": "topicEventsFromSES"}
-            }
-          }
-       }
     }
   },
   "Outputs": {

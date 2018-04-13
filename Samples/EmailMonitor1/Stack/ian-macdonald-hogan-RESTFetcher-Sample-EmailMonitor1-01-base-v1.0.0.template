@@ -551,32 +551,7 @@
         "ProvisionedThroughput": {
           "ReadCapacityUnits": "1",
           "WriteCapacityUnits": "1"
-        },
-        "GlobalSecondaryIndexes": [
-          {
-            "IndexName": "SES_ConfigurationSet-Timestamp-index",
-            "KeySchema": [
-              {
-                "AttributeName": "SES_ConfigurationSet",
-                "KeyType": "HASH"
-              },
-              {
-                "AttributeName": "Timestamp",
-                "KeyType": "RANGE"
-              }
-            ],
-            "Projection": {
-              "ProjectionType": "INCLUDE",
-              "NonKeyAttributes": [
-                "Recipient"
-              ]
-            },
-            "ProvisionedThroughput": {
-              "ReadCapacityUnits": "1",
-              "WriteCapacityUnits": "1"
-            }
-          }
-        ]
+        }
       }
     },
     "snsLoggingTableReadCapacityScaling": {
@@ -742,24 +717,30 @@
             }
     },
     "trackingConfigSetDestination": {
-      "name": "EventDestinationName", 
-      "enabled": false,
-      "matching_event_types": ["send", "reject", "bounce", "complaint", "delivery", "open", "click", "renderingFailure"],
-      "sns_destination": {
-        "topic_arn": {"Fn::GetAtt": ["topicEventsFromSES","Arn"]}
-      }
+      "Type" : "AWS::SES::ConfigurationSetEventDestination",
+      "Properties" : {
+        "ConfigurationSetName" : {"Ref": "trackingConfigSet"},
+        "EventDestination" : {
+          "Name": {"Fn::Sub" : "${ProjectPrefix}-${TargetEnvironment}-sesTrackingDest-${TargetDomain}"}, 
+          "Enabled": true,
+          "MatchingEventTypes": ["send", "reject", "bounce", "complaint", "delivery", "open", "click", "renderingFailure"],
+          "SNSDestination": {
+            "TopicArn": {"Ref": "topicEventsFromSES"}
+            }
+          }
+       }
     }
   },
   "Outputs": {
-    "S3TriggerLambdaArn": {
+    "snsLoggerLambdaArn": {
       "Value": {
         "Fn::GetAtt": [
-          "S3TriggerLambda",
+          "snsLoggerLambda",
           "Arn"
         ]
       },
-      "Description": "Unique resource ID of the S3 Trigger Lamba Function.",
-      "Export" : { "Name" : {"Fn::Sub": "${AWS::StackName}-S3TriggerLambdaArn" }}
+      "Description": "Unique resource ID of the snsLogger Lamba Function.",
+      "Export" : { "Name" : {"Fn::Sub": "${AWS::StackName}-snsLoggerLambdaArn" }}
     },
     "RESTFetcherLambdaArn": {
       "Value": {

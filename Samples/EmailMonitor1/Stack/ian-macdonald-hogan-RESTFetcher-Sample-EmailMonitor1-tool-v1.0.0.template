@@ -1,0 +1,483 @@
+{
+  "AWSTemplateFormatVersion": "2010-09-09",
+  "Description": "Demonstration stack for the RESTFetcher Lambda Function - built by Ian Hogan - Ian_MacDonald_Hogan@yahoo.com.\nThis sample will deploy the tools stack from an S3 bucket from my AWS account. See https://github.com/imhogan/RESTFetcher/tree/master/Samples/Qrvey2 for details.",
+    "Metadata": {"AWS::CloudFormation::Interface": {
+        "ParameterGroups": [
+            {
+                "Label": {"default": "Project Configuration"},
+                "Parameters": [
+                    "ProjectPrefix",
+                    "TargetEnvironment",
+                    "TargetDomain"
+                ]
+            },
+            {
+                "Label": {"default": "Custom Resource Lambda Functions"},
+                "Parameters": [
+                    "RESTFetcherKey",
+                    "S3TriggerKey"
+                ]
+            }
+        ]
+    }},
+  "Parameters": {
+    "RESTFetcherKey": {
+      "Description": "Zip file for REST Fetcher function",
+      "Type": "String",
+      "Default": "au-com-thinkronicity-RestFetcher-V2.5.7CE.zip"
+    },
+    "S3TriggerKey": {
+      "Description": "Zip file for S3Trigger function",
+      "Type": "String",
+      "Default": "au-com-thinkronicity-S3Trigger-V1.0.0.zip"
+    },
+    "ProjectPrefix": {
+      "Description": "Project prefix - for reuse with different projects the bucket name will be prefix-target-domain - observe bucket name restrictions - see http://docs.aws.amazon.com/AmazonS3/latest/dev/BucketRestrictions.html",
+      "Type": "String",
+      "Default": "qrvey",
+      "MinLength": 1,
+      "MaxLength": 6,
+      "AllowedPattern": "^[a-z][-a-z0-9]*$"
+    },
+    "TargetEnvironment": {
+      "Description": "Target environment - dev, uat or prod, default is prod",
+      "Type": "String",
+      "AllowedValues": [
+        "dev",
+        "uat",
+        "prod"
+      ],
+      "Default": "prod"
+    },
+    "TargetDomain": {
+      "Description": "Target domain - this is used as the final bucket suffix to ensure global uniqueness - typically your internet domain name but use - rather than . as separators.",
+      "Type": "String",
+      "Default": "my-domain-me"
+    }
+  },
+  "Mappings": {
+    "AWSRegion2Bucket": {
+      "us-east-1": {
+        "OpenCode": "au-com-thinkronicity-opencode-usea1",
+        "ClientCode": "au-com-thinkronicity-clientcode-apse2"
+      },
+      "us-east-2": {
+        "OpenCode": "au-com-thinkronicity-opencode-usea2",
+        "ClientCode": "au-com-thinkronicity-clientcode-apse2"
+      },
+      "us-west-1": {
+        "OpenCode": "au-com-thinkronicity-opencode-uswe1",
+        "ClientCode": "au-com-thinkronicity-clientcode-apse2"
+      },
+      "us-west-2": {
+        "OpenCode": "au-com-thinkronicity-opencode-uswe2",
+        "ClientCode": "au-com-thinkronicity-clientcode-apse2"
+      },
+      "sa-east-1": {
+        "OpenCode": "au-com-thinkronicity-opencode-saea1",
+        "ClientCode": "au-com-thinkronicity-clientcode-apse2"
+      },
+      "ap-northeast-1": {
+        "OpenCode": "au-com-thinkronicity-opencode-apne1",
+        "ClientCode": "au-com-thinkronicity-clientcode-apse2"
+      },
+      "ap-northeast-2": {
+        "OpenCode": "au-com-thinkronicity-opencode-apne2",
+        "ClientCode": "au-com-thinkronicity-clientcode-apse2"
+      },
+      "ap-south-1": {
+        "OpenCode": "au-com-thinkronicity-opencode-aps1",
+        "ClientCode": "au-com-thinkronicity-clientcode-apse2"
+      },
+      "ap-southeast-1": {
+        "OpenCode": "au-com-thinkronicity-opencode-apse1",
+        "ClientCode": "au-com-thinkronicity-clientcode-apse2"
+      },
+      "ap-southeast-2": {
+        "OpenCode": "au-com-thinkronicity-opencode-apse2",
+        "ClientCode": "au-com-thinkronicity-clientcode-apse2"
+      },
+      "eu-central-1": {
+        "OpenCode": "au-com-thinkronicity-opencode-euce1",
+        "ClientCode": "au-com-thinkronicity-clientcode-apse2"
+      },
+      "eu-west-1": {
+        "OpenCode": "au-com-thinkronicity-opencode-euwe1",
+        "ClientCode": "au-com-thinkronicity-clientcode-apse2"
+      }
+    }
+  },
+  "Resources": {
+    "LambdaExecutionRole": {
+      "Type": "AWS::IAM::Role",
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Version": "2012-10-17",
+          "Statement": [
+            {
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "lambda.amazonaws.com"
+              },
+              "Action": "sts:AssumeRole"
+            },
+            {
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "apigateway.amazonaws.com"
+              },
+              "Action": "sts:AssumeRole"
+            },
+            {
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "s3.amazonaws.com"
+              },
+              "Action": "sts:AssumeRole"
+            }
+          ]
+        },
+        "Path": {
+          "Fn::Join": [
+            "",
+            [
+              "/",
+              {
+                "Ref": "ProjectPrefix"
+              },
+              "/"
+            ]
+          ]
+        },
+        "Policies": [
+          {
+            "PolicyName": "AccessProjectS3FilesAndSES",
+            "PolicyDocument": {
+              "Version": "2012-10-17",
+              "Statement": [
+                {
+                  "Effect": "Allow",
+                  "Action": [
+                    "s3:*"
+                  ],
+                  "Resource": {
+                    "Fn::Join": [
+                      "",
+                      [
+                        "arn:aws:s3:::",
+                        {
+                          "Ref": "ProjectPrefix"
+                        },
+                        "-",
+                        {
+                          "Ref": "TargetEnvironment"
+                        },
+                        "-files-",
+                        {
+                          "Ref": "TargetDomain"
+                        },
+                        "/*"
+                      ]
+                    ]
+                  }
+                },
+                {
+                  "Effect": "Allow",
+                  "Action": [
+                    "ses:*"
+                  ],
+                  "Resource": "*"
+                },
+                {
+                  "Effect": "Allow",
+                  "Action": [
+                    "logs:CreateLogGroup",
+                    "logs:CreateLogStream",
+                    "logs:PutLogEvents"
+                  ],
+                  "Resource": "arn:aws:logs:*:*:*"
+                }
+              ]
+            }
+          }
+        ]
+      }
+    },
+    "RESTFetcherLambda": {
+      "Type": "AWS::Lambda::Function",
+      "Properties": {
+        "Code": {
+          "S3Bucket": {
+            "Fn::FindInMap": [
+              "AWSRegion2Bucket",
+              {
+                "Ref": "AWS::Region"
+              },
+              "OpenCode"
+            ]
+          },
+          "S3Key": {
+            "Ref": "RESTFetcherKey"
+          }
+        },
+        "Runtime": "java8",
+        "Handler": "au.com.thinkronicity.RestFetcher.Fetch",
+        "Description": "Generic REST processor - built by Ian Hogan - Ian_MacDonald_Hogan@yahoo.com",
+        "Timeout": 300,
+        "MemorySize": 512,
+        "Role": {
+          "Fn::GetAtt": [
+            "LambdaExecutionRole",
+            "Arn"
+          ]
+        }
+      }
+    },
+    "S3TriggerLambda": {
+      "Type": "AWS::Lambda::Function",
+      "Properties": {
+        "Code": {
+          "S3Bucket": {
+            "Fn::FindInMap": [
+              "AWSRegion2Bucket",
+              {
+                "Ref": "AWS::Region"
+              },
+              "OpenCode"
+            ]
+          },
+          "S3Key": {
+            "Ref": "S3TriggerKey"
+          }
+        },
+        "Runtime": "nodejs4.3",
+        "Handler": "index.handler",
+        "Description": "Generic S3 Trigger File Utility - built by Ian Hogan - Ian_MacDonald_Hogan@yahoo.com",
+        "Timeout": 50,
+        "MemorySize": 128,
+        "Role": {
+          "Fn::GetAtt": [
+            "LambdaExecutionRole",
+            "Arn"
+          ]
+        }
+      }
+    },
+    "RESTFetcherLambdaInvokePermission": {
+      "Type": "AWS::Lambda::Permission",
+      "Properties": {
+        "FunctionName": {
+          "Fn::GetAtt": [
+            "RESTFetcherLambda",
+            "Arn"
+          ]
+        },
+        "Action": "lambda:InvokeFunction",
+        "Principal": "s3.amazonaws.com",
+        "SourceAccount": {
+          "Ref": "AWS::AccountId"
+        }
+      }
+    },
+    "ProjectFilesBucket": {
+      "Type": "AWS::S3::Bucket",
+      "DeletionPolicy" : "Retain",
+      "DependsOn": ["RESTFetcherLambda","RESTFetcherLambdaInvokePermission"],
+      "Properties": {
+        "BucketName": {
+          "Fn::Join": [
+            "",
+            [
+              {
+                "Ref": "ProjectPrefix"
+              },
+              "-",
+              {
+                "Ref": "TargetEnvironment"
+              },
+              "-files-",
+              {
+                "Ref": "TargetDomain"
+              }
+            ]
+          ]
+        },
+        "AccessControl": "Private",
+        "VersioningConfiguration": {
+          "Status": "Suspended"
+        },
+        "NotificationConfiguration": {
+          "LambdaConfigurations": [
+            {
+              "Event": "s3:ObjectCreated:Put",
+              "Filter": {
+                "S3Key": {
+                  "Rules": [
+                    {
+                      "Name": "Prefix",
+                      "Value": "config"
+                    },
+                    {
+                      "Name": "Suffix",
+                      "Value": ".properties"
+                    }
+                  ]
+                }
+              },
+              "Function": {
+                "Fn::GetAtt": [
+                  "RESTFetcherLambda",
+                  "Arn"
+                ]
+              }
+            },
+            {
+              "Event": "s3:ObjectCreated:Put",
+              "Filter": {
+                "S3Key": {
+                  "Rules": [
+                    {
+                      "Name": "Prefix",
+                      "Value": "Qrveys"
+                    },
+                    {
+                      "Name": "Suffix",
+                      "Value": "Config.xml"
+                    }
+                  ]
+                }
+              },
+              "Function": {
+                "Fn::GetAtt": [
+                  "RESTFetcherLambda",
+                  "Arn"
+                ]
+              }
+            },
+            {
+              "Event": "s3:ObjectCreated:Copy",
+              "Filter": {
+                "S3Key": {
+                  "Rules": [
+                    {
+                      "Name": "Prefix",
+                      "Value": "config"
+                    },
+                    {
+                      "Name": "Suffix",
+                      "Value": ".properties"
+                    }
+                  ]
+                }
+              },
+              "Function": {
+                "Fn::GetAtt": [
+                  "RESTFetcherLambda",
+                  "Arn"
+                ]
+              }
+            },
+            {
+              "Event": "s3:ObjectCreated:Copy",
+              "Filter": {
+                "S3Key": {
+                  "Rules": [
+                    {
+                      "Name": "Prefix",
+                      "Value": "Qrveys"
+                    },
+                    {
+                      "Name": "Suffix",
+                      "Value": "Config.xml"
+                    }
+                  ]
+                }
+              },
+              "Function": {
+                "Fn::GetAtt": [
+                  "RESTFetcherLambda",
+                  "Arn"
+                ]
+              }
+            }
+          ]
+        }
+      }
+    }
+  },
+  "Outputs": {
+    "S3TriggerLambdaArn": {
+      "Value": {
+        "Fn::GetAtt": [
+          "S3TriggerLambda",
+          "Arn"
+        ]
+      },
+      "Description": "Unique resource ID of the S3 Trigger Lamba Function.",
+      "Export" : { "Name" : {"Fn::Sub": "${AWS::StackName}-S3TriggerLambdaArn" }}
+    },
+    "RESTFetcherLambdaArn": {
+      "Value": {
+        "Fn::GetAtt": [
+          "RESTFetcherLambda",
+          "Arn"
+        ]
+      },
+      "Description": "Unique resource ID of the REST Fetcher Lamba Function.",
+      "Export" : { "Name" : {"Fn::Sub": "${AWS::StackName}-RESTFetcherLambdaArn" }}
+    },
+    "LambdaExecutionRoleArn": {
+      "Value": {
+        "Fn::GetAtt": [
+          "LambdaExecutionRole",
+          "Arn"
+        ]
+      },
+      "Description": "Unique resource ID of the IAM Role allocated to the Lambda Functions.",
+      "Export" : { "Name" : {"Fn::Sub": "${AWS::StackName}-LambdaExecutionRoleArn" }}
+    },
+    "AccessProjectS3FilesBucket": {
+      "Value": {
+        "Fn::Join": [
+          "",
+          [
+            {
+              "Ref": "ProjectPrefix"
+            },
+            "-",
+            {
+              "Ref": "TargetEnvironment"
+            },
+            "-files-",
+            {
+              "Ref": "TargetDomain"
+            }
+          ]
+        ]
+      },
+      "Description": "The generated name of the S3 Bucket, used by subsequent stacks to access the project files.",
+      "Export" : { "Name" : {"Fn::Sub": "${AWS::StackName}-AccessProjectS3FilesBucket" }}
+    },
+    "SelectedProjectPrefix": {
+      "Value": {
+          "Ref": "ProjectPrefix"
+       },
+      "Description": "The parameter value entered when the stack was created, used in subsequent stacks which build on this one.",
+      "Export" : { "Name" : {"Fn::Sub": "${AWS::StackName}-SelectedProjectPrefix" }}
+    },
+    "SelectedTargetEnvironment": {
+      "Value": {
+          "Ref": "TargetEnvironment"
+       },
+      "Description": "The parameter value entered when the stack was created, used in subsequent stacks which build on this one.",
+      "Export" : { "Name" : {"Fn::Sub": "${AWS::StackName}-SelectedTargetEnvironment" }}
+    },
+    "SelectedTargetDomain": {
+      "Value": {
+          "Ref": "TargetDomain"
+       },
+      "Description": "The parameter value entered when the stack was created, used in subsequent stacks which build on this one.",
+      "Export" : { "Name" : {"Fn::Sub": "${AWS::StackName}-SelectedTargetDomain" }}
+    }
+  }
+}

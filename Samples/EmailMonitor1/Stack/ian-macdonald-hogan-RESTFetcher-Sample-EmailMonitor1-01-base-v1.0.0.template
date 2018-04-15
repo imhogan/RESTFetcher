@@ -15,6 +15,7 @@
                 "Label": {"default": "Custom Resource Lambda Functions"},
                 "Parameters": [
                     "RESTFetcherKey",
+                    "cfnSesHelperKey",
                     "snsLoggerKey"
                 ]
             }
@@ -44,6 +45,11 @@
       "Description": "Zip file for REST Fetcher function",
       "Type": "String",
       "Default": "au-com-thinkronicity-RestFetcher-V2.5.7CE.zip"
+    },
+    "cfnSesHelperKey": {
+        "Description": "Zip file for Cloud Formation SES Helper function",
+        "Type": "String",
+        "Default": "au-com-thinkronicity-cfnSesHelper-V1.0.0.zip"
     },
     "snsLoggerKey": {
       "Description": "Zip file for snsLogger function",
@@ -214,7 +220,9 @@
           }
         ],
         "ManagedPolicyArns": [
-          "arn:aws:iam::aws:policy/AmazonDynamoDBFullAccess"
+          "arn:aws:iam::aws:policy/AmazonDynamoDBFullAccess",
+          "arn:aws:iam::aws:policy/AmazonSESFullAccess",
+          "arn:aws:iam::aws:policy/AmazonSNSFullAccess"
         ]      
        }
     },
@@ -261,114 +269,6 @@
         "Principal": "s3.amazonaws.com",
         "SourceAccount": {
           "Ref": "AWS::AccountId"
-        }
-      }
-    },
-    "ProjectFilesBucket": {
-      "Type": "AWS::S3::Bucket",
-      "DeletionPolicy" : "Retain",
-      "DependsOn": ["RESTFetcherLambda","RESTFetcherLambdaInvokePermission"],
-      "Properties": {
-        "BucketName": {"Fn::Sub" : "${ProjectPrefix}-${TargetEnvironment}-files-${TargetDomain}"},
-        "AccessControl": "Private",
-        "VersioningConfiguration": {
-          "Status": "Suspended"
-        },
-        "NotificationConfiguration": {
-          "LambdaConfigurations": [
-            {
-              "Event": "s3:ObjectCreated:Put",
-              "Filter": {
-                "S3Key": {
-                  "Rules": [
-                    {
-                      "Name": "Prefix",
-                      "Value": "config"
-                    },
-                    {
-                      "Name": "Suffix",
-                      "Value": ".properties"
-                    }
-                  ]
-                }
-              },
-              "Function": {
-                "Fn::GetAtt": [
-                  "RESTFetcherLambda",
-                  "Arn"
-                ]
-              }
-            },
-            {
-              "Event": "s3:ObjectCreated:Put",
-              "Filter": {
-                "S3Key": {
-                  "Rules": [
-                    {
-                      "Name": "Prefix",
-                      "Value": "Qrveys"
-                    },
-                    {
-                      "Name": "Suffix",
-                      "Value": "Config.xml"
-                    }
-                  ]
-                }
-              },
-              "Function": {
-                "Fn::GetAtt": [
-                  "RESTFetcherLambda",
-                  "Arn"
-                ]
-              }
-            },
-            {
-              "Event": "s3:ObjectCreated:Copy",
-              "Filter": {
-                "S3Key": {
-                  "Rules": [
-                    {
-                      "Name": "Prefix",
-                      "Value": "config"
-                    },
-                    {
-                      "Name": "Suffix",
-                      "Value": ".properties"
-                    }
-                  ]
-                }
-              },
-              "Function": {
-                "Fn::GetAtt": [
-                  "RESTFetcherLambda",
-                  "Arn"
-                ]
-              }
-            },
-            {
-              "Event": "s3:ObjectCreated:Copy",
-              "Filter": {
-                "S3Key": {
-                  "Rules": [
-                    {
-                      "Name": "Prefix",
-                      "Value": "Qrveys"
-                    },
-                    {
-                      "Name": "Suffix",
-                      "Value": "Config.xml"
-                    }
-                  ]
-                }
-              },
-              "Function": {
-                "Fn::GetAtt": [
-                  "RESTFetcherLambda",
-                  "Arn"
-                ]
-              }
-            }
-          ]
         }
       }
     },
@@ -686,7 +586,7 @@
         ]
       }
     },
-    "snspolicyEventsFromSES": {
+    "snsPolicyEventsFromSES": {
       "Type": "AWS::SNS::TopicPolicy",
       "Properties": {
         "Topics": [{"Ref": "topicEventsFromSES"}],
@@ -729,6 +629,158 @@
             "Properties": {
                 "Name": {"Fn::Sub" : "${ProjectPrefix}-${TargetEnvironment}-sesTracking-${TargetDomain}"}
             }
+    },
+    "cfnSesHelperLambda": {
+        "Type": "AWS::Lambda::Function",
+        "Properties": {
+            "Code": {
+                "S3Bucket": {"Fn::FindInMap": [
+                    "AWSRegion2Bucket",
+                    {"Ref": "AWS::Region"},
+                    "OpenCode"
+                ]},
+                "S3Key": {"Ref": "cfnSesHelper"}
+            },
+            "Runtime": "nodejs6.10",
+            "Handler": "index.handler",
+            "Timeout": "30",
+            "Description": "CloudFormation SES ConfigSet Notification Helper from https://github.com/imhogan/CreateSESNotification",
+            "MemorySize": 128,
+            "Role": {"Fn::GetAtt": [
+                "LambdaExecutionRole",
+                "Arn"
+            ]}
+        }
+    },
+    "configSetNotification": {
+        "Type": "Custom::SESCreateConfigSetNotification",
+        "DependsOn": ["cfnSesHelperLambda","trackingConfigSet","topicEventsFromSES"],
+        "Properties": {
+            "ServiceToken": {"Fn::GetAtt": [
+                "cfnSesHelperLambda",
+                "Arn"
+            ]},
+            "NotificationDetails": {
+                "ConfigurationSetName" : {"Ref": "trackingConfigSet"},
+                "EventDestination" : {
+                  "Name": {"Fn::Sub" : "${ProjectPrefix}-${TargetEnvironment}-sesTrackingDest-${TargetDomain}"}, 
+                  "Enabled": true,
+                  "MatchingEventTypes": ["send", "reject", "bounce", "complaint", "delivery", "open", "click", "renderingFailure"],
+                  "SNSDestination": {
+                    "TopicARN": {"Ref": "topicEventsFromSES"}
+                    }
+                  }
+            },
+            "LogLevel": 9
+        }
+    },
+    "projectFilesBucket": {
+      "Type": "AWS::S3::Bucket",
+      "DeletionPolicy" : "Retain",
+      "DependsOn": ["RESTFetcherLambda","RESTFetcherLambdaInvokePermission", "emailTrackingTable","snsLoggingTable", "snsPolicyEventsFromSES", "configSetNotification"],
+      "Properties": {
+        "BucketName": {"Fn::Sub" : "${ProjectPrefix}-${TargetEnvironment}-files-${TargetDomain}"},
+        "AccessControl": "Private",
+        "VersioningConfiguration": {
+          "Status": "Suspended"
+        },
+        "NotificationConfiguration": {
+          "LambdaConfigurations": [
+            {
+              "Event": "s3:ObjectCreated:Put",
+              "Filter": {
+                "S3Key": {
+                  "Rules": [
+                    {
+                      "Name": "Prefix",
+                      "Value": "config"
+                    },
+                    {
+                      "Name": "Suffix",
+                      "Value": ".properties"
+                    }
+                  ]
+                }
+              },
+              "Function": {
+                "Fn::GetAtt": [
+                  "RESTFetcherLambda",
+                  "Arn"
+                ]
+              }
+            },
+            {
+              "Event": "s3:ObjectCreated:Put",
+              "Filter": {
+                "S3Key": {
+                  "Rules": [
+                    {
+                      "Name": "Prefix",
+                      "Value": "Qrveys"
+                    },
+                    {
+                      "Name": "Suffix",
+                      "Value": "Config.xml"
+                    }
+                  ]
+                }
+              },
+              "Function": {
+                "Fn::GetAtt": [
+                  "RESTFetcherLambda",
+                  "Arn"
+                ]
+              }
+            },
+            {
+              "Event": "s3:ObjectCreated:Copy",
+              "Filter": {
+                "S3Key": {
+                  "Rules": [
+                    {
+                      "Name": "Prefix",
+                      "Value": "config"
+                    },
+                    {
+                      "Name": "Suffix",
+                      "Value": ".properties"
+                    }
+                  ]
+                }
+              },
+              "Function": {
+                "Fn::GetAtt": [
+                  "RESTFetcherLambda",
+                  "Arn"
+                ]
+              }
+            },
+            {
+              "Event": "s3:ObjectCreated:Copy",
+              "Filter": {
+                "S3Key": {
+                  "Rules": [
+                    {
+                      "Name": "Prefix",
+                      "Value": "Qrveys"
+                    },
+                    {
+                      "Name": "Suffix",
+                      "Value": "Config.xml"
+                    }
+                  ]
+                }
+              },
+              "Function": {
+                "Fn::GetAtt": [
+                  "RESTFetcherLambda",
+                  "Arn"
+                ]
+              }
+            }
+          ]
+        }
+      }
     }
   },
   "Outputs": {
@@ -741,6 +793,16 @@
       },
       "Description": "Unique resource ID of the snsLogger Lamba Function.",
       "Export" : { "Name" : {"Fn::Sub": "${AWS::StackName}-snsLoggerLambdaArn" }}
+    },
+    "cfnSesHelperLambdaArn": {
+      "Value": {
+        "Fn::GetAtt": [
+          "cfnSesHelperLambda",
+          "Arn"
+        ]
+      },
+      "Description": "Unique resource ID of the cfnSesHelper Lamba Function.",
+      "Export" : { "Name" : {"Fn::Sub": "${AWS::StackName}-cfnSesHelperLambdaArn" }}
     },
     "RESTFetcherLambdaArn": {
       "Value": {
@@ -763,24 +825,7 @@
       "Export" : { "Name" : {"Fn::Sub": "${AWS::StackName}-LambdaExecutionRoleArn" }}
     },
     "AccessProjectS3FilesBucket": {
-      "Value": {
-        "Fn::Join": [
-          "",
-          [
-            {
-              "Ref": "ProjectPrefix"
-            },
-            "-",
-            {
-              "Ref": "TargetEnvironment"
-            },
-            "-files-",
-            {
-              "Ref": "TargetDomain"
-            }
-          ]
-        ]
-      },
+      "Value": {"Ref": "projectFilesBucket"},
       "Description": "The generated name of the S3 Bucket, used by subsequent stacks to access the project files.",
       "Export" : { "Name" : {"Fn::Sub": "${AWS::StackName}-AccessProjectS3FilesBucket" }}
     },

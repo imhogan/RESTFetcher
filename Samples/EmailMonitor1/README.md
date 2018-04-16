@@ -13,7 +13,7 @@ The initial step is to get SES event monitoring working.
 
 |Stack Link  |Stack Purpose  | 
 |--|--| 
-|[Tool Stack](https://s3-ap-southeast-2.amazonaws.com/au-com-thinkronicity-opencode-apse2/CloudFormation/ian-macdonald-hogan-RESTFetcher-Sample-EmailMonitor1-01-base-v1.0.0.template) | This loads the base Lambda tools annd creates the S3 bucket. | 
+|[Tool Stack](https://s3-ap-southeast-2.amazonaws.com/au-com-thinkronicity-opencode-apse2/CloudFormation/ian-macdonald-hogan-RESTFetcher-Sample-EmailMonitor1-01-base-v1.0.1.template) | This loads the base Lambda tools annd creates the S3 bucket. | 
 |[Files Stack](https://s3-ap-southeast-2.amazonaws.com/au-com-thinkronicity-opencode-apse2/CloudFormation/ian-macdonald-hogan-RESTFetcher-Sample-EmailMonitor1-02-files-v1.0.0.template) | This loads the application files into the S3 bucket. | 
 |[API Stack](https://s3-ap-southeast-2.amazonaws.com/au-com-thinkronicity-opencode-apse2/CloudFormation/ian-macdonald-hogan-RESTFetcher-Sample-EmailMonitor1-01-apigateway-v1.0.0.template) | This creates the API Gateway services and initialises the system. | 
 

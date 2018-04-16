@@ -49,7 +49,7 @@
     "cfnSesHelperKey": {
         "Description": "Zip file for Cloud Formation SES Helper function",
         "Type": "String",
-        "Default": "au-com-thinkronicity-cfnSesHelper-V1.0.0.zip"
+        "Default": "au-com-thinkronicity-cfnSesHelper-V1.0.2.zip"
     },
     "snsLoggerKey": {
       "Description": "Zip file for snsLogger function",
@@ -563,17 +563,6 @@
         }
       }
     },
-    "snsLoggerLambdaInvokePermission": {
-      "Type": "AWS::Lambda::Permission",
-      "Properties": {
-        "FunctionName": {"Fn::GetAtt": ["snsLoggerLambda","Arn"]},
-        "Action": "lambda:InvokeFunction",
-        "Principal": "s3.amazonaws.com",
-        "SourceAccount": {
-          "Ref": "AWS::AccountId"
-        }
-      }
-    },
     "topicEventsFromSES": {
       "Type": "AWS::SNS::Topic",
       "Properties": {
@@ -584,6 +573,15 @@
             "Protocol": "lambda"
           }
         ]
+      }
+    },
+    "snsLoggerLambdaInvokePermission": {
+      "Type": "AWS::Lambda::Permission",
+      "Properties": {
+        "FunctionName": {"Fn::GetAtt": ["snsLoggerLambda","Arn"]},
+        "Action": "lambda:InvokeFunction",
+        "Principal": "sns.amazonaws.com",
+       "SourceArn": { "Ref": "topicEventsFromSES" }
       }
     },
     "snsPolicyEventsFromSES": {
@@ -632,6 +630,7 @@
     },
     "cfnSesHelperLambda": {
         "Type": "AWS::Lambda::Function",
+        "DeletionPolicy" : "Retain",
         "Properties": {
             "Code": {
                 "S3Bucket": {"Fn::FindInMap": [
@@ -652,10 +651,33 @@
             ]}
         }
     },
+    "configSetNotification": {
+        "Type": "Custom::SESCreateConfigSetNotification",
+        "DependsOn": ["cfnSesHelperLambda","trackingConfigSet","topicEventsFromSES", "snsPolicyEventsFromSES", "snsLoggerLambdaInvokePermission"],
+        "DeletionPolicy" : "Retain",
+        "Properties": {
+            "ServiceToken": {"Fn::GetAtt": [
+                "cfnSesHelperLambda",
+                "Arn"
+            ]},
+            "NotificationDetails": {
+                "ConfigurationSetName" : {"Ref": "trackingConfigSet"},
+                "EventDestination" : {
+                  "Name": {"Fn::Sub" : "${ProjectPrefix}-${TargetEnvironment}-sesTrackingDest-${TargetDomain}"}, 
+                  "Enabled": true,
+                  "MatchingEventTypes": ["send", "reject", "bounce", "complaint", "delivery", "open", "click", "renderingFailure"],
+                  "SNSDestination": {
+                    "TopicARN": {"Ref": "topicEventsFromSES"}
+                    }
+                  }
+            },
+            "logLevel": 9
+        }
+    },
     "projectFilesBucket": {
       "Type": "AWS::S3::Bucket",
       "DeletionPolicy" : "Retain",
-      "DependsOn": ["RESTFetcherLambda","RESTFetcherLambdaInvokePermission", "emailTrackingTable","snsLoggingTable", "snsPolicyEventsFromSES"],
+      "DependsOn": ["RESTFetcherLambda","RESTFetcherLambdaInvokePermission", "emailTrackingTable","snsLoggingTable", "snsPolicyEventsFromSES", "configSetNotification"],
       "Properties": {
         "BucketName": {"Fn::Sub" : "${ProjectPrefix}-${TargetEnvironment}-files-${TargetDomain}"},
         "AccessControl": "Private",

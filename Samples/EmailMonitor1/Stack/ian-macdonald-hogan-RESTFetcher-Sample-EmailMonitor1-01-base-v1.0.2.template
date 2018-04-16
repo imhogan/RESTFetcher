@@ -1,0 +1,840 @@
+{
+  "AWSTemplateFormatVersion": "2010-09-09",
+  "Description": "Demonstration stack for the RESTFetcher Lambda Function - built by Ian Hogan - Ian_MacDonald_Hogan@yahoo.com.\nThis sample will deploy the tools stack from an S3 bucket from my AWS account. See https://github.com/imhogan/RESTFetcher/tree/master/Samples/EmailMonitor1 for details.",
+    "Metadata": {"AWS::CloudFormation::Interface": {
+        "ParameterGroups": [
+            {
+                "Label": {"default": "Project Configuration"},
+                "Parameters": [
+                    "ProjectPrefix",
+                    "TargetEnvironment",
+                    "TargetDomain"
+                ]
+            },
+            {
+                "Label": {"default": "Custom Resource Lambda Functions"},
+                "Parameters": [
+                    "RESTFetcherKey",
+                    "cfnSesHelperKey",
+                    "snsLoggerKey"
+                ]
+            }
+        ]
+    },
+    "Purpose":
+        ["This template is part of a system which implements SES event logging and reporting."],
+    "TODO":
+        ["Build files stack!"]
+    },
+  "Parameters": {
+    "RESTFetcherKey": {
+      "Description": "Zip file for REST Fetcher function",
+      "Type": "String",
+      "Default": "au-com-thinkronicity-RestFetcher-V2.5.7CE.zip"
+    },
+    "cfnSesHelperKey": {
+        "Description": "Zip file for Cloud Formation SES Helper function",
+        "Type": "String",
+        "Default": "au-com-thinkronicity-cfnSesHelper-V1.0.2.zip"
+    },
+    "snsLoggerKey": {
+      "Description": "Zip file for snsLogger function",
+      "Type": "String",
+      "Default": "au-com-thinkronicity-snsLogger-V1.0.3.zip"
+    },
+    "ProjectPrefix": {
+      "Description": "Project prefix - for reuse with different projects the bucket name will be prefix-target-domain - observe bucket name restrictions - see http://docs.aws.amazon.com/AmazonS3/latest/dev/BucketRestrictions.html",
+      "Type": "String",
+      "Default": "email",
+      "MinLength": 1,
+      "MaxLength": 6,
+      "AllowedPattern": "^[a-z][-a-z0-9]*$"
+    },
+    "TargetEnvironment": {
+      "Description": "Target environment - dev, uat or prod, default is prod",
+      "Type": "String",
+      "AllowedValues": [
+        "dev",
+        "uat",
+        "prod"
+      ],
+      "Default": "prod"
+    },
+    "TargetDomain": {
+      "Description": "Target domain - this is used as the final bucket suffix to ensure global uniqueness - typically your internet domain name but use - rather than . as separators.",
+      "Type": "String",
+      "Default": "my-domain-me"
+    }
+  },
+  "Mappings": {
+    "AWSRegion2Bucket": {
+      "us-east-1": {
+        "OpenCode": "au-com-thinkronicity-opencode-usea1",
+        "ClientCode": "au-com-thinkronicity-clientcode-apse2"
+      },
+      "us-east-2": {
+        "OpenCode": "au-com-thinkronicity-opencode-usea2",
+        "ClientCode": "au-com-thinkronicity-clientcode-apse2"
+      },
+      "us-west-1": {
+        "OpenCode": "au-com-thinkronicity-opencode-uswe1",
+        "ClientCode": "au-com-thinkronicity-clientcode-apse2"
+      },
+      "us-west-2": {
+        "OpenCode": "au-com-thinkronicity-opencode-uswe2",
+        "ClientCode": "au-com-thinkronicity-clientcode-apse2"
+      },
+      "sa-east-1": {
+        "OpenCode": "au-com-thinkronicity-opencode-saea1",
+        "ClientCode": "au-com-thinkronicity-clientcode-apse2"
+      },
+      "ap-northeast-1": {
+        "OpenCode": "au-com-thinkronicity-opencode-apne1",
+        "ClientCode": "au-com-thinkronicity-clientcode-apse2"
+      },
+      "ap-northeast-2": {
+        "OpenCode": "au-com-thinkronicity-opencode-apne2",
+        "ClientCode": "au-com-thinkronicity-clientcode-apse2"
+      },
+      "ap-south-1": {
+        "OpenCode": "au-com-thinkronicity-opencode-aps1",
+        "ClientCode": "au-com-thinkronicity-clientcode-apse2"
+      },
+      "ap-southeast-1": {
+        "OpenCode": "au-com-thinkronicity-opencode-apse1",
+        "ClientCode": "au-com-thinkronicity-clientcode-apse2"
+      },
+      "ap-southeast-2": {
+        "OpenCode": "au-com-thinkronicity-opencode-apse2",
+        "ClientCode": "au-com-thinkronicity-clientcode-apse2"
+      },
+      "eu-central-1": {
+        "OpenCode": "au-com-thinkronicity-opencode-euce1",
+        "ClientCode": "au-com-thinkronicity-clientcode-apse2"
+      },
+      "eu-west-1": {
+        "OpenCode": "au-com-thinkronicity-opencode-euwe1",
+        "ClientCode": "au-com-thinkronicity-clientcode-apse2"
+      }
+    }
+  },
+  "Resources": {
+    "LambdaExecutionRole": {
+      "Type": "AWS::IAM::Role",
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Version": "2012-10-17",
+          "Statement": [
+            {
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "lambda.amazonaws.com"
+              },
+              "Action": "sts:AssumeRole"
+            },
+            {
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "apigateway.amazonaws.com"
+              },
+              "Action": "sts:AssumeRole"
+            },
+            {
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "s3.amazonaws.com"
+              },
+              "Action": "sts:AssumeRole"
+            }
+          ]
+        },
+        "Path": {
+          "Fn::Join": [
+            "",
+            [
+              "/",
+              {
+                "Ref": "ProjectPrefix"
+              },
+              "/"
+            ]
+          ]
+        },
+        "Policies": [
+          {
+            "PolicyName": "AccessProjectS3FilesAndLogs",
+            "PolicyDocument": {
+              "Version": "2012-10-17",
+              "Statement": [
+                {
+                  "Effect": "Allow",
+                  "Action": [
+                    "s3:*"
+                  ],
+                  "Resource": {
+                    "Fn::Join": [
+                      "",
+                      [
+                        "arn:aws:s3:::",
+                        {
+                          "Ref": "ProjectPrefix"
+                        },
+                        "-",
+                        {
+                          "Ref": "TargetEnvironment"
+                        },
+                        "-files-",
+                        {
+                          "Ref": "TargetDomain"
+                        },
+                        "/*"
+                      ]
+                    ]
+                  }
+                },
+                {
+                  "Effect": "Allow",
+                  "Action": [
+                    "logs:CreateLogGroup",
+                    "logs:CreateLogStream",
+                    "logs:PutLogEvents"
+                  ],
+                  "Resource": "arn:aws:logs:*:*:*"
+                }
+              ]
+            }
+          }
+        ],
+        "ManagedPolicyArns": [
+          "arn:aws:iam::aws:policy/AmazonDynamoDBFullAccess",
+          "arn:aws:iam::aws:policy/AmazonSESFullAccess",
+          "arn:aws:iam::aws:policy/AmazonSNSFullAccess"
+        ]      
+       }
+    },
+    "RESTFetcherLambda": {
+      "Type": "AWS::Lambda::Function",
+      "Properties": {
+        "Code": {
+          "S3Bucket": {
+            "Fn::FindInMap": [
+              "AWSRegion2Bucket",
+              {
+                "Ref": "AWS::Region"
+              },
+              "OpenCode"
+            ]
+          },
+          "S3Key": {
+            "Ref": "RESTFetcherKey"
+          }
+        },
+        "Runtime": "java8",
+        "Handler": "au.com.thinkronicity.RestFetcher.Fetch",
+        "Description": "Generic REST processor - built by Ian Hogan - Ian_MacDonald_Hogan@yahoo.com",
+        "Timeout": 300,
+        "MemorySize": 512,
+        "Role": {
+          "Fn::GetAtt": [
+            "LambdaExecutionRole",
+            "Arn"
+          ]
+        }
+      }
+    },
+    "RESTFetcherLambdaInvokePermission": {
+      "Type": "AWS::Lambda::Permission",
+      "Properties": {
+        "FunctionName": {
+          "Fn::GetAtt": [
+            "RESTFetcherLambda",
+            "Arn"
+          ]
+        },
+        "Action": "lambda:InvokeFunction",
+        "Principal": "s3.amazonaws.com",
+        "SourceAccount": {
+          "Ref": "AWS::AccountId"
+        }
+      }
+    },
+    "ScalingRole": {
+      "Type": "AWS::IAM::Role",
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Version": "2012-10-17",
+          "Statement": [
+            {
+              "Effect": "Allow",
+              "Principal": {
+                "Service": [
+                  "application-autoscaling.amazonaws.com"
+                ]
+              },
+              "Action": [
+                "sts:AssumeRole"
+              ]
+            }
+          ]
+        },
+        "Path": "/",
+        "Policies": [
+          {
+            "PolicyName": "root",
+            "PolicyDocument": {
+              "Version": "2012-10-17",
+              "Statement": [
+                {
+                  "Effect": "Allow",
+                  "Action": [
+                    "dynamodb:DescribeTable",
+                    "dynamodb:UpdateTable",
+                    "cloudwatch:PutMetricAlarm",
+                    "cloudwatch:DescribeAlarms",
+                    "cloudwatch:GetMetricStatistics",
+                    "cloudwatch:SetAlarmState",
+                    "cloudwatch:DeleteAlarms"
+                  ],
+                  "Resource": "*"
+                }
+              ]
+            }
+          }
+        ]
+      }
+    },
+    "emailTrackingTable": {
+      "Type": "AWS::DynamoDB::Table",
+      "Properties": {
+        "TableName": {"Fn::Sub" : "${ProjectPrefix}-${TargetEnvironment}-emailTracking-${TargetDomain}"},
+        "AttributeDefinitions": [
+          {
+            "AttributeName": "MessageID",
+            "AttributeType": "S"
+          },
+          {
+            "AttributeName": "Recipient",
+            "AttributeType": "S"
+          },
+          {
+            "AttributeName": "SES_ConfigurationSet",
+            "AttributeType": "S"
+          },
+          {
+            "AttributeName": "Timestamp",
+            "AttributeType": "S"
+          }
+        ],
+        "KeySchema": [
+          {
+            "AttributeName": "Recipient",
+            "KeyType": "HASH"
+          },
+          {
+            "AttributeName": "MessageID",
+            "KeyType": "RANGE"
+          }
+        ],
+        "ProvisionedThroughput": {
+          "ReadCapacityUnits": "1",
+          "WriteCapacityUnits": "1"
+        },
+        "GlobalSecondaryIndexes": [
+          {
+            "IndexName": "SES_ConfigurationSet-Timestamp-index",
+            "KeySchema": [
+              {
+                "AttributeName": "SES_ConfigurationSet",
+                "KeyType": "HASH"
+              },
+              {
+                "AttributeName": "Timestamp",
+                "KeyType": "RANGE"
+              }
+            ],
+            "Projection": {
+              "ProjectionType": "INCLUDE",
+              "NonKeyAttributes": [
+                "Recipient"
+              ]
+            },
+            "ProvisionedThroughput": {
+              "ReadCapacityUnits": "1",
+              "WriteCapacityUnits": "1"
+            }
+          }
+        ]
+      }
+    },
+    "emailTrackingTableReadCapacityScaling": {
+      "Type": "AWS::ApplicationAutoScaling::ScalableTarget",
+      "Properties": {
+        "MaxCapacity": 3,
+        "MinCapacity": 1,
+        "ResourceId": { "Fn::Join": [ "/",["table",{ "Ref": "emailTrackingTable" }]]},
+        "RoleARN": {"Fn::GetAtt": ["ScalingRole", "Arn"]},
+        "ScalableDimension": "dynamodb:table:ReadCapacityUnits",
+        "ServiceNamespace": "dynamodb"
+      }
+    },
+    "emailTrackingReadScalingPolicy": {
+      "Type": "AWS::ApplicationAutoScaling::ScalingPolicy",
+      "Properties": {
+        "PolicyName": "ReadAutoScalingPolicy",
+        "PolicyType": "TargetTrackingScaling",
+        "ScalingTargetId": {
+          "Ref": "emailTrackingTableReadCapacityScaling"
+        },
+        "TargetTrackingScalingPolicyConfiguration": {
+          "TargetValue": 50.0,
+          "ScaleInCooldown": 60,
+          "ScaleOutCooldown": 60,
+          "PredefinedMetricSpecification": {
+            "PredefinedMetricType": "DynamoDBReadCapacityUtilization"
+          }
+        }
+      }
+    },
+    "emailTrackingTableWriteCapacityScaling": {
+      "Type": "AWS::ApplicationAutoScaling::ScalableTarget",
+      "DependsOn": ["emailTrackingReadScalingPolicy"],
+      "Properties": {
+        "MaxCapacity": 3,
+        "MinCapacity": 1,
+        "ResourceId": { "Fn::Join": [ "/",["table",{ "Ref": "emailTrackingTable" }]]},
+        "RoleARN": {"Fn::GetAtt": ["ScalingRole", "Arn"]},
+        "ScalableDimension": "dynamodb:table:WriteCapacityUnits",
+        "ServiceNamespace": "dynamodb"
+      }
+    },
+    "emailTrackingWriteScalingPolicy": {
+      "Type": "AWS::ApplicationAutoScaling::ScalingPolicy",
+      "Properties": {
+        "PolicyName": "WriteAutoScalingPolicy",
+        "PolicyType": "TargetTrackingScaling",
+        "ScalingTargetId": {
+          "Ref": "emailTrackingTableWriteCapacityScaling"
+        },
+        "TargetTrackingScalingPolicyConfiguration": {
+          "TargetValue": 50.0,
+          "ScaleInCooldown": 60,
+          "ScaleOutCooldown": 60,
+          "PredefinedMetricSpecification": {
+            "PredefinedMetricType": "DynamoDBWriteCapacityUtilization"
+          }
+        }
+      }
+    },
+    "snsLoggingTable": {
+      "Type": "AWS::DynamoDB::Table",
+      "Properties": {
+        "TableName": {"Fn::Sub" : "${ProjectPrefix}-${TargetEnvironment}-snsLogging-${TargetDomain}"},
+        "AttributeDefinitions": [
+          {
+            "AttributeName": "Timestamp",
+            "AttributeType": "S"
+          },
+          {
+            "AttributeName": "TopicArn",
+            "AttributeType": "S"
+          }
+        ],
+        "KeySchema": [
+          {
+            "AttributeName": "TopicArn",
+            "KeyType": "HASH"
+          },
+          {
+            "AttributeName": "Timestamp",
+            "KeyType": "RANGE"
+          }
+        ],
+        "ProvisionedThroughput": {
+          "ReadCapacityUnits": "1",
+          "WriteCapacityUnits": "1"
+        }
+      }
+    },
+    "snsLoggingTableReadCapacityScaling": {
+      "Type": "AWS::ApplicationAutoScaling::ScalableTarget",
+      "Properties": {
+        "MaxCapacity": 3,
+        "MinCapacity": 1,
+        "ResourceId": { "Fn::Join": [ "/",["table",{ "Ref": "snsLoggingTable" }]]},
+        "RoleARN": {"Fn::GetAtt": ["ScalingRole", "Arn"]},
+        "ScalableDimension": "dynamodb:table:ReadCapacityUnits",
+        "ServiceNamespace": "dynamodb"
+      }
+    },
+    "snsLoggingReadScalingPolicy": {
+      "Type": "AWS::ApplicationAutoScaling::ScalingPolicy",
+      "Properties": {
+        "PolicyName": "ReadAutoScalingPolicy",
+        "PolicyType": "TargetTrackingScaling",
+        "ScalingTargetId": {
+          "Ref": "snsLoggingTableReadCapacityScaling"
+        },
+        "TargetTrackingScalingPolicyConfiguration": {
+          "TargetValue": 50.0,
+          "ScaleInCooldown": 60,
+          "ScaleOutCooldown": 60,
+          "PredefinedMetricSpecification": {
+            "PredefinedMetricType": "DynamoDBReadCapacityUtilization"
+          }
+        }
+      }
+    },
+    "snsLoggingTableWriteCapacityScaling": {
+      "Type": "AWS::ApplicationAutoScaling::ScalableTarget",
+      "DependsOn": ["snsLoggingReadScalingPolicy"],
+      "Properties": {
+        "MaxCapacity": 3,
+        "MinCapacity": 1,
+        "ResourceId": { "Fn::Join": [ "/",["table",{ "Ref": "snsLoggingTable" }]]},
+        "RoleARN": {"Fn::GetAtt": ["ScalingRole", "Arn"]},
+        "ScalableDimension": "dynamodb:table:WriteCapacityUnits",
+        "ServiceNamespace": "dynamodb"
+      }
+    },
+    "snsLoggingWriteScalingPolicy": {
+      "Type": "AWS::ApplicationAutoScaling::ScalingPolicy",
+      "Properties": {
+        "PolicyName": "WriteAutoScalingPolicy",
+        "PolicyType": "TargetTrackingScaling",
+        "ScalingTargetId": {
+          "Ref": "snsLoggingTableWriteCapacityScaling"
+        },
+        "TargetTrackingScalingPolicyConfiguration": {
+          "TargetValue": 50.0,
+          "ScaleInCooldown": 60,
+          "ScaleOutCooldown": 60,
+          "PredefinedMetricSpecification": {
+            "PredefinedMetricType": "DynamoDBWriteCapacityUtilization"
+          }
+        }
+      }
+    },
+    "snsLoggerLambda": {
+      "Type": "AWS::Lambda::Function",
+      "Properties": {
+        "Code": {
+          "S3Bucket": {
+            "Fn::FindInMap": [
+              "AWSRegion2Bucket",
+              {
+                "Ref": "AWS::Region"
+              },
+              "OpenCode"
+            ]
+          },
+          "S3Key": {
+            "Ref": "snsLoggerKey"
+          }
+        },
+        "Runtime": "nodejs6.10",
+        "Handler": "index.handler",
+        "Description": "An Amazon SNS trigger that logs the message pushed to an SNS topic in a DynamoDB database - built by Ian Hogan - Ian_MacDonald_Hogan@yahoo.com",
+        "Timeout": 50,
+        "MemorySize": 128,
+        "Role": {
+          "Fn::GetAtt": [
+            "LambdaExecutionRole",
+            "Arn"
+          ]
+        },
+        "Environment": {
+            "Variables": {
+                  "EMAIL_TABLE": {"Fn::Sub" : "${ProjectPrefix}-${TargetEnvironment}-emailTracking-${TargetDomain}"},
+                  "LOG_LEVEL": 5,
+                  "LOG_TABLE": {"Fn::Sub" : "${ProjectPrefix}-${TargetEnvironment}-snsLogging-${TargetDomain}"}
+            }
+        }
+      }
+    },
+    "topicEventsFromSES": {
+      "Type": "AWS::SNS::Topic",
+      "Properties": {
+        "DisplayName": "Events from Ian at TPL SES",
+        "Subscription": [
+          {
+            "Endpoint": { "Fn::GetAtt": ["snsLoggerLambda","Arn"]},
+            "Protocol": "lambda"
+          }
+        ]
+      }
+    },
+    "snsLoggerLambdaInvokePermission": {
+      "Type": "AWS::Lambda::Permission",
+      "Properties": {
+        "FunctionName": {"Fn::GetAtt": ["snsLoggerLambda","Arn"]},
+        "Action": "lambda:InvokeFunction",
+        "Principal": "sns.amazonaws.com",
+       "SourceArn": { "Ref": "topicEventsFromSES" }
+      }
+    },
+    "snsPolicyEventsFromSES": {
+      "Type": "AWS::SNS::TopicPolicy",
+      "Properties": {
+        "Topics": [{"Ref": "topicEventsFromSES"}],
+        "PolicyDocument": {
+          "Version": "2008-10-17",
+          "Id": "__default_policy_ID",
+          "Statement": [
+            {
+              "Sid": "__default_statement_ID",
+              "Effect": "Allow",
+              "Principal": {
+                "AWS": "*"
+              },
+              "Action": [
+                "SNS:GetTopicAttributes",
+                "SNS:SetTopicAttributes",
+                "SNS:AddPermission",
+                "SNS:RemovePermission",
+                "SNS:DeleteTopic",
+                "SNS:Subscribe",
+                "SNS:ListSubscriptionsByTopic",
+                "SNS:Publish",
+                "SNS:Receive"
+              ],
+              "Resource": {
+                "Ref": "topicEventsFromSES"
+              },
+              "Condition": {
+                "StringEquals": {
+                  "AWS:SourceOwner": {"Ref": "AWS::AccountId"}
+                }
+              }
+            }
+          ]
+        }
+      }
+    },
+    "trackingConfigSet": {
+            "Type": "AWS::SES::ConfigurationSet",
+            "Properties": {
+                "Name": {"Fn::Sub" : "${ProjectPrefix}-${TargetEnvironment}-sesTracking-${TargetDomain}"}
+            }
+    },
+    "cfnSesHelperLambda": {
+        "Type": "AWS::Lambda::Function",
+        "Properties": {
+            "Code": {
+                "S3Bucket": {"Fn::FindInMap": [
+                    "AWSRegion2Bucket",
+                    {"Ref": "AWS::Region"},
+                    "OpenCode"
+                ]},
+                "S3Key": {"Ref": "cfnSesHelperKey"}
+            },
+            "Runtime": "nodejs6.10",
+            "Handler": "index.handler",
+            "Timeout": "30",
+            "Description": "CloudFormation SES ConfigSet Notification Helper from https://github.com/imhogan/CreateSESNotification",
+            "MemorySize": 128,
+            "Role": {"Fn::GetAtt": [
+                "LambdaExecutionRole",
+                "Arn"
+            ]}
+        }
+    },
+    "configSetNotification": {
+        "Type": "Custom::SESCreateConfigSetNotification",
+        "DependsOn": ["cfnSesHelperLambda","trackingConfigSet","topicEventsFromSES", "snsPolicyEventsFromSES", "snsLoggerLambdaInvokePermission"],
+        "Properties": {
+            "ServiceToken": {"Fn::GetAtt": [
+                "cfnSesHelperLambda",
+                "Arn"
+            ]},
+            "NotificationDetails": {
+                "ConfigurationSetName" : {"Ref": "trackingConfigSet"},
+                "EventDestination" : {
+                  "Name": {"Fn::Sub" : "${ProjectPrefix}-${TargetEnvironment}-sesTrackingDest-${TargetDomain}"}, 
+                  "Enabled": true,
+                  "MatchingEventTypes": ["send", "reject", "bounce", "complaint", "delivery", "open", "click", "renderingFailure"],
+                  "SNSDestination": {
+                    "TopicARN": {"Ref": "topicEventsFromSES"}
+                    }
+                  }
+            },
+            "logLevel": 9
+        }
+    },
+    "projectFilesBucket": {
+      "Type": "AWS::S3::Bucket",
+      "DeletionPolicy" : "Retain",
+      "DependsOn": ["RESTFetcherLambda","RESTFetcherLambdaInvokePermission", "emailTrackingTable","snsLoggingTable", "snsPolicyEventsFromSES", "configSetNotification"],
+      "Properties": {
+        "BucketName": {"Fn::Sub" : "${ProjectPrefix}-${TargetEnvironment}-files-${TargetDomain}"},
+        "AccessControl": "Private",
+        "VersioningConfiguration": {
+          "Status": "Suspended"
+        },
+        "NotificationConfiguration": {
+          "LambdaConfigurations": [
+            {
+              "Event": "s3:ObjectCreated:Put",
+              "Filter": {
+                "S3Key": {
+                  "Rules": [
+                    {
+                      "Name": "Prefix",
+                      "Value": "config"
+                    },
+                    {
+                      "Name": "Suffix",
+                      "Value": ".properties"
+                    }
+                  ]
+                }
+              },
+              "Function": {
+                "Fn::GetAtt": [
+                  "RESTFetcherLambda",
+                  "Arn"
+                ]
+              }
+            },
+            {
+              "Event": "s3:ObjectCreated:Put",
+              "Filter": {
+                "S3Key": {
+                  "Rules": [
+                    {
+                      "Name": "Prefix",
+                      "Value": "Qrveys"
+                    },
+                    {
+                      "Name": "Suffix",
+                      "Value": "Config.xml"
+                    }
+                  ]
+                }
+              },
+              "Function": {
+                "Fn::GetAtt": [
+                  "RESTFetcherLambda",
+                  "Arn"
+                ]
+              }
+            },
+            {
+              "Event": "s3:ObjectCreated:Copy",
+              "Filter": {
+                "S3Key": {
+                  "Rules": [
+                    {
+                      "Name": "Prefix",
+                      "Value": "config"
+                    },
+                    {
+                      "Name": "Suffix",
+                      "Value": ".properties"
+                    }
+                  ]
+                }
+              },
+              "Function": {
+                "Fn::GetAtt": [
+                  "RESTFetcherLambda",
+                  "Arn"
+                ]
+              }
+            },
+            {
+              "Event": "s3:ObjectCreated:Copy",
+              "Filter": {
+                "S3Key": {
+                  "Rules": [
+                    {
+                      "Name": "Prefix",
+                      "Value": "Qrveys"
+                    },
+                    {
+                      "Name": "Suffix",
+                      "Value": "Config.xml"
+                    }
+                  ]
+                }
+              },
+              "Function": {
+                "Fn::GetAtt": [
+                  "RESTFetcherLambda",
+                  "Arn"
+                ]
+              }
+            }
+          ]
+        }
+      }
+    }
+  },
+  "Outputs": {
+    "snsLoggerLambdaArn": {
+      "Value": {
+        "Fn::GetAtt": [
+          "snsLoggerLambda",
+          "Arn"
+        ]
+      },
+      "Description": "Unique resource ID of the snsLogger Lamba Function.",
+      "Export" : { "Name" : {"Fn::Sub": "${AWS::StackName}-snsLoggerLambdaArn" }}
+    },
+    "cfnSesHelperLambdaArn": {
+      "Value": {
+        "Fn::GetAtt": [
+          "cfnSesHelperLambda",
+          "Arn"
+        ]
+      },
+      "Description": "Unique resource ID of the cfnSesHelper Lamba Function.",
+      "Export" : { "Name" : {"Fn::Sub": "${AWS::StackName}-cfnSesHelperLambdaArn" }}
+    },
+    "RESTFetcherLambdaArn": {
+      "Value": {
+        "Fn::GetAtt": [
+          "RESTFetcherLambda",
+          "Arn"
+        ]
+      },
+      "Description": "Unique resource ID of the REST Fetcher Lamba Function.",
+      "Export" : { "Name" : {"Fn::Sub": "${AWS::StackName}-RESTFetcherLambdaArn" }}
+    },
+    "LambdaExecutionRoleArn": {
+      "Value": {
+        "Fn::GetAtt": [
+          "LambdaExecutionRole",
+          "Arn"
+        ]
+      },
+      "Description": "Unique resource ID of the IAM Role allocated to the Lambda Functions.",
+      "Export" : { "Name" : {"Fn::Sub": "${AWS::StackName}-LambdaExecutionRoleArn" }}
+    },
+    "AccessProjectS3FilesBucket": {
+      "Value": {"Ref": "projectFilesBucket"},
+      "Description": "The generated name of the S3 Bucket, used by subsequent stacks to access the project files.",
+      "Export" : { "Name" : {"Fn::Sub": "${AWS::StackName}-AccessProjectS3FilesBucket" }}
+    },
+    "SelectedProjectPrefix": {
+      "Value": {
+          "Ref": "ProjectPrefix"
+       },
+      "Description": "The parameter value entered when the stack was created, used in subsequent stacks which build on this one.",
+      "Export" : { "Name" : {"Fn::Sub": "${AWS::StackName}-SelectedProjectPrefix" }}
+    },
+    "SelectedTargetEnvironment": {
+      "Value": {
+          "Ref": "TargetEnvironment"
+       },
+      "Description": "The parameter value entered when the stack was created, used in subsequent stacks which build on this one.",
+      "Export" : { "Name" : {"Fn::Sub": "${AWS::StackName}-SelectedTargetEnvironment" }}
+    },
+    "SelectedTargetDomain": {
+      "Value": {
+          "Ref": "TargetDomain"
+       },
+      "Description": "The parameter value entered when the stack was created, used in subsequent stacks which build on this one.",
+      "Export" : { "Name" : {"Fn::Sub": "${AWS::StackName}-SelectedTargetDomain" }}
+    }
+  }
+}

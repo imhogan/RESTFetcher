@@ -411,6 +411,7 @@
     },
     "emailTrackingTableWriteCapacityScaling": {
       "Type": "AWS::ApplicationAutoScaling::ScalableTarget",
+      "DependsOn": ["emailTrackingReadScalingPolicy"],
       "Properties": {
         "MaxCapacity": 3,
         "MinCapacity": 1,

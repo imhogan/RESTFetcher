@@ -630,7 +630,6 @@
     },
     "cfnSesHelperLambda": {
         "Type": "AWS::Lambda::Function",
-        "DeletionPolicy" : "Retain",
         "Properties": {
             "Code": {
                 "S3Bucket": {"Fn::FindInMap": [
@@ -654,7 +653,6 @@
     "configSetNotification": {
         "Type": "Custom::SESCreateConfigSetNotification",
         "DependsOn": ["cfnSesHelperLambda","trackingConfigSet","topicEventsFromSES", "snsPolicyEventsFromSES", "snsLoggerLambdaInvokePermission"],
-        "DeletionPolicy" : "Retain",
         "Properties": {
             "ServiceToken": {"Fn::GetAtt": [
                 "cfnSesHelperLambda",

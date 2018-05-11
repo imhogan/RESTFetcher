@@ -250,7 +250,7 @@
             "Ref": "S3TriggerKey"
           }
         },
-        "Runtime": "nodejs4.3",
+        "Runtime": "nodejs8.10",
         "Handler": "index.handler",
         "Description": "Generic S3 Trigger File Utility - built by Ian Hogan - Ian_MacDonald_Hogan@yahoo.com",
         "Timeout": 50,

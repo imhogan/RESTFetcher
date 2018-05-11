@@ -548,7 +548,7 @@
                     ]},
                     "S3Key": {"Ref": "S3PutFileKey"}
                 },
-                "Runtime": "nodejs4.3",
+                "Runtime": "nodejs8.10",
                 "Handler": "index.handler",
                 "Timeout": "30",
                 "Description": "CloudFormation S3 Put File Helper from https://github.com/imhogan/PutS3File",

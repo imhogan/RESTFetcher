@@ -40,7 +40,7 @@
     "snsLoggerKey": {
       "Description": "Zip file for snsLogger function",
       "Type": "String",
-      "Default": "au-com-thinkronicity-snsLogger-V1.0.3.zip"
+      "Default": "au-com-thinkronicity-snsLogger-V1.0.4.zip"
     },
     "ProjectPrefix": {
       "Description": "Project prefix - for reuse with different projects the bucket name will be prefix-target-domain - observe bucket name restrictions - see http://docs.aws.amazon.com/AmazonS3/latest/dev/BucketRestrictions.html",

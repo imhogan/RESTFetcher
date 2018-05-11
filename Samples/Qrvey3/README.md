@@ -1,10 +1,10 @@
-#Qrvey Sample 2
+# Qrvey Sample 3
 This sample demonstrates the use of RESTFetcher to choreograph a collection of microservices to deliver an application for a hypothetical group of retirement villages.
 This sample uses the free tier of the qrvey.com API. To use this you will need to get an API Key - see http://www.qrvey.com/ for details on how to do this. You will also need an Amazon Web Services (AWS) account - see https://aws.amazon.com/ - and 
 you will need to verify one of your email addresses with AWS SES (Simple Email Service) - see http://docs.aws.amazon.com/ses/latest/DeveloperGuide/verify-email-addresses.html 
 for details on this. Note, to send to non-verified email addresses - eg to send out Qrvey invitations - you will need to move your account out of sandbox mode. See http://docs.aws.amazon.com/ses/latest/DeveloperGuide/request-production-access.html for details on doing that. 
 
-#Sample usage -- WARNING - Sample still under construction.
+# Sample usage -- WARNING - Sample still under construction.
 
  ... 
  
@@ -27,7 +27,7 @@ for details on this. Note, to send to non-verified email addresses - eg to send 
  *To be continued ...*
  
  
- TODO: 
+# TODO: 
  * Deactivate debug mode in post-processing page
  * Document and test installation procedure
  * Add simple handler for New Residents form - issue PDF letter?

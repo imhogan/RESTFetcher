@@ -55,6 +55,7 @@
       <xs:enumeration value="FOP"/>
       <xs:enumeration value="eMail"/>
       <xs:enumeration value="S3PUT"/>
+      <xs:enumeration value="S3LIST"/>
       <xs:enumeration value="S3DELETE"/>
       <xs:enumeration value="AddResult"/>
       <xs:enumeration value="ZIP"/>

@@ -602,6 +602,20 @@ public class REST_Walker {
             // Log the result.
             Utility.LogMessage(s3FileDeleteResult);
         }
+        else if (actionType.equals("S3LIST")) {
+        	
+        	// List the contents of the specified bucket.
+        	
+        	// Validate parameters.
+            String missingParams = this.missingParameters("Bucket,Prefix", actionParameters);
+            if (!missingParams.isEmpty()) {
+                throw new Exception("Action with Type S3LIST is missing required parameters " + missingParams + "!");
+            }
+            
+            // List the bucket contents.
+            actionDocument = AWS_S3_Helper.listS3Files(this.getMyCredentials(), actionParameters.get("Bucket"), actionParameters.get("Prefix"));
+            
+       }
         else if (actionType.equals("XSLT")) {
         	
         	// Transform the context document, using the XSLT1 transform in the action element's Transform attribute or in the parameter named Transform. 
@@ -803,7 +817,7 @@ public class REST_Walker {
         }
         else if (actionType.equals("ZIP")) {
         	
-        	// Send an email using AWS SES using the supplied body.
+        	// Create a ZIP file from the specified source files..
         	
         	// Validate the parameters.
             String missingParams = this.missingParameters("Name,SourceFiles", actionParameters);

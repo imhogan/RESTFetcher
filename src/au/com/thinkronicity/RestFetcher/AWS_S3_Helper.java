@@ -6,12 +6,18 @@ import com.amazonaws.services.s3.AmazonS3Client;
 import com.amazonaws.services.s3.model.CannedAccessControlList;
 import com.amazonaws.services.s3.model.DeleteObjectRequest;
 import com.amazonaws.services.s3.model.ObjectMetadata;
+import com.amazonaws.services.s3.model.ObjectListing;
+import com.amazonaws.services.s3.model.S3ObjectSummary;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 import java.util.Date;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.Iterator;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+
 
 /**
  * AWS S3 Helper functions.
@@ -123,4 +129,59 @@ public class AWS_S3_Helper {
         }
         return resolvedURI;
     }
+    
+    /**
+	 * listS3Files - List files from a specified S3 bucket, returning XML results.
+	 * 
+     * @param credentials	- Credentials for accessing AWS Resources
+     * @param bucketName	- The name of the bucket containing the files.
+     * @param prefix		- The prefix for the files to list.
+     * @return				- List of files in XML format.
+     * 
+     * @throws Exception
+     */
+    public static Document listS3Files(
+    		 AWSCredentials credentials
+    		,String bucketName
+    		,String prefix
+    	) throws Exception {
+    	Document filesList =  Utility.readXmlFromString("<Contents/>");
+    	
+    	Element contentRoot = filesList.getDocumentElement();
+    	contentRoot.setAttribute("bucketName", bucketName);
+    	contentRoot.setAttribute("prefix", prefix);
+    	
+    	try {
+            AmazonS3Client conn = new AmazonS3Client(credentials);
+            ObjectListing foundObjects = conn.listObjects(bucketName, prefix);
+            while (true) {
+                for (Iterator<?> iterator =
+                        foundObjects.getObjectSummaries().iterator();
+                        iterator.hasNext();) {
+                    S3ObjectSummary summary = (S3ObjectSummary)iterator.next();
+                    
+                    Element key = filesList.createElement("Key");
+                    
+                    key.setTextContent(summary.getKey());
+                    
+                    contentRoot.appendChild(key);
+                    // Add result for summary.getKey());
+                }
+        
+                // more object_listing to retrieve?
+                if (foundObjects.isTruncated()) {
+                    foundObjects = conn.listNextBatchOfObjects(foundObjects);
+                } else {
+                    break;
+                }
+            }
+    	    
+    	}
+        catch (Exception ex) {
+    	   contentRoot.setAttribute("error", ex.getMessage());
+        }
+
+        return filesList;
+    }
 }
+

@@ -333,7 +333,7 @@ public class REST_Walker {
         		// Get the action element
                 Element actionElement = (Element)actionNodes.item(action);
                 
-                String actionMatch = actionElement.getAttribute("Match");
+                String actionMatch = Utility.replaceParameters(actionElement.getAttribute("Match"), contextParameters, this.walkerConfig.debug);
                 if (!actionMatch.equals("")) {
 
                 	// If a Match attribute is supplied, then the actions are performed for each element found by evaluating this as an XPath expression

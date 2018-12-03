@@ -59,3 +59,4 @@ The following table explains the placeholders used in the above sample JSON.
  Once created, you can use the App in Draft mode for 90 days to test the API functionality.
   
 Ian_MacDonald_Hogan@yahoo.com
+

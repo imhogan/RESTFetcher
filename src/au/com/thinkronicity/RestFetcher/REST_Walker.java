@@ -481,6 +481,30 @@ public class REST_Walker {
                 }
             }
         }
+        else if (actionType.equals("SetResult")) {
+
+        	// For set result action we set the walkResults to the given body or context document.
+        	
+        	// Write the context document, or a specified body content, to an S3 file.
+        	
+            // Get the content type.
+            // Get the email body.
+            String bodyContent = actionParameters.get("Body");
+            NodeList bodyNodes = actionElement.getElementsByTagNameNS(commandsXmlNamespace, "Body");
+            if (bodyNodes.getLength() == 1) {
+                Element bodyElement = (Element)bodyNodes.item(0);
+                bodyContent = Utility.getParameterValue("Body", bodyElement, this.commandsNamespaceMap, actionParameters, contextElement, this.walkerConfig.verbose, this.walkerConfig.debug);
+            }
+            
+            // Write the content to the walk results.
+            this.walkResults = bodyContent;
+            
+            // Log information if required.
+            if (this.walkerConfig.debug) {
+	            Utility.LogMessage("Set result to '" + this.walkResults + "'.");
+            }
+            
+        }
         else if (actionType.equals("Output")) {
         	
         	// Output the context document, or the contents of a specified URI, to a specified file.

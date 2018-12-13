@@ -58,6 +58,7 @@
       <xs:enumeration value="S3LIST"/>
       <xs:enumeration value="S3DELETE"/>
       <xs:enumeration value="AddResult"/>
+      <xs:enumeration value="SetResult"/>
       <xs:enumeration value="ZIP"/>
     </xs:restriction>
   </xs:simpleType>

@@ -74,8 +74,6 @@
       <xs:enumeration value="Path"/>
       <xs:enumeration value="Query"/>
       <xs:enumeration value="Form"/>
-      <xs:enumeration value="URL"/>
-      <xs:enumeration value="LocalFile"/>
     </xs:restriction>
   </xs:simpleType>
   <xs:simpleType name="BodyType">

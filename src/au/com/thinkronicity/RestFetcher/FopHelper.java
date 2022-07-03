@@ -3,15 +3,20 @@ package au.com.thinkronicity.RestFetcher;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.io.File;
 import java.net.URI;
 import java.net.URISyntaxException;
 import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.sax.SAXResult;
+import org.apache.fop.apps.FOPException;
 import org.apache.fop.apps.FOUserAgent;
 import org.apache.fop.apps.Fop;
 import org.apache.fop.apps.FopFactory;
+import org.apache.fop.apps.FopConfParser;
+import org.apache.fop.apps.FopFactoryBuilder;
+import org.apache.fop.apps.MimeConstants;
 import org.w3c.dom.Document;
 import org.xml.sax.SAXException;
 
@@ -25,7 +30,7 @@ public class FopHelper {
     /**
      * FOP Factory 
      */
-    private FopFactory fopFactory = FopFactory.newInstance();
+    private FopFactory fopFactory = null;
 
     /**
      * FopHelper - constructor, taking a base URI and configuration file path.
@@ -38,7 +43,9 @@ public class FopHelper {
      * @throws IOException
      */
     public FopHelper(URI baseURI, String configFilePath) throws URISyntaxException, SAXException, IOException {
-        this.fopFactory.setUserConfig(String.valueOf(baseURI.toString()) + "/" + configFilePath);
+        FopConfParser parser = new FopConfParser(new File(String.valueOf(baseURI.toString()) + "/" + configFilePath)); //parsing configuration  
+        FopFactoryBuilder builder = parser.getFopFactoryBuilder(); //building the factory with the user options
+        this.fopFactory = builder.build();            
     }
 
     /**
@@ -55,7 +62,7 @@ public class FopHelper {
         }
         FOUserAgent foUserAgent = this.fopFactory.newFOUserAgent();
         ByteArrayOutputStream out = new ByteArrayOutputStream();
-        Fop fop = this.fopFactory.newFop("application/pdf", foUserAgent, (OutputStream)out);
+        Fop fop = this.fopFactory.newFop(MimeConstants.MIME_PDF, foUserAgent, (OutputStream)out);
         TransformerFactory factory = TransformerFactory.newInstance();
         Transformer transformer = factory.newTransformer();
         DOMSource src = new DOMSource(fo);

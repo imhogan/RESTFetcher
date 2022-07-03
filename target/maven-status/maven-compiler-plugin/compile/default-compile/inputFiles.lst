@@ -1,8 +1,8 @@
-/projects/project-o1du/src/au/com/thinkronicity/RestFetcher/Utility.java
-/projects/project-o1du/src/au/com/thinkronicity/RestFetcher/AWS_S3_Helper.java
-/projects/project-o1du/src/au/com/thinkronicity/RestFetcher/Fetch.java
-/projects/project-o1du/src/au/com/thinkronicity/RestFetcher/FopHelper.java
-/projects/project-o1du/src/au/com/thinkronicity/RestFetcher/REST_Walker.java
-/projects/project-o1du/src/au/com/thinkronicity/RestFetcher/MappedNamespaceContext.java
-/projects/project-o1du/src/au/com/thinkronicity/RestFetcher/EmailHelper.java
-/projects/project-o1du/src/au/com/thinkronicity/RestFetcher/Configuration.java
+/home/ec2-user/environment/RESTFetcher/src/au/com/thinkronicity/RestFetcher/Configuration.java
+/home/ec2-user/environment/RESTFetcher/src/au/com/thinkronicity/RestFetcher/REST_Walker.java
+/home/ec2-user/environment/RESTFetcher/src/au/com/thinkronicity/RestFetcher/MappedNamespaceContext.java
+/home/ec2-user/environment/RESTFetcher/src/au/com/thinkronicity/RestFetcher/AWS_S3_Helper.java
+/home/ec2-user/environment/RESTFetcher/src/au/com/thinkronicity/RestFetcher/EmailHelper.java
+/home/ec2-user/environment/RESTFetcher/src/au/com/thinkronicity/RestFetcher/FopHelper.java
+/home/ec2-user/environment/RESTFetcher/src/au/com/thinkronicity/RestFetcher/Fetch.java
+/home/ec2-user/environment/RESTFetcher/src/au/com/thinkronicity/RestFetcher/Utility.java

@@ -3,41 +3,32 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>THINKronicity</groupId>
     <artifactId>RESTFetcher</artifactId>
-    <version>2.7.1C9</version>
+    <version>2.7.3C9</version>
     <packaging>jar</packaging>
     <properties>
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
+        <maven.compiler.parameters>true</maven.compiler.parameters>
     </properties>
     <dependencies>
+        <!-- https://mvnrepository.com/artifact/junit/junit -->
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
-            <version>4.13</version>
+            <version>4.13.2</version>
             <scope>test</scope>
         </dependency>
-        <!--<dependency>
-    <groupId>com.fasterxml.jackson.core</groupId>
-    <artifactId>jackson-databind</artifactId>
-    <version>2.7.0</version>
-  </dependency>-->
-        <!-- https://mvnrepository.com/artifact/com.fasterxml.jackson.dataformat/jackson-dataformat-xml -->
-        <!--<dependency>
-    <groupId>com.fasterxml.jackson.dataformat</groupId>
-    <artifactId>jackson-dataformat-xml</artifactId>
-    <version>2.7.0</version>
-</dependency>-->
         <!-- https://mvnrepository.com/artifact/org.json/json -->
         <dependency>
             <groupId>org.json</groupId>
             <artifactId>json</artifactId>
-            <version>20160810</version>
+            <version>20220320</version>
         </dependency>
         <!-- https://mvnrepository.com/artifact/net.sf.saxon/Saxon-HE -->
         <dependency>
             <groupId>net.sf.saxon</groupId>
             <artifactId>Saxon-HE</artifactId>
-            <version>9.9.1-3</version>
+            <version>11.3</version>
         </dependency>
         <!-- https://mvnrepository.com/artifact/org.apache.xmlgraphics/fop -->
         <dependency>
@@ -67,18 +58,14 @@
         <dependency>
             <groupId>com.amazonaws</groupId>
             <artifactId>aws-lambda-java-events</artifactId>
-            <version>1.3.0</version>
+            <version>3.11.0</version>
         </dependency>
         <!-- https://mvnrepository.com/artifact/com.amazonaws/aws-lambda-java-core -->
         <dependency>
             <groupId>com.amazonaws</groupId>
             <artifactId>aws-lambda-java-core</artifactId>
-            <version>1.1.0</version>
+            <version>1.2.1</version>
         </dependency>
-        <!--<dependency>
-   <groupId>com.amazonaws</groupId>
-   <artifactId>aws-java-sdk-core</artifactId>
-</dependency>-->
         <dependency>
             <groupId>com.amazonaws</groupId>
             <artifactId>aws-java-sdk-lambda</artifactId>
@@ -96,20 +83,26 @@
         <dependency>
             <groupId>javax.mail</groupId>
             <artifactId>javax.mail-api</artifactId>
-            <version>1.5.6</version>
+            <version> 1.6.2</version>
         </dependency>
         <!-- https://mvnrepository.com/artifact/javax.mail/mail -->
         <dependency>
             <groupId>javax.mail</groupId>
             <artifactId>mail</artifactId>
-            <version>1.4.7</version>
+            <version>1.5.0-b01</version>
         </dependency>
         <!-- https://mvnrepository.com/artifact/org.bouncycastle/bcprov-jdk16 -->
         <!-- https://mvnrepository.com/artifact/org.bouncycastle/bcprov-jdk15on -->
         <dependency>
             <groupId>org.bouncycastle</groupId>
             <artifactId>bcprov-jdk15on</artifactId>
-            <version>1.67</version>
+            <version>1.70</version>
+        </dependency>
+        <!-- https://mvnrepository.com/artifact/javax.xml.bind/jaxb-api -->
+        <dependency>
+            <groupId>javax.xml.bind</groupId>
+            <artifactId>jaxb-api</artifactId>
+            <version>2.4.0-b180830.0359</version>
         </dependency>
     </dependencies>
     <dependencyManagement>
@@ -118,7 +111,7 @@
                 <groupId>com.amazonaws</groupId>
                 <artifactId>aws-java-sdk-bom</artifactId>
                 <!--<version>1.10.50</version>-->
-                <version>1.11.78</version>
+                <version>1.12.253</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>

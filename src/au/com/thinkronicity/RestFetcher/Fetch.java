@@ -10,6 +10,7 @@ import com.amazonaws.auth.EnvironmentVariableCredentialsProvider;
 import com.amazonaws.services.lambda.runtime.Context;
 import com.amazonaws.services.lambda.runtime.RequestHandler;
 import com.amazonaws.services.lambda.runtime.events.S3Event;
+import com.amazonaws.services.lambda.runtime.events.models.s3.S3EventNotification.S3EventNotificationRecord;
 import com.amazonaws.services.s3.event.S3EventNotification;
 import java.io.IOException;
 import java.net.MalformedURLException;
@@ -50,7 +51,7 @@ implements RequestHandler<Object, String> {
     /**
      * Version of this codebase.
      */
-    private static final String version = "2.6.1CE";
+    private static final String version = "2.7.3C9";
     
     /**
      * Namespace for the Commands XML schema. 
@@ -202,7 +203,7 @@ implements RequestHandler<Object, String> {
     public Object createInputFromS3Event(S3Event s3event, Context context) throws IOException {
         try {
         	LinkedHashMap<String, String> eventInput = new LinkedHashMap<String, String>();
-            S3EventNotification.S3EventNotificationRecord record = (S3EventNotification.S3EventNotificationRecord)s3event.getRecords().get(0);
+            S3EventNotificationRecord record = s3event.getRecords().get(0);
             String srcBucket = record.getS3().getBucket().getName();
             String srcKey = record.getS3().getObject().getKey().replace('+', ' ');
             srcKey = URLDecoder.decode(srcKey, "UTF-8");

@@ -1176,4 +1176,26 @@ public class Utility {
         }
         return result;
     }
+    
+     /**
+     * isValidURL - Check if the given string is a valid URL
+     * 
+     * @param url				- value to process. 
+     * @return					- the evaluated string.
+     */
+   public static boolean isValidURL(String url)
+    {
+        /* Try creating a valid URL */
+        try {
+            new URL(url).toURI();
+            return true;
+        }
+          
+        // If there was an Exception
+        // while creating URL object
+        catch (Exception e) {
+            return false;
+        }
+    }
+    
 }

@@ -4,6 +4,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.File;
+import java.net.URL;
 import java.net.URI;
 import java.net.URISyntaxException;
 import javax.xml.transform.Transformer;
@@ -43,7 +44,14 @@ public class FopHelper {
      * @throws IOException
      */
     public FopHelper(URI baseURI, String configFilePath) throws URISyntaxException, SAXException, IOException {
-        FopConfParser parser = new FopConfParser(new File(String.valueOf(baseURI.toString()) + "/" + configFilePath)); //parsing configuration  
+        FopConfParser parser;
+        String configPath = String.valueOf(baseURI.toString()) + "/" + configFilePath;
+        if (Utility.isValidURL(configPath)) {
+            parser = new FopConfParser(new URL(configPath).openStream(), baseURI);
+        } else {
+            parser = new FopConfParser(new File(configPath)); //parsing configuration  
+        }
+        
         FopFactoryBuilder builder = parser.getFopFactoryBuilder(); //building the factory with the user options
         this.fopFactory = builder.build();            
     }

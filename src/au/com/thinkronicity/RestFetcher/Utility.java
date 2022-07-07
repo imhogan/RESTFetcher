@@ -386,7 +386,7 @@ public class Utility {
             }
             FopHelper myFop = new FopHelper(baseURI, configFilePath);
             ByteArrayOutputStream pdf = myFop.convertFO2PDF(xslOutput);
-            result = AWS_S3_Helper.writeStreamToS3File(credentials, bucketName, key, pdf, "application/pdf", CannedAccessControlList.Private);
+            result = AWS_S3_Helper.writeStreamToS3File(credentials, bucketName, key, pdf, "application/pdf", null);
         }
         catch (Exception e) {
             Utility.LogMessage("Exception: " + e.getMessage());

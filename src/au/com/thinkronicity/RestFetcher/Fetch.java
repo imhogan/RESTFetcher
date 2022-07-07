@@ -51,7 +51,7 @@ implements RequestHandler<Object, String> {
     /**
      * Version of this codebase.
      */
-    private static final String version = "2.7.5C9";
+    private static final String version = "2.7.6C9";
     
     /**
      * Namespace for the Commands XML schema. 

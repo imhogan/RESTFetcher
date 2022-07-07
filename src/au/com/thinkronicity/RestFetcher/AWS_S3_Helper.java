@@ -35,7 +35,7 @@ public class AWS_S3_Helper {
      * @param key			- The key for the file to write.
      * @param stream		- The stream to be written to the file.
      * @param contentType	- Content type for the file.
-     * @param acl			- Access Control List specifying file permissions.
+     * @param acl			- Access Control List specifying file permissions, or null if not required.
      * @return				- A pre-signed URL to access the file contents - with a 15 minute expiration time.
      */
     public static String writeStreamToS3File(
@@ -53,7 +53,15 @@ public class AWS_S3_Helper {
         metadata.setContentLength((long)stream.toByteArray().length);
         ByteArrayInputStream input = new ByteArrayInputStream(stream.toByteArray());
         conn.putObject(bucketName, key, (InputStream)input, metadata);
-        conn.setObjectAcl(bucketName, key, acl);
+        if (acl != null) {
+            // Bucket may not allow ACL, so catch error.
+            try {
+                conn.setObjectAcl(bucketName, key, acl);
+                
+            } catch(Exception e) {
+                Utility.LogMessage("Unable to set ACL due to exception: " + e.getMessage());
+            }
+        }
         result = conn.generatePresignedUrl(bucketName, key, new Date(new Date().getTime() + 900000), HttpMethod.GET).toString();
         return result;
     }

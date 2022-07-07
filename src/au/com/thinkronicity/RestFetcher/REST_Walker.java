@@ -563,7 +563,7 @@ public class REST_Walker {
             }
             
             // Get the file permissions. 
-            CannedAccessControlList acl = CannedAccessControlList.Private;
+            CannedAccessControlList acl = null;
             if (actionParameters.containsKey("ACL")) {
                 acl = CannedAccessControlList.valueOf((String)actionParameters.get("ACL"));
             }
@@ -685,7 +685,7 @@ public class REST_Walker {
                 if (actionParameters.containsKey("Bucket")) {
                     
                     // Get the file permissions. 
-                    CannedAccessControlList acl = CannedAccessControlList.Private;
+                    CannedAccessControlList acl = null;
                     if (actionParameters.containsKey("ACL")) {
                         acl = CannedAccessControlList.valueOf((String)actionParameters.get("ACL"));
                     }

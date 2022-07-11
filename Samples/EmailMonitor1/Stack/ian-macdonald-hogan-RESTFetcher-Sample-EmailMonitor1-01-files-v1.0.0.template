@@ -1,0 +1,245 @@
+{
+    "AWSTemplateFormatVersion": "2010-09-09",
+    "Description": "Load the S3 files for the Our Village Sample Application.",
+    "Metadata": {"AWS::CloudFormation::Interface": {
+        "ParameterGroups": [
+            {
+                "Label": {"default": "Project Configuration"},
+                "Parameters": [
+                    "ProjectZipFilesList",
+                    "ProjectToolsStack"
+                ]
+            },
+            {
+                "Label": {"default": "Custom Resource Lambda Functions"},
+                "Parameters": [
+                    "S3ZipFileLoaderKey"
+                ]
+            }
+        ]
+    }},
+    "Parameters": {
+        "S3ZipFileLoaderKey": {
+            "Description": "Zip file for S3 Zip File Loader function",
+            "Type": "String",
+            "Default": "au-com-thinkronicity-S3ZipFileLoader-V1.1.2.zip"
+        },
+        "ProjectZipFilesList": {
+            "Description": "Project List Files",
+            "Type": "CommaDelimitedList",
+            "Default": "au-com-thinkronicity-RestFetcher-QrveySample3-V1.0.1.zip"
+        },
+        "ProjectToolsStack": {
+            "Description": "The stack containing the base framework for the system.",
+            "Type": "String",
+            "MinLength": 1,
+            "MaxLength": 255,
+            "AllowedPattern": "^[a-zA-Z][-a-zA-Z0-9]*$",
+            "Default": "qrvey-sample-3-tools"
+        }
+    },
+    "Mappings": {"AWSRegion2Bucket": {
+        "us-east-1": {
+            "OpenCode": "au-com-thinkronicity-opencode-usea1",
+            "ClientCode": "au-com-thinkronicity-clientcode-apse2"
+        },
+        "us-east-2": {
+            "OpenCode": "au-com-thinkronicity-opencode-usea2",
+            "ClientCode": "au-com-thinkronicity-clientcode-apse2"
+        },
+        "us-west-1": {
+            "OpenCode": "au-com-thinkronicity-opencode-uswe1",
+            "ClientCode": "au-com-thinkronicity-clientcode-apse2"
+        },
+        "us-west-2": {
+            "OpenCode": "au-com-thinkronicity-opencode-uswe2",
+            "ClientCode": "au-com-thinkronicity-clientcode-apse2"
+        },
+        "sa-east-1": {
+            "OpenCode": "au-com-thinkronicity-opencode-saea1",
+            "ClientCode": "au-com-thinkronicity-clientcode-apse2"
+        },
+        "ap-northeast-1": {
+            "OpenCode": "au-com-thinkronicity-opencode-apne1",
+            "ClientCode": "au-com-thinkronicity-clientcode-apse2"
+        },
+        "ap-northeast-2": {
+            "OpenCode": "au-com-thinkronicity-opencode-apne2",
+            "ClientCode": "au-com-thinkronicity-clientcode-apse2"
+        },
+        "ap-south-1": {
+            "OpenCode": "au-com-thinkronicity-opencode-aps1",
+            "ClientCode": "au-com-thinkronicity-clientcode-apse2"
+        },
+        "ap-southeast-1": {
+            "OpenCode": "au-com-thinkronicity-opencode-apse1",
+            "ClientCode": "au-com-thinkronicity-clientcode-apse2"
+        },
+        "ap-southeast-2": {
+            "OpenCode": "au-com-thinkronicity-opencode-apse2",
+            "ClientCode": "au-com-thinkronicity-clientcode-apse2"
+        },
+        "eu-central-1": {
+            "OpenCode": "au-com-thinkronicity-opencode-euce1",
+            "ClientCode": "au-com-thinkronicity-clientcode-apse2"
+        },
+        "eu-west-1": {
+            "OpenCode": "au-com-thinkronicity-opencode-euwe1",
+            "ClientCode": "au-com-thinkronicity-clientcode-apse2"
+        }
+    }},
+    "Resources": {
+        "LambdaExecutionRole": {
+            "Type": "AWS::IAM::Role",
+            "Properties": {
+                "AssumeRolePolicyDocument": {
+                    "Version": "2012-10-17",
+                    "Statement": [
+                        {
+                            "Effect": "Allow",
+                            "Principal": {"Service": "lambda.amazonaws.com"},
+                            "Action": "sts:AssumeRole"
+                        },
+                        {
+                            "Effect": "Allow",
+                            "Principal": {"Service": "apigateway.amazonaws.com"},
+                            "Action": "sts:AssumeRole"
+                        },
+                        {
+                            "Effect": "Allow",
+                            "Principal": {"Service": "s3.amazonaws.com"},
+                            "Action": "sts:AssumeRole"
+                        }
+                    ]
+                },
+                "Path": {"Fn::Join": [
+                    "",
+                    [
+                        "/",
+                        {"Fn::ImportValue" : {"Fn::Sub" : "${ProjectToolsStack}-SelectedProjectPrefix"}},
+                        "/"
+                    ]
+                ]},
+                "Policies": [{
+                    "PolicyName": "AccessProjectS3FilesAndSES",
+                    "PolicyDocument": {
+                        "Version": "2012-10-17",
+                        "Statement": [
+                            {
+                                "Effect": "Allow",
+                                "Action": ["s3:*"],
+                                "Resource": [{"Fn::Join": [
+                                    "",
+                                    [
+                                        "arn:aws:s3:::",
+                                        {"Fn::ImportValue" : {"Fn::Sub" : "${ProjectToolsStack}-AccessProjectS3FilesBucket"}},
+                                        "/*"
+                                    ]
+                                ]}]
+                            },
+                            {
+                                "Effect": "Allow",
+                                "Action": [
+                                    "s3:Get*",
+                                    "s3:List*"
+                                ],
+                                "Resource": [{"Fn::Join": [
+                                    "",
+                                    [
+                                        "arn:aws:s3:::",
+                                        {"Fn::FindInMap": [
+                                            "AWSRegion2Bucket",
+                                            {"Ref": "AWS::Region"},
+                                            "OpenCode"
+                                        ]},
+                                        "/*"
+                                    ]
+                                ]}]
+                            },
+                            {
+                                "Effect": "Allow",
+                                "Action": [
+                                    "logs:CreateLogGroup",
+                                    "logs:CreateLogStream",
+                                    "logs:PutLogEvents"
+                                ],
+                                "Resource": "arn:aws:logs:*:*:*"
+                            }
+                        ]
+                    }
+                }]
+            }
+        },
+        "S3ZipLoaderLambda": {
+            "Type": "AWS::Lambda::Function",
+            "Properties": {
+                "Code": {
+                    "S3Bucket": {"Fn::FindInMap": [
+                        "AWSRegion2Bucket",
+                        {"Ref": "AWS::Region"},
+                        "OpenCode"
+                    ]},
+                    "S3Key": {"Ref": "S3ZipFileLoaderKey"}
+                },
+                "Runtime": "java8",
+                "Handler": "au.com.thinkronicity.aws.S3ZipFileLoader",
+                "Description": "CloudFormation S3 Zip Loader from https://github.com/imhogan/S3ZipFileLoader",
+                "Timeout": 300,
+                "MemorySize": 768,
+                "Role": {"Fn::GetAtt": [
+                    "LambdaExecutionRole",
+                    "Arn"
+                ]}
+            }
+        },
+        "ProjectFilesLoad": {
+            "Type": "Custom::S3ZipLoader",
+            "DeletionPolicy": "Retain",
+            "Properties": {
+                "ServiceToken": {"Fn::GetAtt": [
+                    "S3ZipLoaderLambda",
+                    "Arn"
+                ]},
+                "SourceBucket": {"Fn::FindInMap": [
+                    "AWSRegion2Bucket",
+                    {"Ref": "AWS::Region"},
+                    "OpenCode"
+                ]},
+                "SourceKeys": {"Ref": "ProjectZipFilesList"},
+                "TargetBucket": {"Fn::ImportValue" : {"Fn::Sub" : "${ProjectToolsStack}-AccessProjectS3FilesBucket"}},
+                "PublicRead": "^(images/|xsl/|xsl/f/|fop/).*$",
+                "Debug": "true"
+            }
+        }
+    },
+    "Outputs": {
+        "LambdaExecutionRoleArn": {
+            "Value": {"Fn::GetAtt": [
+                "LambdaExecutionRole",
+                "Arn"
+            ]},
+            "Description": "Unique resource ID of the IAM Role allocated to the S3 Zip Loader Lambda Functions.",
+            "Export" : { "Name" : {"Fn::Sub": "${AWS::StackName}-LambdaExecutionRoleArn" }}
+        },
+        "S3ZipLoaderLambdaArn": {
+            "Value": {"Fn::GetAtt": [
+                "S3ZipLoaderLambda",
+                "Arn"
+            ]},
+            "Description": "Unique resource ID of the S3 Zip Loader Lamba Function.",
+            "Export" : { "Name" : {"Fn::Sub": "${AWS::StackName}-S3ZipLoaderLambdaArn" }}
+        },
+        "ProjectFilesLoadResult": {
+            "Value": {"Fn::GetAtt": [
+                "ProjectFilesLoad",
+                "SourceZips"
+            ]},
+            "Description": "The result message from the S3 Zip Loader."
+        },
+        "ToolsStack": {
+            "Value": {"Ref": "ProjectToolsStack"},
+            "Description": "The Tools Stack this Stack Builds on.",
+            "Export" : { "Name" : {"Fn::Sub": "${AWS::StackName}-ToolsStack" }}
+        }
+    }
+}
